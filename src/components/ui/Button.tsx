@@ -62,15 +62,28 @@ export function Button({
   className,
   children,
   type = "button",
+  disabled,
+  onClick,
   ...props
 }: ButtonProps) {
+  // While loading, the button keeps its normal colours (it is busy, not unavailable):
+  // it is not natively disabled, so `disabled:` styles don't apply, but clicks are
+  // ignored and assistive tech is told it is busy and disabled.
   return (
     <button
       type={type}
-      className={buttonClasses({ variant, size, fullWidth, className })}
+      className={buttonClasses({
+        variant,
+        size,
+        fullWidth,
+        className: cn(loading && "cursor-progress", className),
+      })}
       aria-busy={loading || undefined}
+      aria-disabled={loading || undefined}
       data-loading={loading || undefined}
       {...props}
+      disabled={loading ? false : disabled}
+      onClick={loading ? (e) => e.preventDefault() : onClick}
     >
       {loading ? <Spinner /> : icon}
       {children}

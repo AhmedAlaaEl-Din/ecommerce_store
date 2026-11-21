@@ -85,16 +85,16 @@ Notes:
 
 ## 3. Results
 
-### `npm run verify` (final run, step 17)
+### `npm run verify` (latest run, after the polish pass in section 9)
 
 | Stage                                                             | Result                                    |
 | ----------------------------------------------------------------- | ----------------------------------------- |
 | Lint (`eslint --max-warnings=0`)                                  | pass, 0 problems                          |
 | Typecheck (`tsc --noEmit`)                                        | pass                                      |
-| Unit (Vitest)                                                     | **30 / 30 passed** (3 files)              |
-| Integration (Vitest, separate `prisma/test.db`)                   | **32 / 32 passed** (2 files)              |
+| Unit (Vitest)                                                     | **35 / 35 passed** (4 files)              |
+| Integration (Vitest, separate `prisma/test.db`)                   | **35 / 35 passed** (2 files)              |
 | Build (`next build`)                                              | pass; all routes dynamic (ƒ)              |
-| E2E (Playwright vs `next start`, fresh `prisma/e2e.db`)           | **18 / 18 passed** (13 desktop, 5 mobile) |
+| E2E (Playwright vs `next start`, fresh `prisma/e2e.db`)           | **21 / 21 passed** (16 desktop, 5 mobile) |
 | Axe (@axe-core/playwright, WCAG 2.0/2.1/2.2 A+AA + best practice) | **13 / 13 passed**, 0 serious/critical    |
 
 What the suites cover:
@@ -113,7 +113,9 @@ What the suites cover:
   - The full journey: browse, paginate, filter, search, sort, product, add (toast and badge, no
     reload), cart, change quantity, reload persists, remove and undo, empty state.
   - Cookie flags and 30-day expiry, and the badge on every page.
-  - Stock cap, a fresh context gets an empty cart, and the cart survives a browser restart.
+  - Stock cap ("All N are in your cart" state), a fresh context gets an empty cart, and the cart survives
+    a browser restart.
+  - Add-to-cart loading colours and cursor, toast width and two-line clamp (desktop and phone).
   - Out-of-stock button disabled, real 404s, no-results reset, garbage query params, OG/meta tags.
   - Skip link, keyboard-only add-to-cart, security headers.
   - Mobile: menu with keyboard and focus trap, menu navigation, filter bottom sheet, phone add to cart,
@@ -364,8 +366,24 @@ e021203 fix(ui): apply design review findings (prices, breadcrumbs, search UX, O
 e51ded5 perf: lighthouse runner (median of 3), LCP fetchpriority, keep zod out of client bundle; fix layout rethrow
 dbfca07 feat(demo): playwright frame recorder and storyboard for the phase 1 video
 243798f docs: README, MIT licence, phase 1 report and home test guide
-(final)  chore: privacy check, final verify, report sections 7-8   <- this commit
+3dbb4ae chore: privacy check, final verify, report sections 7-8
+(latest) fix(ui): add-to-cart loading style, wider toast, all-in-cart state   <- polish pass, section 9
 ```
 
 Nothing was pushed or merged. The push and merge commands for you are in
 `docs/HOW_TO_TEST_PHASE1.md`, step 53.
+
+## 9. Polish pass (2026-11-21)
+
+A small follow-up on `phase-1`, under the same rules (no push, no merge, demo data only).
+
+| #   | Request                                                        | What changed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| --- | -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | "Adding…" keeps the dark-green button, `cursor: progress`      | `Button` no longer sets the native `disabled` attribute while `loading`: it sets `aria-busy` + `aria-disabled`, ignores clicks and adds `cursor-progress`, so the pale `disabled:` style and the not-allowed cursor never apply during loading. They are now used only for genuinely unavailable buttons (out of stock). The old `disabled:bg-primary` override was removed.                                                                                                                                                                                                                                                                                           |
+| 2   | Wider toast, no mid-word wraps, max 2 lines                    | Desktop: `min-width: 360px`, grows with content up to 448 px. Phone: full width minus the 16 px margins. Title is one line, description is `line-clamp-2` with an ellipsis (full text in `title`; the live region still announces everything); `overflow-wrap: normal` and no hyphenation.                                                                                                                                                                                                                                                                                                                                                                             |
+| 3   | "All N are in your cart" when the cart already holds all stock | The product page reads the visitor's quantity for that product on the server (`getCartQuantity`, clamped to current stock). When nothing more can be added, the stepper and button are replaced by a disabled "All N are in your cart" button and a "View cart" link. It also switches immediately after the add that fills the cart, and keyboard focus moves to "View cart". The stepper's maximum is now what is left (stock − in cart). For a single unit the label reads "The only one is in your cart", since "All 1 are" is ungrammatical.                                                                                                                      |
+| 4   | Tests                                                          | Unit: `Button` loading/disabled markup, `maxPerLine` / `remainingAddable`. Integration: `getCartQuantity` (no cart, clamping, sold out, inactive). E2E: loading state keeps the idle background/text colours with `cursor: progress` and ignores a second press; out of stock keeps the pale style; the all-in-cart flow (immediate, after reload, after lowering the quantity in the cart, single-unit label); toast ≥ 360 px and two-line clamp on desktop; full-width toast on the phone. The old "add again → 'Only 2 available' toast" E2E step can no longer be reached through the UI and was replaced; the server-side cap stays covered by integration tests. |
+| 5   | Frames and handoff                                             | `npm run frames` re-run (54 desktop + 64 mobile, unchanged script); `evidence/phase1` copied over `E:\handoff\ecommerce_phase1` and checked identical with `diff -rq`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+
+`npm run verify` result: lint and typecheck clean; unit 35/35, integration 35/35, build OK, E2E 21/21, axe 13/13.
+Nothing was pushed or merged.

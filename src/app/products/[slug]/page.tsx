@@ -8,7 +8,10 @@ import { ProductCard } from "@/components/product/ProductCard";
 import { Badge } from "@/components/ui/Badge";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { Price } from "@/components/ui/Price";
+import { readCartId } from "@/lib/cart/cookie";
+import { getCartQuantity } from "@/lib/cart/service";
 import { getProductBySlug, getRelatedProducts } from "@/lib/catalog";
+import { db } from "@/lib/db";
 import { formatMoney } from "@/lib/money";
 import { getSaleInfo, getStockStatus } from "@/lib/pricing";
 
@@ -52,7 +55,10 @@ export default async function ProductPage({ params }: Props) {
   const product = await getProductBySlug(slug);
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product.id, product.categoryId, 4);
+  const [related, inCart] = await Promise.all([
+    getRelatedProducts(product.id, product.categoryId, 4),
+    readCartId().then((cartId) => getCartQuantity(db, cartId, product.id)),
+  ]);
   const stock = getStockStatus(product.stock);
   const sale = getSaleInfo(product.priceCents, product.compareAtCents);
 
@@ -128,7 +134,12 @@ export default async function ProductPage({ params }: Props) {
           <p className="mt-6 text-lg">{product.shortDescription}</p>
 
           <div className="mt-8">
-            <AddToCart productId={product.id} productName={product.name} stock={product.stock} />
+            <AddToCart
+              productId={product.id}
+              productName={product.name}
+              stock={product.stock}
+              inCart={inCart}
+            />
           </div>
 
           <ul className="border-line mt-8 flex flex-col gap-3 border-t pt-6">

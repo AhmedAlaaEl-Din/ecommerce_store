@@ -156,7 +156,7 @@ test.describe("cart rules", () => {
     }
   });
 
-  test("adding the same product again increases quantity but never above stock", async ({
+  test("once the cart holds all available stock, the add button becomes a disabled notice", async ({
     page,
   }) => {
     await page.goto("/products/delta-pour-over-kettle"); // stock 2
@@ -165,10 +165,19 @@ test.describe("cart rules", () => {
     await expect(page.getByRole("button", { name: "Increase quantity" })).toBeDisabled();
     await page.getByTestId("add-to-cart").click();
     await expect(page.getByTestId("cart-count")).toHaveText("2");
-    await page.getByTestId("add-to-cart").click();
-    await expect(page.getByTestId("toast").filter({ hasText: "Only 2 available" })).toBeVisible();
-    await expect(page.getByTestId("cart-count")).toHaveText("2");
 
+    // The button is replaced straight away, without a reload.
+    const full = page.getByTestId("all-in-cart");
+    await expect(full.getByTestId("add-to-cart")).toBeDisabled();
+    await expect(full.getByTestId("add-to-cart")).toHaveText("All 2 are in your cart");
+    await expect(page.getByRole("button", { name: "Increase quantity" })).toHaveCount(0);
+    await expect(full.getByRole("link", { name: "View cart" })).toBeFocused();
+
+    // It is server-rendered on later visits too.
+    await page.reload();
+    await expect(page.getByTestId("add-to-cart")).toHaveText("All 2 are in your cart");
+
+    // Partly in cart: the stepper only offers what is left.
     await page.goto("/cart");
     const line = page.locator('[data-product="delta-pour-over-kettle"]');
     await expect(line.getByTestId("quantity-value")).toHaveText("2");
@@ -176,6 +185,96 @@ test.describe("cart rules", () => {
     await line.getByRole("button", { name: "Decrease quantity" }).click();
     await expect(line.getByTestId("quantity-value")).toHaveText("1");
     await expect(line.getByRole("button", { name: "Decrease quantity" })).toBeDisabled();
+
+    await page.goto("/products/delta-pour-over-kettle");
+    await expect(page.getByTestId("add-to-cart")).toHaveText("Add to cart");
+    await expect(page.getByRole("button", { name: "Increase quantity" })).toBeDisabled();
+    await page.getByTestId("add-to-cart").click();
+    await expect(page.getByTestId("add-to-cart")).toHaveText("All 2 are in your cart");
+    await expect(page.getByTestId("cart-count")).toHaveText("2");
+  });
+
+  test("a single last unit reads naturally when it is in the cart", async ({ page }) => {
+    await page.goto("/products/ibis-enamel-teapot"); // stock 1
+    await page.getByTestId("add-to-cart").click();
+    await expect(page.getByTestId("add-to-cart")).toHaveText("The only one is in your cart");
+    await expect(
+      page.getByTestId("all-in-cart").getByRole("link", { name: "View cart" }),
+    ).toHaveAttribute("href", "/cart");
+  });
+
+  test("while adding, the button keeps its primary colours and shows a progress cursor", async ({
+    page,
+  }) => {
+    await page.goto("/products/felucca-weekender-duffel");
+    const add = page.getByTestId("add-to-cart");
+    await expect(add).toHaveText("Add to cart");
+    const idle = await add.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { bg: cs.backgroundColor, color: cs.color };
+    });
+
+    // Hold the server action so the loading state can be inspected.
+    let release!: () => void;
+    const held = new Promise<void>((r) => (release = r));
+    await page.route("**/products/felucca-weekender-duffel", async (route) => {
+      if (route.request().method() === "POST") await held;
+      await route.continue();
+    });
+
+    await add.focus(); // keyboard, so the mouse isn't hovering
+    await page.keyboard.press("Enter");
+    await expect(add).toHaveText("Adding…");
+    await expect(add).toHaveAttribute("aria-busy", "true");
+    const busy = await add.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        bg: cs.backgroundColor,
+        color: cs.color,
+        cursor: cs.cursor,
+        disabled: (el as HTMLButtonElement).disabled,
+      };
+    });
+    expect(busy).toEqual({ ...idle, cursor: "progress", disabled: false });
+
+    // A second press while busy does nothing.
+    await page.keyboard.press("Enter");
+    release();
+    await expect(page.getByTestId("cart-count")).toHaveText("1");
+    await expect(add).not.toHaveAttribute("aria-busy");
+
+    // Out of stock is the only state that uses the pale disabled style.
+    await page.goto("/products/lumen-table-lamp");
+    const out = await page.getByTestId("add-to-cart").evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { bg: cs.backgroundColor, cursor: cs.cursor };
+    });
+    expect(out.bg).not.toBe(idle.bg);
+    expect(out.cursor).toBe("not-allowed");
+  });
+
+  test("toast is at least 360px wide and clamps the description to two lines", async ({ page }) => {
+    await page.goto("/products/nomad-roll-top-backpack");
+    await page.getByTestId("add-to-cart").click();
+    const toast = page.getByTestId("toast");
+    await expect(toast).toBeVisible();
+    const box = await toast.boundingBox();
+    expect(box!.width).toBeGreaterThanOrEqual(360);
+    expect(box!.width).toBeLessThanOrEqual(448);
+
+    const desc = toast.getByTestId("toast-description");
+    await expect(desc).toHaveText("1 × Nomad Roll-Top Backpack");
+    const style = await desc.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return {
+        clamp: cs.getPropertyValue("-webkit-line-clamp"),
+        wrap: cs.overflowWrap,
+        lines: Math.round(el.getBoundingClientRect().height / parseFloat(cs.lineHeight)),
+      };
+    });
+    expect(style.clamp).toBe("2");
+    expect(style.wrap).toBe("normal");
+    expect(style.lines).toBe(1); // a product name fits on one line, unbroken
   });
 
   test("a new browser context (fresh cookie jar) starts with an empty cart", async ({

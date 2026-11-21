@@ -99,6 +99,24 @@ export async function getCartItemCount(db: Db, cartId: string | null): Promise<n
   return items.reduce((sum, i) => sum + Math.min(i.quantity, i.product.stock), 0);
 }
 
+/**
+ * Units of one product in the cart, clamped to current stock (as the cart page shows them).
+ * Returns 0 for no cart, an unknown cart, or an inactive / sold-out product.
+ */
+export async function getCartQuantity(
+  db: Db,
+  cartId: string | null,
+  productId: string,
+): Promise<number> {
+  if (!cartId) return 0;
+  const item = await db.cartItem.findUnique({
+    where: { cartId_productId: { cartId, productId } },
+    select: { quantity: true, product: { select: { stock: true, isActive: true } } },
+  });
+  if (!item || !item.product.isActive) return 0;
+  return Math.max(Math.min(item.quantity, item.product.stock), 0);
+}
+
 type Tx = Parameters<Parameters<Db["$transaction"]>[0]>[0];
 
 async function findBuyableProduct(db: Db | Tx, productId: string) {

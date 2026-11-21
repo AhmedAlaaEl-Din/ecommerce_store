@@ -3,6 +3,7 @@ import {
   addItem,
   getCart,
   getCartItemCount,
+  getCartQuantity,
   pruneIdleCarts,
   removeItem,
   restoreItem,
@@ -218,5 +219,29 @@ describe("pruneIdleCarts", () => {
     expect(await db.cart.findUnique({ where: { id: oldCart } })).toBeNull();
     expect(await db.cart.findUnique({ where: { id: activeCart } })).not.toBeNull();
     expect(await db.cartItem.count({ where: { cartId: oldCart } })).toBe(0);
+  });
+});
+
+describe("getCartQuantity", () => {
+  it("returns 0 without a cart, for an unknown cart and for a product not in the cart", async () => {
+    expect(await getCartQuantity(db, null, f.plenty.id)).toBe(0);
+    expect(await getCartQuantity(db, "00000000-0000-4000-8000-000000000000", f.plenty.id)).toBe(0);
+    const cartId = await newCartWith(f.plenty.id, 2);
+    expect(await getCartQuantity(db, cartId, f.scarce.id)).toBe(0);
+  });
+
+  it("returns the line quantity, clamped to current stock", async () => {
+    const cartId = await newCartWith(f.scarce.id, 2);
+    expect(await getCartQuantity(db, cartId, f.scarce.id)).toBe(2);
+    await db.product.update({ where: { id: f.scarce.id }, data: { stock: 1 } });
+    expect(await getCartQuantity(db, cartId, f.scarce.id)).toBe(1);
+    await db.product.update({ where: { id: f.scarce.id }, data: { stock: 0 } });
+    expect(await getCartQuantity(db, cartId, f.scarce.id)).toBe(0);
+  });
+
+  it("returns 0 for a product that became inactive", async () => {
+    const cartId = await newCartWith(f.plenty.id, 3);
+    await db.product.update({ where: { id: f.plenty.id }, data: { isActive: false } });
+    expect(await getCartQuantity(db, cartId, f.plenty.id)).toBe(0);
   });
 });

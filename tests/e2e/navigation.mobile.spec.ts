@@ -70,6 +70,15 @@ test.describe("mobile", () => {
     expect(box!.height).toBeGreaterThanOrEqual(44);
     await add.click();
     await expect(page.getByTestId("cart-count")).toHaveText("1");
+    // Toast spans the screen minus the 16px margins, and its text stays within two lines.
+    const toast = await page.getByTestId("toast").boundingBox();
+    expect(toast!.x).toBeCloseTo(16, 0);
+    expect(toast!.width).toBeCloseTo(390 - 32, 0);
+    const desc = page.getByTestId("toast-description");
+    const lines = await desc.evaluate(
+      (el) => el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight),
+    );
+    expect(Math.round(lines)).toBeLessThanOrEqual(2);
     await page.getByTestId("cart-button").click();
     await expect(page.getByTestId("cart-line")).toHaveCount(1);
 

@@ -16,6 +16,19 @@ export function clampQuantity(requested: number, stock: number): number {
   return Math.min(Math.max(q, 1), max);
 }
 
+/** Most units of a product a cart can hold right now: min(stock, MAX_QUANTITY_PER_LINE), never negative. */
+export function maxPerLine(stock: number): number {
+  return Number.isFinite(stock)
+    ? Math.min(Math.max(Math.trunc(stock), 0), MAX_QUANTITY_PER_LINE)
+    : 0;
+}
+
+/** How many more units can still be added when the cart already holds `inCart`. */
+export function remainingAddable(stock: number, inCart: number): number {
+  const held = Number.isFinite(inCart) ? Math.max(Math.trunc(inCart), 0) : 0;
+  return Math.max(maxPerLine(stock) - held, 0);
+}
+
 export type PricedLine = { priceCents: number; quantity: number };
 
 export function lineTotalCents(line: PricedLine): number {

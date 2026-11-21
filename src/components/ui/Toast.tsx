@@ -109,7 +109,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
   return (
     <div
       data-testid="toast"
-      className="animate-toast-in border-line bg-surface shadow-3 pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border p-3 pr-2"
+      className="animate-toast-in border-line bg-surface shadow-3 pointer-events-auto flex w-full items-start gap-3 rounded-lg border p-3 pr-2 sm:w-auto sm:max-w-md sm:min-w-90"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -124,8 +124,16 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
         {toneIcon[tone]}
       </span>
       <div className="min-w-0 flex-1 py-1">
-        <p className="font-semibold">{title}</p>
-        {description && <p className="text-muted mt-0.5 text-sm">{description}</p>}
+        <p className="line-clamp-1 font-semibold">{title}</p>
+        {description && (
+          <p
+            data-testid="toast-description"
+            title={description}
+            className="text-muted mt-0.5 line-clamp-2 text-sm [overflow-wrap:normal] hyphens-none"
+          >
+            {description}
+          </p>
+        )}
       </div>
       {action &&
         ("href" in action ? (
