@@ -287,8 +287,85 @@ Notes:
 
 ## 7. Privacy check
 
-_Filled in at step 17 (below)._
+Run at step 17 from the project root (Git Bash) over **all tracked files**, the **evidence folder** and
+the **handoff folder**. Commands and results:
+
+```bash
+# 1. Email addresses in tracked files (package scopes like @types/ and the commit co-author excluded)
+git ls-files -z | xargs -0 grep -nIoE "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}" \
+  | grep -vE "@(types|prisma|playwright|axe-core|tailwindcss|vitejs|next|eslint)/|noreply@anthropic.com"
+#    -> no output
+
+# 2. Windows user paths / user or machine names in tracked files
+git ls-files -z | xargs -0 grep -nIiE "C:\\Users|C:/Users|\\Users\\|/Users/|Lenovo|AppData"
+#    -> no output
+
+# 3. Tokens and keys in tracked files
+git ls-files -z | xargs -0 grep -nIiE "sk_(live|test)_|pk_(live|test)_|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}|xox[bp]-|-----BEGIN [A-Z ]*PRIVATE KEY|api[_-]?key\s*[:=]|secret\s*[:=]|password\s*[:=]|token\s*[:=]"
+#    -> no output
+
+# 4. Env or database files tracked by git
+git ls-files | grep -E "(^|/)\.env|\.db($|-)"
+#    -> .env.example   (placeholders only; .env and *.db are git-ignored)
+
+# 5. Evidence and handoff folders (146 PNG, 25 JSON, 24 HTML each): user paths, emails, keys
+for d in evidence/phase1 /e/handoff/ecommerce_phase1; do
+  grep -rlIiE "C:\\Users|C:/Users|Lenovo|AppData" "$d"
+  grep -rhoIE "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}" "$d"
+  grep -rlIiE "sk_(live|test)_|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY" "$d"
+done
+#    -> no output for either folder
+
+# 6. Machine hostname and absolute project path in evidence/handoff/repo
+grep -rlIiE "DESKTOP-|E:\\ecommerce_store" evidence/phase1 /e/handoff/ecommerce_phase1
+#    -> no output
+
+# 7. The owner's real name in repo, evidence and handoff
+grep -rlIi "<owner first name>\|<owner last name>" $(git ls-files) evidence/phase1 /e/handoff/ecommerce_phase1
+#    -> no output
+```
+
+Results:
+
+- Nothing personal is in the code, docs, frames, storyboard or Lighthouse reports. The screenshots show
+  only the demo site (page content, no browser chrome, no file paths).
+- All people, brands and products are invented ("Nile Goods"). No stock photos are used; the illustrations
+  are generated SVGs. No employer material is included.
+- **One thing to know:** the 17 commits are authored with your global git identity (`user.name` /
+  `user.email` from your git config), as usual for your own repository. They also carry a
+  `Co-Authored-By: Claude` trailer. If you want a different author before pushing, change it with
+  `git rebase --exec` or set a repo-local `git config user.email`.
+- `LICENSE` still says `TODO_COPYRIGHT_NAME`, as requested.
 
 ## 8. Commits
 
-_Filled in at step 17 (below)._
+`main` (1 commit):
+
+```
+f25dd77 chore: scaffold Next.js app with create-next-app
+```
+
+`phase-1` (on top of `main`, oldest first):
+
+```
+dca4024 chore: tooling (prisma, zod, vitest, playwright, prettier), env example, progress file
+8291bfd docs: design direction, tokens and component list
+995ba7a feat(db): prisma schema, migration, idempotent seed and SVG product illustrations
+0b2b964 feat(ui): design tokens, icons and base components
+5f1cfc2 feat: site layout, header with mobile menu, footer and home page
+349aea0 feat(catalog): products page with search, category filter, sort, pagination and mobile filter sheet
+26f15a2 feat(product): product page, add to cart action, branded 404 and error pages
+91c1ba6 feat(cart): server-side cart page with optimistic updates, remove + undo and order summary
+f9dc671 test: unit and integration suites (vitest, separate SQLite test DB)
+31ce0a8 test: playwright e2e + axe suites and npm run verify
+66f7a22 fix(ui): visual self-review fixes (cart line layout, search heading, mobile section headers) + review screenshot script
+e021203 fix(ui): apply design review findings (prices, breadcrumbs, search UX, OOS cards, info layout)
+577401b fix(security): headers, config-driven Secure cookie, stock re-clamp, strict schemas, wildcard-safe search, cart pruning, error boundaries
+e51ded5 perf: lighthouse runner (median of 3), LCP fetchpriority, keep zod out of client bundle; fix layout rethrow
+dbfca07 feat(demo): playwright frame recorder and storyboard for the phase 1 video
+243798f docs: README, MIT licence, phase 1 report and home test guide
+(final)  chore: privacy check, final verify, report sections 7-8   <- this commit
+```
+
+Nothing was pushed or merged. The push and merge commands for you are in
+`docs/HOW_TO_TEST_PHASE1.md`, step 53.

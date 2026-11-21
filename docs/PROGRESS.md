@@ -16,7 +16,7 @@
 - [x] 14. Lighthouse scores
 - [x] 15. Demo frames and storyboard (section 10)
 - [x] 16. README, LICENSE, docs/PHASE1_REPORT.md, docs/HOW_TO_TEST_PHASE1.md
-- [ ] 17. Privacy check and final `npm run verify`
+- [x] 17. Privacy check and final `npm run verify`
 
 ## Notes
 - 1: Next 16.4.6 scaffold on main, branch phase-1. Cache Components disabled (real 404s). prisma@latest is 8.0 RC, pinned stable 7.10.1. Prisma init added vendor agent-skill folders; removed. npm 11 allowScripts approved for better-sqlite3, prisma, @prisma/engines, esbuild.
@@ -35,7 +35,10 @@
 - 14: Lighthouse (median of 3, mobile preset): perf 70/74/82 default (missed; CPU benchmark ~730, LH warns slow CPU), 93/92/91 with calibrated 2x CPU; a11y/BP/SEO 100 everywhere. Fixes: fetchPriority=high (priority prop deprecated), zod out of client bundle (CSP eval -> BP 100). Also fixed regression: layout try/catch swallowed Next dynamic-usage signal (unstable_rethrow) -> /info,/_not-found had been static; e2e now checks badge on /info & 404. Details docs/reviews/lighthouse.md.
 - 15: npm run frames (scripts/record-frames.ts starts its own server on port 3200 with reseeded e2e.db): 54 desktop (1280x720) + 64 mobile (390x844) frames, bursts of 4-6 frames 60ms apart for toast/badge/qty/remove, storyboard.json with captions+durations. Copied evidence/phase1 (frames, storyboard, review, lighthouse) to E:/handoff/ecommerce_phase1 (39 MB).
 - 16: README (stack, design highlights, 2 screenshots in docs/images, Windows setup, scripts, roadmap), LICENSE (MIT, TODO_COPYRIGHT_NAME), docs/HOW_TO_TEST_PHASE1.md (53 steps + known limitations), docs/PHASE1_REPORT.md (sections 7 and 8 completed in step 17). Removed unused cross-env.
+- 17: Privacy check clean (no emails, user paths, hostnames, keys or real names in repo, evidence or handoff; only the git author identity from global config, noted in report). Final npm run verify green: unit 30, integration 32, e2e 18, axe 13. Report sections 7-8 filled. Phase 1 complete; nothing pushed.
 
 ## Needed permissions
+- None missing. (npm 11 install-script approvals were granted via `npm install-scripts approve`; see package.json allowScripts.)
 
 ## Blocked
+- Nothing blocked.
