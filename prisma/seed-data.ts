@@ -97,6 +97,7 @@ export const products: SeedProduct[] = [
       "A slow-burning soy wax candle with a cotton wick and notes of fig leaf, cedar and a little woodsmoke. Around 45 hours of burn time; the jar makes a good pen pot afterwards.",
     priceCents: 3200,
     stock: 40,
+    isFeatured: true,
     ageDays: 6,
   },
   {
@@ -285,6 +286,7 @@ export const products: SeedProduct[] = [
       "A waxed canvas roll-top backpack with a padded 15-inch laptop sleeve, a quick-access front pocket and adjustable straps with brass buckles.",
     priceCents: 14800,
     stock: 11,
+    isFeatured: true,
     ageDays: 1,
   },
   {
