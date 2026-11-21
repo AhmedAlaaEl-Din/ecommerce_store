@@ -313,9 +313,10 @@ export async function adjustStock(db: Db, actor: Actor, input: AdjustInput) {
   return db.$transaction(async (tx) => {
     const before = await tx.product.findUnique({
       where: { id: input.productId },
-      select: { stock: true, name: true },
+      select: { stock: true, name: true, archivedAt: true },
     });
     if (!before) return fail("That product no longer exists.");
+    if (before.archivedAt) return fail("This product is archived. Restore it to change its stock.");
     const after = await applyStockChange(tx, {
       productId: input.productId,
       delta: input.delta,
@@ -355,9 +356,9 @@ export async function bulkSetStock(
       if (!Number.isSafeInteger(row.stock) || row.stock < 0) continue;
       const p = await tx.product.findUnique({
         where: { id: row.productId },
-        select: { stock: true, name: true },
+        select: { stock: true, name: true, archivedAt: true },
       });
-      if (!p) continue;
+      if (!p || p.archivedAt) continue;
       if (p.stock !== row.expected) {
         // Stock moved (an order, another user) since the table was loaded.
         conflicts.push(p.name);
