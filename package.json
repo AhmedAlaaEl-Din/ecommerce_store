@@ -28,7 +28,8 @@
     "lighthouse": "tsx scripts/lighthouse.ts",
     "db:prune-carts": "tsx scripts/prune-carts.ts",
     "orders:expire": "tsx scripts/expire-orders.ts",
-    "review:shots:phase2": "tsx scripts/review-shots-phase2.ts"
+    "review:shots:phase2": "tsx scripts/review-shots-phase2.ts",
+    "frames:phase2": "tsx scripts/record-frames-phase2.ts"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.1",
