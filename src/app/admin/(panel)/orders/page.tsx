@@ -219,7 +219,7 @@ export default async function AdminOrdersPage({ searchParams }: PageProps<"/admi
               <td className={tdClass}>
                 <Link
                   href={`/admin/orders/${o.id}`}
-                  className="text-primary font-medium underline-offset-2 hover:underline"
+                  className="text-primary font-medium whitespace-nowrap underline-offset-2 hover:underline"
                 >
                   {o.orderNumber}
                 </Link>

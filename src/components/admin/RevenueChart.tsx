@@ -38,57 +38,60 @@ export function RevenueChart({ days, currency }: { days: DayRevenue[]; currency:
 
   return (
     <figure>
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="h-auto w-full"
-        role="img"
-        aria-labelledby="revenue-chart-title revenue-chart-desc"
-        data-testid="revenue-chart"
-      >
-        <title id="revenue-chart-title">{`Revenue by day, last ${days.length} days`}</title>
-        <desc id="revenue-chart-desc">{summary}</desc>
-        {ticks.map((t) => {
-          const y = PAD.top + innerH - (t / max) * innerH;
-          return (
-            <g key={t}>
-              <line
-                x1={PAD.left}
-                x2={W - PAD.right}
-                y1={y}
-                y2={y}
-                stroke="var(--border)"
-                strokeWidth={1}
-              />
-              <text x={PAD.left - 8} y={y + 4} textAnchor="end" fontSize={11} fill="var(--muted)">
-                {formatMoney(t, currency).replace(/\.00$/, "")}
-              </text>
-            </g>
-          );
-        })}
-        {days.map((d, i) => {
-          const h = (d.revenueCents / max) * innerH;
-          const x = PAD.left + i * slot + (slot - barW) / 2;
-          const y = PAD.top + innerH - h;
-          return (
-            <g key={d.day}>
-              <rect x={x} y={y} width={barW} height={Math.max(0, h)} rx={2} fill="var(--primary)">
-                <title>{`${shortDay(d.day)}: ${formatMoney(d.revenueCents, currency)} (${d.orders} order${d.orders === 1 ? "" : "s"})`}</title>
-              </rect>
-              {(i % 5 === 0 || i === days.length - 1) && (
-                <text
-                  x={x + barW / 2}
-                  y={H - 8}
-                  textAnchor="middle"
-                  fontSize={11}
-                  fill="var(--muted)"
-                >
-                  {shortDay(d.day)}
+      {/* On phones the chart keeps a readable size and scrolls sideways. */}
+      <div className="-mx-1 overflow-x-auto px-1" data-testid="revenue-chart-scroll">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="h-auto w-full min-w-[40rem]"
+          role="img"
+          aria-labelledby="revenue-chart-title revenue-chart-desc"
+          data-testid="revenue-chart"
+        >
+          <title id="revenue-chart-title">{`Revenue by day, last ${days.length} days`}</title>
+          <desc id="revenue-chart-desc">{summary}</desc>
+          {ticks.map((t) => {
+            const y = PAD.top + innerH - (t / max) * innerH;
+            return (
+              <g key={t}>
+                <line
+                  x1={PAD.left}
+                  x2={W - PAD.right}
+                  y1={y}
+                  y2={y}
+                  stroke="var(--border)"
+                  strokeWidth={1}
+                />
+                <text x={PAD.left - 8} y={y + 4} textAnchor="end" fontSize={11} fill="var(--muted)">
+                  {formatMoney(t, currency).replace(/\.00$/, "")}
                 </text>
-              )}
-            </g>
-          );
-        })}
-      </svg>
+              </g>
+            );
+          })}
+          {days.map((d, i) => {
+            const h = (d.revenueCents / max) * innerH;
+            const x = PAD.left + i * slot + (slot - barW) / 2;
+            const y = PAD.top + innerH - h;
+            return (
+              <g key={d.day}>
+                <rect x={x} y={y} width={barW} height={Math.max(0, h)} rx={2} fill="var(--primary)">
+                  <title>{`${shortDay(d.day)}: ${formatMoney(d.revenueCents, currency)} (${d.orders} order${d.orders === 1 ? "" : "s"})`}</title>
+                </rect>
+                {(i % 5 === 0 || i === days.length - 1) && (
+                  <text
+                    x={x + barW / 2}
+                    y={H - 8}
+                    textAnchor="middle"
+                    fontSize={11}
+                    fill="var(--muted)"
+                  >
+                    {shortDay(d.day)}
+                  </text>
+                )}
+              </g>
+            );
+          })}
+        </svg>
+      </div>
       <figcaption className="text-muted mt-2 text-xs">{summary}</figcaption>
       <details className="mt-3 text-sm">
         <summary className="text-primary inline-flex min-h-11 cursor-pointer items-center font-medium underline underline-offset-4 lg:min-h-8">

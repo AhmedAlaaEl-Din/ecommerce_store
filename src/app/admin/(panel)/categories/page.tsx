@@ -49,7 +49,7 @@ export default async function AdminCategoriesPage({
           That category still has products. Move them to another category, or delete them, first.
         </Notice>
       )}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <TableWrap label="Categories">
           <thead>
             <tr>

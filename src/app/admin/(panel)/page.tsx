@@ -131,11 +131,11 @@ export default async function AdminDashboardPage() {
                     <td className={tdClass}>
                       <Link
                         href={`/admin/orders/${o.id}`}
-                        className="text-primary font-medium underline-offset-2 hover:underline"
+                        className="text-primary font-medium whitespace-nowrap underline-offset-2 hover:underline"
                       >
                         {o.orderNumber}
                       </Link>
-                      <div className="text-muted text-xs">{fmtDateTime(o.createdAt)}</div>
+                      <div className="text-muted text-xs whitespace-nowrap">{fmtDateTime(o.createdAt)}</div>
                     </td>
                     <td className={tdClass}>{o.customerName}</td>
                     <td className={tdClass}>

@@ -26,7 +26,7 @@ const MONA = {
   addressLine2: "Studio 4",
   city: "Delta Town",
   postalCode: "DT 1024",
-  country: "nilera",
+  country: "EG",
 };
 
 async function newPage(browser: Browser, vp: Vp) {

@@ -300,7 +300,7 @@ export function ProductForm({
         <div className="xl:sticky xl:top-20">
           <h2
             id="preview-title"
-            className="text-muted mb-2 text-xs font-semibold tracking-[0.08em] uppercase"
+            className="text-muted mb-2 font-sans text-xs font-semibold tracking-[0.08em] uppercase"
           >
             Live preview
           </h2>

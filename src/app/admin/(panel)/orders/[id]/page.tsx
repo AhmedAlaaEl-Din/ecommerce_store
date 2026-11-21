@@ -242,7 +242,7 @@ export default async function AdminOrderPage({
           </Panel>
         </div>
 
-        <div className="flex flex-col gap-4">
+        <div className="order-first flex min-w-0 flex-col gap-4 xl:order-none">
           <Panel title="Fulfilment" id="fulfilment">
             {status === "paid" || status === "refunded" ? (
               <>

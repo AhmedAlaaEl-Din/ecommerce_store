@@ -60,7 +60,7 @@ export function Panel({
   return (
     <section
       id={id}
-      className={cn("border-line bg-surface shadow-1 rounded-lg border", className)}
+      className={cn("border-line bg-surface shadow-1 min-w-0 rounded-lg border", className)}
       aria-labelledby={title && id ? `${id}-title` : undefined}
     >
       {(title || actions) && (
@@ -188,7 +188,7 @@ export function TableWrap({
   return (
     <div
       className={cn(
-        "border-line bg-surface shadow-1 max-h-[calc(100dvh-15rem)] min-h-40 overflow-auto rounded-lg border",
+        "border-line bg-surface shadow-1 max-h-[calc(100dvh-15rem)] min-h-40 min-w-0 overflow-auto rounded-lg border",
         className,
       )}
       role="region"

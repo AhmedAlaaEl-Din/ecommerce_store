@@ -48,7 +48,7 @@ export default async function AdminUsersPage({ searchParams }: PageProps<"/admin
           demote or disable yourself.
         </Notice>
       )}
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <TableWrap label="Users">
           <thead>
             <tr>

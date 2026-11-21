@@ -60,8 +60,8 @@ export default async function StockHistoryPage({
           </Link>
         }
       />
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
-        <div>
+      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]">
+        <div className="min-w-0">
           <div className="mb-3 flex flex-wrap items-center gap-3 text-sm">
             <span>
               In stock:{" "}
@@ -70,7 +70,9 @@ export default async function StockHistoryPage({
               </strong>
             </span>
             {product.stock <= threshold && (
-              <Pill tone={product.stock === 0 ? "bad" : "warn"}>Low stock</Pill>
+              <Pill tone={product.stock === 0 ? "bad" : "warn"}>
+                {product.stock === 0 ? "Out of stock" : "Low stock"}
+              </Pill>
             )}
             <span className="text-muted" data-testid="balance-check">
               {balanced
