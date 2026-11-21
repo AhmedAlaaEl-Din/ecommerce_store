@@ -1,0 +1,47 @@
+{
+  "permissions": {
+    "defaultMode": "acceptEdits",
+    "additionalDirectories": ["E:\\handoff\\ecommerce_phase1"],
+    "allow": [
+      "Bash(npm *)",
+      "Bash(npx *)",
+      "Bash(node *)",
+      "Bash(git init*)",
+      "Bash(git status*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git checkout *)",
+      "Bash(git switch *)",
+      "Bash(git branch *)",
+      "Bash(git log*)",
+      "Bash(git diff*)",
+      "Bash(git restore *)",
+      "Bash(git stash*)",
+      "Bash(mkdir *)",
+      "Bash(cp *)",
+      "Bash(mv *)",
+      "Bash(ls*)",
+      "Bash(cat *)",
+      "Bash(grep *)",
+      "Bash(find *)",
+      "Bash(rm -rf node_modules*)",
+      "Bash(rm -rf .next*)",
+      "Bash(rm -rf evidence/*)",
+      "Bash(rm -f prisma/*.db*)"
+    ],
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git remote*)",
+      "Bash(git reset --hard*)",
+      "Bash(gh *)",
+      "Bash(ngrok*)",
+      "Bash(npx localtunnel*)",
+      "Bash(npx vercel*)",
+      "Bash(npx stripe*)",
+      "Bash(stripe *)",
+      "Read(./.env)"
+    ]
+  }
+}
