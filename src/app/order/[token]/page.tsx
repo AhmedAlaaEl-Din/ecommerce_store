@@ -57,8 +57,8 @@ function Pending({ order }: { order: OrderView }) {
       </h1>
       <p className="text-muted mt-2 max-w-prose">
         Thanks for your patience. We’re waiting for the payment provider to confirm order{" "}
-        <strong className="text-ink">{order.orderNumber}</strong>. This usually takes a few seconds,
-        and this page updates by itself.
+        <strong className="text-ink whitespace-nowrap">{order.orderNumber}</strong>. This usually
+        takes a few seconds, and this page updates by itself.
       </p>
       <OrderStatusPoller />
     </section>
@@ -107,12 +107,12 @@ function Paid({ order }: { order: OrderView }) {
       <p className="text-accent mt-5 text-xs font-semibold tracking-[0.12em] uppercase">
         Order confirmed
       </p>
-      <h1 id="order-heading" className="mt-1 text-3xl sm:text-4xl">
+      <h1 id="order-heading" className="mt-1 text-2xl sm:text-4xl">
         Thank you, {firstName}.
       </h1>
       <p className="text-muted mt-3 max-w-prose">
         Your order number is{" "}
-        <strong className="text-ink tabular-nums" data-testid="order-number">
+        <strong className="text-ink whitespace-nowrap tabular-nums" data-testid="order-number">
           {order.orderNumber}
         </strong>
         . We’ve written a confirmation to <span className="text-ink">{order.email}</span> (demo:

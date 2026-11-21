@@ -87,7 +87,7 @@ export function CheckoutForm({
                 <li key={f}>
                   <a
                     href={`#checkout-${f}`}
-                    className="inline-block min-h-6 py-0.5 underline underline-offset-4"
+                    className="block min-h-6 py-0.5 underline underline-offset-4"
                   >
                     {FIELD_LABELS[f]}: {e[f]}
                   </a>

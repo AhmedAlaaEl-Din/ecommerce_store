@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Spinner } from "../ui/Spinner";
 
 const INTERVAL_MS = 2000;
 const MAX_ATTEMPTS = 15; // 30 seconds
@@ -48,8 +47,7 @@ export function OrderStatusPoller() {
   }
 
   return (
-    <p className="text-muted mt-6 flex items-center gap-2 text-sm" aria-hidden="true">
-      <Spinner className="text-primary size-5" />
+    <p className="text-muted mt-6 text-sm" aria-hidden="true">
       Checking every few seconds…
     </p>
   );

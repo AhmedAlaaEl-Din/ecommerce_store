@@ -4,11 +4,12 @@ import { InfoIcon } from "../icons";
 export function DemoRibbon() {
   return (
     <p
-      className="bg-ink flex items-center justify-center gap-2 px-4 py-2 text-center text-sm font-medium text-white"
+      className="bg-ink px-4 py-2 text-center text-sm font-medium text-white"
       data-testid="demo-ribbon"
     >
-      <InfoIcon size={16} />
-      Demo mode: mock payments. No real payment provider is used.
+      <InfoIcon size={16} className="mr-1.5 inline-block align-[-3px]" />
+      Demo mode: mock payments.{" "}
+      <span className="text-white/80">No real payment provider is used.</span>
     </p>
   );
 }

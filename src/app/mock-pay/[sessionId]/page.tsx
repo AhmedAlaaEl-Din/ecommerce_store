@@ -51,7 +51,7 @@ export default async function MockPayPage({ params, searchParams }: Props) {
   const cancelHref = `/checkout/cancel?order=${order.publicToken}`;
 
   return (
-    <div className="bg-sunken/60 min-h-[calc(100dvh-4rem)]">
+    <div>
       <p
         className="bg-accent px-4 py-3 text-center text-sm font-semibold text-white"
         data-testid="mock-banner"
