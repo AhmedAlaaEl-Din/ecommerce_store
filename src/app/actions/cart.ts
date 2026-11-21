@@ -17,6 +17,7 @@ import {
   type CartView,
 } from "@/lib/cart/service";
 import { db } from "@/lib/db";
+import { logError as logSafe } from "@/lib/log";
 import {
   addToCartSchema,
   removeCartItemSchema,
@@ -47,8 +48,7 @@ const MESSAGES: Record<CartErrorCode | "INVALID" | "UNEXPECTED", string> = {
 };
 
 function logError(action: string, err: unknown) {
-  // Server-side only; the client receives a friendly message, never the raw error.
-  console.error(`[cart] ${action} failed:`, err instanceof Error ? err.message : err);
+  logSafe("cart", `${action} failed`, err);
 }
 
 export async function addToCartAction(input: unknown): Promise<AddToCartResult> {

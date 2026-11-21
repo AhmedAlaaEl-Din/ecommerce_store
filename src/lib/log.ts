@@ -41,6 +41,10 @@ export function describeError(err: unknown): string {
   return [err.name, typeof code === "string" ? code : null, clipped].filter(Boolean).join(" ");
 }
 
+export function logWarn(scope: string, message: string) {
+  console.warn(`[${scope}] ${message}`);
+}
+
 export function logError(scope: string, message: string, err?: unknown) {
   console.error(`[${scope}] ${message}`, describeError(err));
 }

@@ -11,6 +11,8 @@
  *   Signs its events with MOCK_WEBHOOK_SECRET; outside production a dev-only
  *   default is used when it is not set.
  */
+import { randomBytes } from "node:crypto";
+
 export type ProviderName = "mock" | "stripe";
 
 export type PaymentConfig =
@@ -29,8 +31,12 @@ export class PaymentConfigError extends Error {
   }
 }
 
-/** Dev-only signing secret for mock events (never used in production). */
-export const DEV_MOCK_WEBHOOK_SECRET = "nile-goods-dev-mock-webhook-secret";
+/**
+ * Dev-only signing secret for mock events when MOCK_WEBHOOK_SECRET is not set:
+ * random per server process, so nobody can forge mock events from a known value.
+ * (Signing and verifying both happen inside the same process.)
+ */
+export const DEV_MOCK_WEBHOOK_SECRET = randomBytes(32).toString("hex");
 
 type Env = Record<string, string | undefined>;
 

@@ -115,6 +115,9 @@ describe("webhook signature verification", () => {
       sessionId: "cs_test_1",
       orderId: "order123456",
       paymentStatus: "paid",
+      amountTotal: null,
+      currency: null,
+      livemode: false,
     });
   });
 

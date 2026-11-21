@@ -34,7 +34,14 @@ async function findPendingMockOrder(sessionId: unknown) {
   if (config.provider !== "mock") return null;
   const order = await db.order.findUnique({
     where: { providerSessionId: sessionId },
-    select: { id: true, publicToken: true, status: true, provider: true },
+    select: {
+      id: true,
+      publicToken: true,
+      status: true,
+      provider: true,
+      totalCents: true,
+      currency: true,
+    },
   });
   if (!order || order.provider !== "mock") return null;
   return { order, secret: config.webhookSecret };
@@ -71,6 +78,8 @@ export async function mockPayAction(formData: FormData): Promise<void> {
     sessionId: sessionId as string,
     orderId: order.id,
     paymentStatus: "paid",
+    amountTotal: order.totalCents,
+    currency: order.currency,
   });
   const delay = paidDelayMs();
   after(async () => {

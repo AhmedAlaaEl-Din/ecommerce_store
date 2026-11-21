@@ -15,7 +15,7 @@ instead of `E:\handoff\ecommerce_phase2`.
 - [x] 10. Unit and integration tests — unit 74 (provider rules, signatures, order number, totals, form schema, idempotency guard, masking, rate limiter, email escaping); integration 59 (reservation, two-process race, transitions, duplicates, tampering, late payment).
 - [x] 11. E2E and axe; `npm run verify` passes — 34 e2e (purchase, decline, cancel, validation, autocomplete, sold-out-between-cart-and-checkout, keyboard-only, mobile, guards) + 15 axe; fixed runtime APP_URL for redirects, select reset after submit, error-link target size.
 - [x] 12. Visual self-review loop (as in Phase 1, section 5.4) — 23 shots in evidence/phase2/review (`npm run review:shots:phase2`); 2 rounds: mobile demo ribbon wrap, mock-pay background band, order number wrapping mid-token, double spinner, oversized mobile thank-you heading, error-list bullet alignment.
-- [ ] 13. CHECKPOINT: security review subagent, then fixes
+- [x] 13. CHECKPOINT: security review subagent, then fixes — 12 findings, no critical: 10 fixed (one pending order per cart, signature-first limiter, retryable unmatched events, amount/livemode checks, fulfilmentNote, cart-bound cancel, byte-capped body, random dev secret, mixed currency, sanitized logs), adapter hazard mitigated + documented, per-IP limits deferred to Phase 4. docs/reviews/phase2-security-review.md
 - [ ] 14. CHECKPOINT: design review subagent, then fixes
 - [ ] 15. Lighthouse performance work and scores
 - [ ] 16. Frames, storyboard and review screenshots; copy to handoff

@@ -103,11 +103,23 @@ export async function placeOrderAction(
   }
   if (!result.ok) {
     if (result.code === "EMPTY_CART") redirect("/cart");
+    if (result.code === "MIXED_CURRENCY") {
+      return {
+        values,
+        errors: {},
+        attempt,
+        formError: "Your cart mixes currencies, which we can’t charge together. Please contact us.",
+      };
+    }
     const ids = result.changes.map((c) => c.productId).join(".");
     redirect(`/cart?adjusted=${encodeURIComponent(ids)}`);
   }
 
   const { order } = result;
+  // A resubmit replaced an earlier pending order: make its session unpayable.
+  for (const old of result.supersededSessionIds) {
+    await payments.provider.cancelSession(old);
+  }
   let redirectUrl: string;
   try {
     const session = await payments.provider.createCheckoutSession({

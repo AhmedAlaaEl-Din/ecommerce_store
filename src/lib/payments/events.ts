@@ -24,9 +24,12 @@ export type HandledEventType = (typeof HANDLED_EVENT_TYPES)[number];
 const sessionEventSchema = z.object({
   id: z.string().min(1).max(255),
   type: z.string().min(1).max(100),
+  livemode: z.boolean().nullish(),
   data: z.object({
     object: z.object({
       id: z.string().min(1).max(255),
+      amount_total: z.number().int().nullish(),
+      currency: z.string().max(10).nullish(),
       client_reference_id: z.string().max(255).nullish(),
       payment_status: z.string().max(50).nullish(),
       metadata: z.record(z.string(), z.string()).nullish(),
@@ -40,6 +43,10 @@ export type PaymentEvent = {
   sessionId: string;
   orderId: string | null;
   paymentStatus: string | null;
+  /** Amount the provider charged, in cents (null when the event does not say). */
+  amountTotal: number | null;
+  currency: string | null;
+  livemode: boolean | null;
 };
 
 export class WebhookSignatureError extends Error {
@@ -86,6 +93,9 @@ export function verifyAndParseEvent(
     sessionId: session.id,
     orderId: session.metadata?.orderId ?? session.client_reference_id ?? null,
     paymentStatus: session.payment_status ?? null,
+    amountTotal: session.amount_total ?? null,
+    currency: session.currency ?? null,
+    livemode: parsed.data.livemode ?? null,
   };
 }
 
@@ -96,6 +106,8 @@ export function buildSessionEvent(input: {
   sessionId: string;
   orderId: string;
   paymentStatus?: "paid" | "unpaid";
+  amountTotal?: number;
+  currency?: string;
   created?: number;
 }): string {
   return JSON.stringify({
@@ -110,6 +122,8 @@ export function buildSessionEvent(input: {
         object: "checkout.session",
         client_reference_id: input.orderId,
         payment_status: input.paymentStatus ?? "unpaid",
+        amount_total: input.amountTotal ?? null,
+        currency: input.currency?.toLowerCase() ?? null,
         metadata: { orderId: input.orderId },
       },
     },

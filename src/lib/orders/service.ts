@@ -84,8 +84,11 @@ export type CreateOrderResult =
         reservedUntil: Date;
         lines: Array<{ name: string; unitAmountCents: number; quantity: number }>;
       };
+      /** Provider sessions of earlier pending orders from this cart, now cancelled. */
+      supersededSessionIds: string[];
     }
   | { ok: false; code: "EMPTY_CART" }
+  | { ok: false; code: "MIXED_CURRENCY" }
   | { ok: false; code: "STOCK_CHANGED"; changes: StockChange[] };
 
 /**
@@ -111,10 +114,28 @@ export async function createPendingOrder(
   });
   if (cartItems.length === 0) return { ok: false, code: "EMPTY_CART" };
 
+  const superseded: string[] = [];
   const order = await withBusyRetry(() =>
     db.$transaction(async (tx) => {
-      // 1. Reserve: conditional decrements (`stock >= qty`). Writing first takes
-      //    SQLite's write lock, so concurrent checkouts are serialised from here on.
+      // 0. One pending order per cart: a resubmit (e.g. Back from the payment
+      //    page) cancels the earlier one and returns its stock first, so a cart
+      //    never holds stock twice and never has two payable sessions.
+      superseded.length = 0;
+      // First statement is a write (touching the cart), so this transaction takes
+      // SQLite's write lock immediately; reads that follow cannot be invalidated
+      // by another writer (avoids lock-upgrade failures across processes).
+      await tx.cart.update({ where: { id: cartId }, data: { updatedAt: now } });
+      const previous = await tx.order.findMany({
+        where: { cartId, status: "pending_payment" },
+        select: { id: true, providerSessionId: true },
+      });
+      for (const p of previous) {
+        if ((await releaseOrderInTx(tx, p.id, "cancelled")) && p.providerSessionId) {
+          superseded.push(p.providerSessionId);
+        }
+      }
+
+      // 1. Reserve: conditional decrements (`stock >= qty`).
       const reserved: Array<{ productId: string; quantity: number }> = [];
       let short = false;
       for (const item of cartItems) {
@@ -154,6 +175,17 @@ export async function createPendingOrder(
           currency: p.currency,
         };
       });
+      const currencies = new Set(lines.map((l) => l.currency));
+      if (currencies.size !== 1) {
+        // Never charge a mixed cart in one currency: put the stock back and stop.
+        for (const l of lines) {
+          await tx.product.update({
+            where: { id: l.productId },
+            data: { stock: { increment: l.quantity } },
+          });
+        }
+        return "MIXED_CURRENCY" as const;
+      }
       const totals = cartTotals(lines);
       const currency = lines[0]!.currency;
       const reservedUntil = new Date(now.getTime() + RESERVATION_MINUTES * 60_000);
@@ -194,6 +226,7 @@ export async function createPendingOrder(
     }),
   );
 
+  if (order === "MIXED_CURRENCY") return { ok: false, code: "MIXED_CURRENCY" };
   if (!order) {
     return { ok: false, code: "STOCK_CHANGED", changes: await adjustCartToStock(db, cartId) };
   }
@@ -213,6 +246,7 @@ export async function createPendingOrder(
         quantity: i.quantity,
       })),
     },
+    supersededSessionIds: [...superseded],
   };
 }
 
@@ -237,18 +271,31 @@ async function adjustCartToStock(db: Db, cartId: string): Promise<StockChange[]>
       requested: item.quantity,
       available,
     });
-    if (available === 0) await db.cartItem.delete({ where: { id: item.id } });
-    else await db.cartItem.update({ where: { id: item.id }, data: { quantity: available } });
   }
   if (changes.length > 0) {
-    await db.cart.update({ where: { id: cartId }, data: { updatedAt: new Date() } });
+    // Writes go through a transaction (see the note on the SQLite adapter in the report).
+    await db.$transaction(async (tx) => {
+      for (const c of changes) {
+        if (c.available === 0) {
+          await tx.cartItem.deleteMany({ where: { cartId, productId: c.productId } });
+        } else {
+          await tx.cartItem.updateMany({
+            where: { cartId, productId: c.productId },
+            data: { quantity: c.available },
+          });
+        }
+      }
+      await tx.cart.update({ where: { id: cartId }, data: { updatedAt: new Date() } });
+    });
   }
   return changes;
 }
 
 /** Stores the provider's session id once the session exists. */
 export async function attachProviderSession(db: Db, orderId: string, sessionId: string) {
-  await db.order.update({ where: { id: orderId }, data: { providerSessionId: sessionId } });
+  await db.$transaction((tx) =>
+    tx.order.update({ where: { id: orderId }, data: { providerSessionId: sessionId } }),
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -312,9 +359,24 @@ export async function markOrderPaidInTx(tx: Tx, orderId: string, now: Date): Pro
       if (res.count !== 1) result = "paid_oversold";
     }
   }
-  await tx.order.update({ where: { id: orderId }, data: { status: "paid", paidAt: now } });
+  await tx.order.update({
+    where: { id: orderId },
+    data: {
+      status: "paid",
+      paidAt: now,
+      // Flag late/oversold payments for manual follow-up.
+      fulfilmentNote: result === "paid" ? null : result,
+    },
+  });
   if (order.cartId) {
-    await tx.cartItem.deleteMany({ where: { cartId: order.cartId } });
+    // Remove only what was bought: items added to the cart after checkout stay.
+    for (const item of order.items) {
+      await tx.cartItem.updateMany({
+        where: { cartId: order.cartId, productId: item.productId },
+        data: { quantity: { decrement: item.quantity } },
+      });
+    }
+    await tx.cartItem.deleteMany({ where: { cartId: order.cartId, quantity: { lte: 0 } } });
   }
   return result;
 }

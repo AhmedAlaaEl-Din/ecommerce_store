@@ -135,6 +135,9 @@ describe("webhook idempotency guard (unit, fake database)", () => {
     sessionId: "cs_1",
     orderId: "o1",
     paymentStatus: "paid",
+    amountTotal: null,
+    currency: null,
+    livemode: false,
   };
 
   it("acknowledges an already-processed event without touching the order", async () => {

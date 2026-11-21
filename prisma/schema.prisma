@@ -99,6 +99,9 @@ model Order {
   /// Stock is held until this time while the order is pending payment.
   reservedUntil     DateTime
   paidAt            DateTime?
+  /// Set when a payment arrived after the reservation was released
+  /// ("paid_after_release") or the stock was gone ("paid_oversold").
+  fulfilmentNote    String?
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
   items             OrderItem[]

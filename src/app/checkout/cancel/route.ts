@@ -4,6 +4,7 @@
  * configured APP_URL, never the request Host header.
  */
 import { NextResponse, type NextRequest } from "next/server";
+import { readCartId } from "@/lib/cart/cookie";
 import { cancelPendingOrder } from "@/lib/orders/cancel";
 import { PUBLIC_TOKEN_RE } from "@/lib/orders/service";
 import { appUrl } from "@/lib/site";
@@ -15,7 +16,7 @@ export async function GET(request: NextRequest) {
   if (!PUBLIC_TOKEN_RE.test(token)) {
     return NextResponse.redirect(new URL("/checkout", appUrl()), 303);
   }
-  await cancelPendingOrder(token);
+  await cancelPendingOrder(token, await readCartId());
   const to = new URL("/checkout", appUrl());
   to.searchParams.set("order", token);
   to.searchParams.set("status", "cancelled");

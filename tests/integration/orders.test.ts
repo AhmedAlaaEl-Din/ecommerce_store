@@ -12,7 +12,7 @@ import {
   RESERVATION_MINUTES,
 } from "@/lib/orders/service";
 import { buildSessionEvent, signPayload, WebhookSignatureError } from "@/lib/payments/events";
-import { applyPaymentEvent, handleWebhook } from "@/lib/payments/webhook";
+import { applyPaymentEvent, handleWebhook, WebhookRetryError } from "@/lib/payments/webhook";
 import { makeFixtures, resetDb, testDb, TEST_DB_URL } from "./helpers";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
@@ -78,6 +78,9 @@ function event(
     sessionId: order.sessionId,
     orderId: order.id,
     paymentStatus: type === "checkout.session.completed" ? "paid" : null,
+    amountTotal: null as number | null,
+    currency: null as string | null,
+    livemode: false as boolean | null,
   };
 }
 
@@ -196,8 +199,14 @@ describe("createPendingOrder (reservation)", () => {
         run(cartA, "mona@example.com"),
         run(cartB, "omar@example.com"),
       ]);
-      expect(results.filter((r) => r.ok)).toHaveLength(1);
-      expect(results.filter((r) => !r.ok && r.code === "STOCK_CHANGED")).toHaveLength(1);
+      expect(
+        results.filter((r) => r.ok),
+        JSON.stringify(results),
+      ).toHaveLength(1);
+      expect(
+        results.filter((r) => !r.ok && r.code === "STOCK_CHANGED"),
+        JSON.stringify(results),
+      ).toHaveLength(1);
       expect(await stockOf(f.scarce.id)).toBe(0);
       expect(await db.order.count()).toBe(1);
     },
@@ -468,5 +477,94 @@ describe("getOrderByToken", () => {
     expect(await getOrderByToken(db, order.id)).toBeNull();
     expect(await getOrderByToken(db, "x".repeat(32))).toBeNull();
     expect(await getOrderByToken(db, "../../etc")).toBeNull();
+  });
+});
+
+describe("security review fixes", () => {
+  it("a resubmit from the same cart replaces the earlier pending order (no double hold)", async () => {
+    const cartId = await cartWith([f.scarce.id, 2]);
+    const first = await pendingOrder(cartId);
+    expect(await stockOf(f.scarce.id)).toBe(0);
+    const again = await createPendingOrder(db, { cartId, customer, provider: "mock" });
+    expect(again.ok).toBe(true);
+    if (!again.ok) return;
+    expect(again.supersededSessionIds).toEqual([first.sessionId]);
+    expect((await db.order.findUniqueOrThrow({ where: { id: first.id } })).status).toBe(
+      "cancelled",
+    );
+    expect(await stockOf(f.scarce.id)).toBe(0); // held once, by the new order
+    expect(await db.order.count({ where: { status: "pending_payment" } })).toBe(1);
+  });
+
+  it("refuses to mark paid when the charged amount or currency differs", async () => {
+    const order = await pendingOrder(await cartWith([f.plenty.id, 1]));
+    const base = event("checkout.session.completed", order);
+    expect(await applyPaymentEvent(db, { ...base, amountTotal: 1 })).toMatchObject({
+      action: "ignored",
+      reason: "amount or currency mismatch",
+    });
+    expect(
+      await applyPaymentEvent(db, { ...base, id: "evt_cur", amountTotal: 1845, currency: "eur" }),
+    ).toMatchObject({ action: "ignored" });
+    expect(
+      await applyPaymentEvent(db, { ...base, id: "evt_ok", amountTotal: 1845, currency: "usd" }),
+    ).toMatchObject({ action: "paid" });
+  });
+
+  it("refuses live-mode events", async () => {
+    const order = await pendingOrder(await cartWith([f.plenty.id, 1]));
+    expect(
+      await applyPaymentEvent(db, {
+        ...event("checkout.session.completed", order),
+        livemode: true,
+      }),
+    ).toMatchObject({ action: "ignored", reason: "live-mode event refused" });
+  });
+
+  it("unmatched events are not recorded; an event before the session is stored asks for a retry", async () => {
+    const order = await pendingOrder(await cartWith([f.plenty.id, 1]));
+    await applyPaymentEvent(db, {
+      ...event("checkout.session.completed", order, "evt_wrong"),
+      sessionId: "cs_other",
+    });
+    expect(await db.processedEvent.count()).toBe(0);
+
+    const r = await createPendingOrder(db, {
+      cartId: await cartWith([f.plenty.id, 1]),
+      customer,
+      provider: "mock",
+    });
+    if (!r.ok) throw new Error("setup");
+    await expect(
+      applyPaymentEvent(db, {
+        ...event("checkout.session.completed", { id: r.order.id, sessionId: "cs_x" }),
+      }),
+    ).rejects.toThrow(WebhookRetryError);
+  });
+
+  it("paying removes only the purchased quantities from the cart", async () => {
+    const cartId = await cartWith([f.plenty.id, 2]);
+    const order = await pendingOrder(cartId);
+    // Shopper keeps shopping while the payment is pending.
+    await addItem(db, cartId, f.plenty.id, 1);
+    await addItem(db, cartId, f.scarce.id, 1);
+    await applyPaymentEvent(db, event("checkout.session.completed", order));
+    const left = await db.cartItem.findMany({ where: { cartId }, orderBy: { productId: "asc" } });
+    expect(left.map((l) => [l.productId, l.quantity]).sort()).toEqual(
+      [
+        [f.plenty.id, 1],
+        [f.scarce.id, 1],
+      ].sort(),
+    );
+  });
+
+  it("late and oversold payments are flagged on the order", async () => {
+    const t0 = new Date("2026-11-21T10:00:00Z");
+    const late = await pendingOrder(await cartWith([f.plenty.id, 1]), t0);
+    await expireStaleOrders(db, new Date(t0.getTime() + 31 * 60_000));
+    await applyPaymentEvent(db, event("checkout.session.completed", late));
+    expect((await db.order.findUniqueOrThrow({ where: { id: late.id } })).fulfilmentNote).toBe(
+      "paid_after_release",
+    );
   });
 });
