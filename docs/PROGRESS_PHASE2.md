@@ -9,8 +9,8 @@ instead of `E:\handoff\ecommerce_phase2`.
 - [x] 4. Webhook handler, signature, idempotency — /api/webhooks/payments verifies the raw body with Stripe's helper (both providers), ProcessedEvent guard, session-id match, outbox side effect once; integration-tested.
 - [x] 5. Checkout page, form and validation — /checkout with contact + shipping (autocomplete, invented country list), zod on the server, error summary + inline errors, values kept; summary right on desktop, collapsible on top on mobile; cart button now "Checkout".
 - [x] 6. Reservation transaction and expiry — one transaction with conditional decrements (no rollback path), 30-min hold, `npm run orders:expire` + expiry before each checkout; cross-process race integration test.
-- [ ] 7. Mock pay page, success page with polling, failure and cancel paths
-- [ ] 8. Outbox email and /dev/outbox
+- [x] 7. Mock pay page, success page with polling, failure and cancel paths — /mock-pay/[sessionId] (labelled banner, Pay/Decline/Cancel) signs Stripe-shaped events and hands them to `receiveWebhook`, the function behind the webhook route; paid event arrives ~1.5 s after redirect like Stripe; /order/[token] polls every 2 s up to 30 s; decline/cancel return to the refilled form.
+- [x] 8. Outbox email and /dev/outbox — escaped HTML confirmation written once per paid order to var/outbox (git-ignored); /dev/outbox list + viewer return 404 in production.
 - [ ] 9. Security items (section 5)
 - [ ] 10. Unit and integration tests
 - [ ] 11. E2E and axe; `npm run verify` passes

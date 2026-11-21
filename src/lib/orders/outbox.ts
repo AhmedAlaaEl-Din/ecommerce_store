@@ -9,7 +9,10 @@ import { formatMoney } from "../money";
 import { countryName } from "./checkout-schema";
 
 export function outboxDir(): string {
-  return resolve(process.cwd(), process.env.OUTBOX_DIR ?? join("var", "outbox"));
+  return resolve(
+    /*turbopackIgnore: true*/ process.cwd(),
+    process.env.OUTBOX_DIR ?? join("var", "outbox"),
+  );
 }
 
 /** Only names we generate are ever read back (no path traversal). */
@@ -105,9 +108,13 @@ export async function writeConfirmationEmail(db: Db, orderId: string): Promise<s
   });
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const dir = outboxDir();
-  await mkdir(dir, { recursive: true });
+  await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
   const name = `${order.orderNumber}-${Date.now()}.html`;
-  await writeFile(join(dir, name), renderConfirmationEmail(order, siteUrl), "utf8");
+  await writeFile(
+    join(/*turbopackIgnore: true*/ dir, name),
+    renderConfirmationEmail(order, siteUrl),
+    "utf8",
+  );
   return name;
 }
 
@@ -117,7 +124,7 @@ export async function listOutbox(): Promise<OutboxEntry[]> {
   const dir = outboxDir();
   let names: string[];
   try {
-    names = await readdir(dir);
+    names = await readdir(/*turbopackIgnore: true*/ dir);
   } catch {
     return [];
   }
@@ -125,7 +132,7 @@ export async function listOutbox(): Promise<OutboxEntry[]> {
     names
       .filter((n) => OUTBOX_FILE_RE.test(n))
       .map(async (name) => {
-        const s = await stat(join(dir, name));
+        const s = await stat(join(/*turbopackIgnore: true*/ dir, name));
         return {
           name,
           orderNumber: name.replace(/-\d{13}\.html$/, ""),
@@ -140,7 +147,7 @@ export async function listOutbox(): Promise<OutboxEntry[]> {
 export async function readOutboxFile(name: string): Promise<string | null> {
   if (!OUTBOX_FILE_RE.test(name)) return null;
   try {
-    return await readFile(join(outboxDir(), name), "utf8");
+    return await readFile(join(/*turbopackIgnore: true*/ outboxDir(), name), "utf8");
   } catch {
     return null;
   }

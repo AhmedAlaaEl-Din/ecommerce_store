@@ -4,6 +4,7 @@
  * Requires a production build (`npm run build`); builds one if missing.
  */
 import { execSync, spawn } from "node:child_process";
+import { randomBytes } from "node:crypto";
 import { existsSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
@@ -15,11 +16,20 @@ const env = {
   ...process.env,
   DATABASE_URL: "file:./prisma/e2e.db",
   NEXT_PUBLIC_SITE_URL: `http://localhost:${port}`,
+  // Phase 2: the production build runs with the offline mock payment provider.
+  PAYMENT_PROVIDER: "mock",
+  ALLOW_MOCK_PAYMENTS: "true",
+  MOCK_WEBHOOK_SECRET: randomBytes(32).toString("hex"),
+  MOCK_WEBHOOK_DELAY_MS: process.env.MOCK_WEBHOOK_DELAY_MS ?? "1500",
+  OUTBOX_DIR: process.env.OUTBOX_DIR ?? "var/outbox-e2e",
+  STRIPE_SECRET_KEY: "",
+  STRIPE_WEBHOOK_SECRET: "",
 };
 
 for (const suffix of ["", "-journal", "-wal", "-shm"]) {
   rmSync(join(root, "prisma", `e2e.db${suffix}`), { force: true });
 }
+rmSync(join(root, env.OUTBOX_DIR), { recursive: true, force: true });
 execSync("npx prisma migrate deploy", { cwd: root, env, stdio: "pipe" });
 execSync("npx tsx prisma/seed.ts --reset-carts", { cwd: root, env, stdio: "inherit" });
 
