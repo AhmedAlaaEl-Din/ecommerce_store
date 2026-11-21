@@ -197,7 +197,11 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
     2,
   );
   await page.getByLabel("Country").selectOption("EG");
-  await rec.snap("form", "A short list of real countries; the customer and address are invented.", 1.2);
+  await rec.snap(
+    "form",
+    "A short list of real countries; the customer and address are invented.",
+    1.2,
+  );
 
   // 4. Validation error, then the fix
   await page.getByTestId("place-order").click();

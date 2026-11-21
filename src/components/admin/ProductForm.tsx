@@ -9,6 +9,7 @@ import { ProductCard } from "../product/ProductCard";
 import { Button } from "../ui/Button";
 import { fieldClasses, Input } from "../ui/Input";
 import { Select } from "../ui/Select";
+import { useFieldErrors } from "./useFieldErrors";
 
 export type ProductFormValues = {
   name: string;
@@ -67,7 +68,7 @@ function Textarea({
         onChange={(e) => onChange(e.target.value)}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-error` : hint ? `${id}-hint` : undefined}
-        className={cn(fieldClasses.replace("h-11 ", ""), "min-h-28 py-2 leading-6")}
+        className={cn(fieldClasses.replace("h-11", ""), "min-h-28 py-2 leading-6")}
       />
       {error ? (
         <p id={`${id}-error`} className="text-danger text-sm">
@@ -99,18 +100,17 @@ export function ProductForm({
   const [v, setV] = useState(initial);
   const [slugTouched, setSlugTouched] = useState(mode === "edit");
   const [preview, setPreview] = useState<string | null>(null);
-  const [dirty, setDirty] = useState<Set<string>>(new Set());
+  const fields = useFieldErrors(state);
   const set = <K extends keyof ProductFormValues>(k: K, value: ProductFormValues[K]) => {
     setV((prev) => ({
       ...prev,
       [k]: value,
       ...(k === "name" && !slugTouched ? { slug: slugify(String(value)) } : {}),
     }));
-    setDirty((d) => new Set(d).add(k));
+    fields.touch(k);
   };
   // Errors clear as soon as their field is edited (same behaviour as checkout).
-  const err = (k: string) => (dirty.has(k) ? undefined : state.fieldErrors?.[k]);
-  useEffect(() => setDirty(new Set()), [state]);
+  const err = fields.error;
   useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
 
   const category = categories.find((c) => c.id === v.categoryId) ?? categories[0];
@@ -124,7 +124,10 @@ export function ProductForm({
       currency: "USD",
       stock: Number.parseInt(v.stock, 10) || 0,
       imagePath: preview ?? v.imagePath,
-      category: { name: category?.name ?? "Category", accentColor: category?.accentColor ?? "#EFE8DC" },
+      category: {
+        name: category?.name ?? "Category",
+        accentColor: category?.accentColor ?? "#EFE8DC",
+      },
     }),
     [v, preview, category],
   );
@@ -133,13 +136,25 @@ export function ProductForm({
     <form action={formAction} className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_20rem]" noValidate>
       <div className="border-line bg-surface shadow-1 flex flex-col gap-4 rounded-lg border p-4 sm:p-5">
         {state.error && (
-          <div role="alert" className="bg-danger-soft text-danger flex gap-2 rounded-md p-3 text-sm" data-testid="form-error">
+          <div
+            role="alert"
+            className="bg-danger-soft text-danger flex gap-2 rounded-md p-3 text-sm"
+            data-testid="form-error"
+          >
             <AlertIcon size={18} className="mt-0.5 shrink-0" />
             <p>{state.error}</p>
           </div>
         )}
         <div className="grid gap-4 md:grid-cols-2">
-          <Input label="Name" name="name" value={v.name} onChange={(e) => set("name", e.target.value)} error={err("name")} maxLength={80} required />
+          <Input
+            label="Name"
+            name="name"
+            value={v.name}
+            onChange={(e) => set("name", e.target.value)}
+            error={err("name")}
+            maxLength={80}
+            required
+          />
           <Input
             label="Slug"
             name="slug"
@@ -174,7 +189,15 @@ export function ProductForm({
           hint="Shown on the product page as plain text."
         />
         <div className="grid gap-4 sm:grid-cols-3">
-          <Input label="Price (USD)" name="price" inputMode="decimal" value={v.price} onChange={(e) => set("price", e.target.value)} error={err("price")} placeholder="24.00" />
+          <Input
+            label="Price (USD)"
+            name="price"
+            inputMode="decimal"
+            value={v.price}
+            onChange={(e) => set("price", e.target.value)}
+            error={err("price")}
+            placeholder="24.00"
+          />
           <Input
             label="Compare-at price"
             name="compareAt"
@@ -185,11 +208,20 @@ export function ProductForm({
             hint="Optional; shows a sale."
           />
           {mode === "create" ? (
-            <Input label="Opening stock" name="stock" inputMode="numeric" value={v.stock} onChange={(e) => set("stock", e.target.value)} error={err("stock")} />
+            <Input
+              label="Opening stock"
+              name="stock"
+              inputMode="numeric"
+              value={v.stock}
+              onChange={(e) => set("stock", e.target.value)}
+              error={err("stock")}
+            />
           ) : (
             <div className="flex flex-col gap-1.5">
               <span className="text-sm font-medium">Stock</span>
-              <p className="border-line bg-sunken flex h-11 items-center rounded-sm border px-3 tabular-nums">{v.stock}</p>
+              <p className="border-line bg-sunken flex h-11 items-center rounded-sm border px-3 tabular-nums">
+                {v.stock}
+              </p>
               <p className="text-muted text-sm">Change stock from Inventory, with a reason.</p>
             </div>
           )}
@@ -217,7 +249,7 @@ export function ProductForm({
             onChange={(e) => {
               const f = e.target.files?.[0];
               setPreview(f ? URL.createObjectURL(f) : null);
-              setDirty((d) => new Set(d).add("image"));
+              fields.touch("image");
             }}
             className="file:bg-sunken file:text-ink hover:file:bg-line text-sm file:mr-3 file:min-h-11 file:cursor-pointer file:rounded-md file:border-0 file:px-4 file:font-medium"
           />
@@ -228,18 +260,32 @@ export function ProductForm({
           ) : (
             <p id="f-image-hint" className="text-muted text-sm">
               JPEG, PNG or WebP, up to 5 MB. It is cropped square, resized and stripped of metadata.
-              {mode === "edit" ? " Leave empty to keep the current image." : " Without one, a neutral illustration is used."}
+              {mode === "edit"
+                ? " Leave empty to keep the current image."
+                : " Without one, a neutral illustration is used."}
             </p>
           )}
         </div>
         <fieldset className="flex flex-wrap gap-x-6 gap-y-2">
           <legend className="sr-only">Visibility</legend>
           <label className="inline-flex min-h-11 items-center gap-2 text-sm">
-            <input type="checkbox" name="isActive" checked={v.isActive} onChange={(e) => set("isActive", e.target.checked)} className="accent-primary size-4" />
+            <input
+              type="checkbox"
+              name="isActive"
+              checked={v.isActive}
+              onChange={(e) => set("isActive", e.target.checked)}
+              className="accent-primary size-4"
+            />
             Active (visible in the store)
           </label>
           <label className="inline-flex min-h-11 items-center gap-2 text-sm">
-            <input type="checkbox" name="isFeatured" checked={v.isFeatured} onChange={(e) => set("isFeatured", e.target.checked)} className="accent-primary size-4" />
+            <input
+              type="checkbox"
+              name="isFeatured"
+              checked={v.isFeatured}
+              onChange={(e) => set("isFeatured", e.target.checked)}
+              className="accent-primary size-4"
+            />
             Featured on the home page
           </label>
         </fieldset>
@@ -252,14 +298,23 @@ export function ProductForm({
 
       <aside aria-labelledby="preview-title">
         <div className="xl:sticky xl:top-20">
-          <h2 id="preview-title" className="text-muted mb-2 text-xs font-semibold tracking-[0.08em] uppercase">
+          <h2
+            id="preview-title"
+            className="text-muted mb-2 text-xs font-semibold tracking-[0.08em] uppercase"
+          >
             Live preview
           </h2>
           {/* inert: the preview card is not a real link while editing */}
-          <div inert className="border-line bg-background rounded-lg border p-4" data-testid="product-preview">
+          <div
+            inert
+            className="border-line bg-background rounded-lg border p-4"
+            data-testid="product-preview"
+          >
             <ProductCard product={card} />
           </div>
-          {!v.isActive && <p className="text-warning mt-2 text-sm">Inactive: hidden from the store.</p>}
+          {!v.isActive && (
+            <p className="text-warning mt-2 text-sm">Inactive: hidden from the store.</p>
+          )}
         </div>
       </aside>
     </form>

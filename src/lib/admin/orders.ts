@@ -50,7 +50,8 @@ export function orderWhere(f: OrderFilters): Prisma.OrderWhereInput {
   if (f.fulfilment) where.fulfilmentStatus = f.fulfilment;
   const created: Prisma.DateTimeFilter = {};
   if (f.from && DATE_RE.test(f.from)) created.gte = new Date(`${f.from}T00:00:00.000Z`);
-  if (f.to && DATE_RE.test(f.to)) created.lt = new Date(new Date(`${f.to}T00:00:00.000Z`).getTime() + 86_400_000);
+  if (f.to && DATE_RE.test(f.to))
+    created.lt = new Date(new Date(`${f.to}T00:00:00.000Z`).getTime() + 86_400_000);
   if (created.gte || created.lt) where.createdAt = created;
   const q = f.q?.trim().slice(0, 100);
   if (q) {
@@ -96,8 +97,14 @@ export async function getOrderDetail(db: Db, id: string) {
   return db.order.findUnique({
     where: { id },
     include: {
-      items: { orderBy: { id: "asc" }, include: { product: { select: { slug: true, archivedAt: true } } } },
-      events: { orderBy: [{ createdAt: "asc" }, { id: "asc" }], include: { actor: { select: { name: true } } } },
+      items: {
+        orderBy: { id: "asc" },
+        include: { product: { select: { slug: true, archivedAt: true } } },
+      },
+      events: {
+        orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+        include: { actor: { select: { name: true } } },
+      },
       notes: { orderBy: { createdAt: "desc" }, include: { author: { select: { name: true } } } },
       refund: true,
     },
@@ -107,7 +114,11 @@ export async function getOrderDetail(db: Db, id: string) {
 const CSV_LIMIT = 5000;
 
 /** CSV of the filtered list (same filters as the table), newest first. */
-export async function exportOrdersCsv(db: Db, actor: Actor, f: OrderFilters): Promise<{ csv: string; count: number }> {
+export async function exportOrdersCsv(
+  db: Db,
+  actor: Actor,
+  f: OrderFilters,
+): Promise<{ csv: string; count: number }> {
   assertCan(actor, "orders.export");
   const rows = await db.order.findMany({
     where: orderWhere(f),
@@ -197,7 +208,10 @@ export async function advanceFulfilment(
     });
     if (!order) return fail("That order no longer exists.");
     const check = checkFulfilmentTransition(
-      { status: order.status as PaymentStatus, fulfilmentStatus: order.fulfilmentStatus as FulfilmentStatus },
+      {
+        status: order.status as PaymentStatus,
+        fulfilmentStatus: order.fulfilmentStatus as FulfilmentStatus,
+      },
       to,
       { carrier, trackingNumber },
     );
@@ -217,7 +231,10 @@ export async function advanceFulfilment(
     await addOrderEvent(tx, {
       orderId,
       type: to,
-      message: to === "shipped" ? `${STEP_MESSAGES[to]} with ${carrier} (${trackingNumber})` : STEP_MESSAGES[to],
+      message:
+        to === "shipped"
+          ? `${STEP_MESSAGES[to]} with ${carrier} (${trackingNumber})`
+          : STEP_MESSAGES[to],
       actorId: actor.id,
       now,
     });
@@ -266,7 +283,12 @@ export async function addNote(db: Db, actor: Actor, orderId: string, body: strin
 // Cancel (pending orders) and refund (paid orders) — admin only
 // ---------------------------------------------------------------------------
 
-export async function cancelOrder(db: Db, actor: Actor, orderId: string, provider: PaymentProvider) {
+export async function cancelOrder(
+  db: Db,
+  actor: Actor,
+  orderId: string,
+  provider: PaymentProvider,
+) {
   assertCan(actor, "orders.cancel");
   const order = await db.order.findUnique({
     where: { id: orderId },
@@ -279,7 +301,12 @@ export async function cancelOrder(db: Db, actor: Actor, orderId: string, provide
   const released = await db.$transaction(async (tx) => {
     const ok = await releaseOrderInTx(tx, orderId, "cancelled");
     if (ok) {
-      await addOrderEvent(tx, { orderId, type: "note", message: "Cancelled from the admin", actorId: actor.id });
+      await addOrderEvent(tx, {
+        orderId,
+        type: "note",
+        message: "Cancelled from the admin",
+        actorId: actor.id,
+      });
       await writeAudit(tx, {
         actorId: actor.id,
         action: "order.cancel",
@@ -334,7 +361,9 @@ export async function refundOrder(
   });
   if (!check.ok) return fail(REFUND_ERRORS[check.reason]);
   if (order.provider !== provider.name) {
-    return fail(`This order was paid with the ${order.provider} provider, which is not the one configured now.`);
+    return fail(
+      `This order was paid with the ${order.provider} provider, which is not the one configured now.`,
+    );
   }
 
   let refundId: string;
@@ -347,7 +376,9 @@ export async function refundOrder(
     }));
   } catch (err) {
     logError("admin-orders", "refund failed at the provider", err);
-    return fail("The payment provider did not accept the refund. Nothing was changed; try again later.");
+    return fail(
+      "The payment provider did not accept the refund. Nothing was changed; try again later.",
+    );
   }
 
   const res = await db.$transaction(async (tx) => {

@@ -61,5 +61,12 @@ export async function listAdminProducts(db: Db, f: ProductFilters, threshold: nu
       },
     }),
   ]);
-  return { total, rows, page, sort, dir, pageCount: Math.max(1, Math.ceil(total / PRODUCT_PAGE_SIZE)) };
+  return {
+    total,
+    rows,
+    page,
+    sort,
+    dir,
+    pageCount: Math.max(1, Math.ceil(total / PRODUCT_PAGE_SIZE)),
+  };
 }

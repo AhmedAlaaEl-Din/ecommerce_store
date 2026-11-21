@@ -130,8 +130,13 @@ function Paid({ order }: { order: OrderView }) {
       </p>
 
       {order.status === "refunded" && (
-        <p className="bg-accent-soft text-accent mt-6 rounded-md px-4 py-3 text-sm" data-testid="order-refunded" role="status">
-          This order was refunded in full ({m(order.totalCents)}). Refunds usually show on your statement within 5 to 10 business days.
+        <p
+          className="bg-accent-soft text-accent mt-6 rounded-md px-4 py-3 text-sm"
+          data-testid="order-refunded"
+          role="status"
+        >
+          This order was refunded in full ({m(order.totalCents)}). Refunds usually show on your
+          statement within 5 to 10 business days.
         </p>
       )}
       <OrderProgress order={order} />
@@ -216,8 +221,8 @@ function Paid({ order }: { order: OrderView }) {
         </h2>
         <p className="text-muted mt-2 max-w-prose">
           We pack orders within two working days and update this page when your parcel ships, with
-          its tracking number. This is a demo store, so nothing really ships. Keep this page’s link to
-          check on the order.
+          its tracking number. This is a demo store, so nothing really ships. Keep this page’s link
+          to check on the order.
         </p>
       </section>
 

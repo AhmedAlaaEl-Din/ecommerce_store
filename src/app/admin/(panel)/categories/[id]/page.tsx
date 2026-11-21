@@ -16,11 +16,19 @@ export default async function EditCategoryPage({ params }: PageProps<"/admin/cat
   if (!c) notFound();
   return (
     <>
-      <PageHeader title={`Edit ${c.name}`} back={{ href: "/admin/categories", label: "Categories" }} />
+      <PageHeader
+        title={`Edit ${c.name}`}
+        back={{ href: "/admin/categories", label: "Categories" }}
+      />
       <Panel className="max-w-xl" id="edit-category">
         <CategoryForm
           action={updateCategoryAction.bind(null, c.id)}
-          initial={{ name: c.name, slug: c.slug, description: c.description, accentColor: c.accentColor }}
+          initial={{
+            name: c.name,
+            slug: c.slug,
+            description: c.description,
+            accentColor: c.accentColor,
+          }}
           submitLabel="Save changes"
         />
       </Panel>

@@ -47,7 +47,10 @@ const DONE = {
   refunded: "Refund issued. A “Refund issued” email was written to the outbox.",
 };
 
-export default async function AdminOrderPage({ params, searchParams }: PageProps<"/admin/orders/[id]">) {
+export default async function AdminOrderPage({
+  params,
+  searchParams,
+}: PageProps<"/admin/orders/[id]">) {
   const { user } = await requireAdmin();
   const { id } = await params;
   const sp = await searchParams;
@@ -58,7 +61,11 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
   const fulfilment = order.fulfilmentStatus as FulfilmentStatus;
   const next = status === "paid" ? nextFulfilment(fulfilment) : null;
   const money = (c: number) => formatMoney(c, order.currency);
-  const refundCheck = checkRefund({ status, providerSessionId: order.providerSessionId, hasRefund: !!order.refund });
+  const refundCheck = checkRefund({
+    status,
+    providerSessionId: order.providerSessionId,
+    hasRefund: !!order.refund,
+  });
   const isAdmin = can(user.role, "orders.refund");
 
   return (
@@ -68,7 +75,9 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
           <span className="flex flex-wrap items-center gap-3">
             {order.orderNumber}
             <PaymentBadge status={order.status} />
-            {(status === "paid" || status === "refunded") && <FulfilmentBadge status={order.fulfilmentStatus} />}
+            {(status === "paid" || status === "refunded") && (
+              <FulfilmentBadge status={order.fulfilmentStatus} />
+            )}
           </span>
         }
         description={`Placed ${fmtDateTime(order.createdAt)}`}
@@ -87,12 +96,18 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
         }
       />
       <DoneNotice code={done} messages={DONE} />
-      {done === "refund_failed" && <Notice tone="error">The refund didn’t go through. Nothing was changed.</Notice>}
-      {done === "cancel_failed" && <Notice tone="error">This order can no longer be cancelled.</Notice>}
+      {done === "refund_failed" && (
+        <Notice tone="error">The refund didn’t go through. Nothing was changed.</Notice>
+      )}
+      {done === "cancel_failed" && (
+        <Notice tone="error">This order can no longer be cancelled.</Notice>
+      )}
       {order.fulfilmentNote && (
         <Notice tone="error">
           Payment arrived after the reservation expired
-          {order.fulfilmentNote === "paid_oversold" ? " and stock was short. Check stock before shipping." : "; stock was taken again."}
+          {order.fulfilmentNote === "paid_oversold"
+            ? " and stock was short. Check stock before shipping."
+            : "; stock was taken again."}
         </Notice>
       )}
 
@@ -103,45 +118,86 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
               <table className="w-full border-separate border-spacing-0 text-sm">
                 <thead>
                   <tr>
-                    <th scope="col" className={thClass}>Product</th>
-                    <th scope="col" className={`${thClass} text-right`}>Qty</th>
-                    <th scope="col" className={`${thClass} text-right`}>Unit price</th>
-                    <th scope="col" className={`${thClass} text-right`}>Total</th>
+                    <th scope="col" className={thClass}>
+                      Product
+                    </th>
+                    <th scope="col" className={`${thClass} text-right`}>
+                      Qty
+                    </th>
+                    <th scope="col" className={`${thClass} text-right`}>
+                      Unit price
+                    </th>
+                    <th scope="col" className={`${thClass} text-right`}>
+                      Total
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {order.items.map((i) => (
                     <tr key={i.id} data-testid="order-line">
                       <td className={tdClass}>
-                        <Link href={`/admin/products/${i.productId}`} className="font-medium underline-offset-2 hover:underline">
+                        <Link
+                          href={`/admin/products/${i.productId}`}
+                          className="font-medium underline-offset-2 hover:underline"
+                        >
                           {i.productNameSnapshot}
                         </Link>
-                        {i.product.archivedAt && <span className="text-muted ml-2 text-xs">(archived)</span>}
+                        {i.product.archivedAt && (
+                          <span className="text-muted ml-2 text-xs">(archived)</span>
+                        )}
                       </td>
                       <td className={`${tdClass} text-right tabular-nums`}>{i.quantity}</td>
-                      <td className={`${tdClass} text-right tabular-nums`}>{money(i.unitPriceCentsSnapshot)}</td>
-                      <td className={`${tdClass} text-right tabular-nums`}>{money(i.lineTotalCents)}</td>
+                      <td className={`${tdClass} text-right tabular-nums`}>
+                        {money(i.unitPriceCentsSnapshot)}
+                      </td>
+                      <td className={`${tdClass} text-right tabular-nums`}>
+                        {money(i.lineTotalCents)}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot className="text-sm">
                   <tr>
-                    <th scope="row" colSpan={3} className="px-3 pt-3 text-right font-normal text-muted">Subtotal</th>
-                    <td className="px-3 pt-3 text-right tabular-nums">{money(order.subtotalCents)}</td>
+                    <th
+                      scope="row"
+                      colSpan={3}
+                      className="text-muted px-3 pt-3 text-right font-normal"
+                    >
+                      Subtotal
+                    </th>
+                    <td className="px-3 pt-3 text-right tabular-nums">
+                      {money(order.subtotalCents)}
+                    </td>
                   </tr>
                   <tr>
-                    <th scope="row" colSpan={3} className="px-3 pt-1 text-right font-normal text-muted">Shipping</th>
-                    <td className="px-3 pt-1 text-right tabular-nums">{order.shippingCents === 0 ? "Free" : money(order.shippingCents)}</td>
+                    <th
+                      scope="row"
+                      colSpan={3}
+                      className="text-muted px-3 pt-1 text-right font-normal"
+                    >
+                      Shipping
+                    </th>
+                    <td className="px-3 pt-1 text-right tabular-nums">
+                      {order.shippingCents === 0 ? "Free" : money(order.shippingCents)}
+                    </td>
                   </tr>
                   <tr>
-                    <th scope="row" colSpan={3} className="px-3 pt-1 pb-3 text-right font-semibold">Total</th>
-                    <td className="px-3 pt-1 pb-3 text-right font-semibold tabular-nums" data-testid="order-total">{money(order.totalCents)}</td>
+                    <th scope="row" colSpan={3} className="px-3 pt-1 pb-3 text-right font-semibold">
+                      Total
+                    </th>
+                    <td
+                      className="px-3 pt-1 pb-3 text-right font-semibold tabular-nums"
+                      data-testid="order-total"
+                    >
+                      {money(order.totalCents)}
+                    </td>
                   </tr>
                 </tfoot>
               </table>
             </div>
             <p className="text-muted border-line border-t px-3 py-2 text-xs">
-              Names and prices are a snapshot from when the order was placed; later product edits don’t change them.
+              Names and prices are a snapshot from when the order was placed; later product edits
+              don’t change them.
             </p>
           </Panel>
 
@@ -149,7 +205,10 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
             <ol className="flex flex-col gap-3" data-testid="timeline">
               {order.events.map((e) => (
                 <li key={e.id} className="flex gap-3 text-sm">
-                  <span className="bg-primary mt-1.5 size-2 shrink-0 rounded-full" aria-hidden="true" />
+                  <span
+                    className="bg-primary mt-1.5 size-2 shrink-0 rounded-full"
+                    aria-hidden="true"
+                  />
                   <div>
                     <p>{e.message}</p>
                     <p className="text-muted text-xs">
@@ -159,7 +218,11 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
                   </div>
                 </li>
               ))}
-              {order.events.length === 0 && <li className="text-muted text-sm">No events recorded (order placed before Phase 3).</li>}
+              {order.events.length === 0 && (
+                <li className="text-muted text-sm">
+                  No events recorded (order placed before Phase 3).
+                </li>
+              )}
             </ol>
           </Panel>
 
@@ -188,8 +251,16 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
                     const reached = FULFILMENT_STEPS.indexOf(fulfilment) >= i;
                     return (
                       <li key={s} className="flex flex-col gap-1">
-                        <span className={cn("h-1.5 rounded-full", reached ? "bg-primary" : "bg-line")} aria-hidden="true" />
-                        <span className={cn("text-xs", reached ? "text-ink font-semibold" : "text-muted")}>
+                        <span
+                          className={cn("h-1.5 rounded-full", reached ? "bg-primary" : "bg-line")}
+                          aria-hidden="true"
+                        />
+                        <span
+                          className={cn(
+                            "text-xs",
+                            reached ? "text-ink font-semibold" : "text-muted",
+                          )}
+                        >
                           {FULFILMENT_LABELS[s]}
                           <span className="sr-only">{reached ? " (done)" : " (not yet)"}</span>
                         </span>
@@ -198,7 +269,10 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
                   })}
                 </ol>
                 {order.trackingNumber && (
-                  <dl className="mb-4 grid grid-cols-[6rem_1fr] gap-y-1 text-sm" data-testid="tracking">
+                  <dl
+                    className="mb-4 grid grid-cols-[6rem_1fr] gap-y-1 text-sm"
+                    data-testid="tracking"
+                  >
                     <dt className="text-muted">Carrier</dt>
                     <dd>{order.carrier}</dd>
                     <dt className="text-muted">Tracking</dt>
@@ -206,10 +280,15 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
                   </dl>
                 )}
                 {next && can(user.role, "orders.fulfil") ? (
-                  <FulfilmentForm orderId={order.id} next={next as Exclude<FulfilmentStatus, "unfulfilled">} />
+                  <FulfilmentForm
+                    orderId={order.id}
+                    next={next as Exclude<FulfilmentStatus, "unfulfilled">}
+                  />
                 ) : (
                   <p className="text-muted text-sm">
-                    {status === "refunded" ? "Refunded orders are not fulfilled further." : "Delivered. Nothing left to do."}
+                    {status === "refunded"
+                      ? "Refunded orders are not fulfilled further."
+                      : "Delivered. Nothing left to do."}
                   </p>
                 )}
               </>
@@ -221,7 +300,9 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
           <Panel title="Customer" id="customer">
             <p className="font-medium">{order.customerName}</p>
             <p className="text-sm break-all">{order.email}</p>
-            <h3 className="text-muted mt-3 font-sans text-xs font-semibold tracking-[0.06em] uppercase">Ship to</h3>
+            <h3 className="text-muted mt-3 font-sans text-xs font-semibold tracking-[0.06em] uppercase">
+              Ship to
+            </h3>
             <address className="mt-1 text-sm not-italic">
               {order.addressLine1}
               {order.addressLine2 && (
@@ -242,7 +323,9 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
               <dt className="text-muted">Provider</dt>
               <dd className="capitalize">{order.provider}</dd>
               <dt className="text-muted">Session</dt>
-              <dd className="font-mono text-xs break-all" data-testid="masked-session">{maskReference(order.providerSessionId)}</dd>
+              <dd className="font-mono text-xs break-all" data-testid="masked-session">
+                {maskReference(order.providerSessionId)}
+              </dd>
               <dt className="text-muted">Paid</dt>
               <dd>{fmtDateTime(order.paidAt)}</dd>
               {order.refund && (
@@ -250,8 +333,12 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
                   <dt className="text-muted">Refunded</dt>
                   <dd>
                     {money(order.refund.amountCents)} · {fmtDateTime(order.refund.createdAt)}
-                    <span className="text-muted block font-mono text-xs">{maskReference(order.refund.providerRefundId)}</span>
-                    <span className="text-muted block text-xs">{order.refund.restocked ? "Items restocked" : "Not restocked"}</span>
+                    <span className="text-muted block font-mono text-xs">
+                      {maskReference(order.refund.providerRefundId)}
+                    </span>
+                    <span className="text-muted block text-xs">
+                      {order.refund.restocked ? "Items restocked" : "Not restocked"}
+                    </span>
                   </dd>
                 </>
               )}
@@ -267,7 +354,8 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
                     action={cancelOrderAction}
                     hidden={{ orderId: order.id }}
                   >
-                    The order hasn’t been paid. Cancelling it releases the reserved stock and stops the payment session.
+                    The order hasn’t been paid. Cancelling it releases the reserved stock and stops
+                    the payment session.
                   </ConfirmDialog>
                 )}
                 {refundCheck.ok && (
@@ -280,10 +368,16 @@ export default async function AdminOrderPage({ params, searchParams }: PageProps
                     hidden={{ orderId: order.id }}
                   >
                     <p>
-                      The full amount goes back through the {order.provider} provider. This can’t be undone. A “Refund issued” email is written to the outbox.
+                      The full amount goes back through the {order.provider} provider. This can’t be
+                      undone. A “Refund issued” email is written to the outbox.
                     </p>
                     <label className="text-ink mt-3 flex min-h-11 items-center gap-2">
-                      <input type="checkbox" name="restock" className="accent-primary size-4" data-testid="refund-restock" />
+                      <input
+                        type="checkbox"
+                        name="restock"
+                        className="accent-primary size-4"
+                        data-testid="refund-restock"
+                      />
                       Put the items back in stock
                     </label>
                   </ConfirmDialog>

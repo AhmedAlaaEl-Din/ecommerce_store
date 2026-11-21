@@ -4,12 +4,7 @@
  */
 export type FulfilmentStatus = "unfulfilled" | "packed" | "shipped" | "delivered";
 export type PaymentStatus =
-  | "pending_payment"
-  | "paid"
-  | "payment_failed"
-  | "cancelled"
-  | "expired"
-  | "refunded";
+  "pending_payment" | "paid" | "payment_failed" | "cancelled" | "expired" | "refunded";
 
 export const FULFILMENT_STEPS: readonly FulfilmentStatus[] = [
   "unfulfilled",
@@ -41,8 +36,7 @@ export function nextFulfilment(current: FulfilmentStatus): FulfilmentStatus | nu
 }
 
 export type TransitionCheck =
-  | { ok: true }
-  | { ok: false; reason: "NOT_PAID" | "INVALID_STEP" | "TRACKING_REQUIRED" };
+  { ok: true } | { ok: false; reason: "NOT_PAID" | "INVALID_STEP" | "TRACKING_REQUIRED" };
 
 /**
  * Fulfilment moves one step at a time, only for paid orders, and "shipped"
@@ -62,8 +56,7 @@ export function checkFulfilmentTransition(
 }
 
 export type RefundCheck =
-  | { ok: true }
-  | { ok: false; reason: "NOT_PAID" | "ALREADY_REFUNDED" | "NO_PAYMENT_REFERENCE" };
+  { ok: true } | { ok: false; reason: "NOT_PAID" | "ALREADY_REFUNDED" | "NO_PAYMENT_REFERENCE" };
 
 /** Full refunds only, once, for a paid order that has a provider payment reference. */
 export function checkRefund(order: {
@@ -71,7 +64,8 @@ export function checkRefund(order: {
   providerSessionId: string | null;
   hasRefund: boolean;
 }): RefundCheck {
-  if (order.hasRefund || order.status === "refunded") return { ok: false, reason: "ALREADY_REFUNDED" };
+  if (order.hasRefund || order.status === "refunded")
+    return { ok: false, reason: "ALREADY_REFUNDED" };
   if (order.status !== "paid") return { ok: false, reason: "NOT_PAID" };
   if (!order.providerSessionId) return { ok: false, reason: "NO_PAYMENT_REFERENCE" };
   return { ok: true };

@@ -60,9 +60,7 @@ export function uploadsDir(): string {
   );
 }
 
-export type ImageCheck =
-  | { ok: true; type: DetectedType }
-  | { ok: false; error: string };
+export type ImageCheck = { ok: true; type: DetectedType } | { ok: false; error: string };
 
 export function checkUpload(file: { size: number }, head: Uint8Array): ImageCheck {
   if (file.size === 0) return { ok: false, error: "Choose an image file." };

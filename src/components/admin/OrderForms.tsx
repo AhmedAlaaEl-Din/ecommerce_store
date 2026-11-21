@@ -15,7 +15,11 @@ import { fieldClasses, Input } from "../ui/Input";
 function ErrorLine({ error, testId }: { error?: string; testId: string }) {
   if (!error) return null;
   return (
-    <p role="alert" className="bg-danger-soft text-danger flex gap-2 rounded-md p-2.5 text-sm" data-testid={testId}>
+    <p
+      role="alert"
+      className="bg-danger-soft text-danger flex gap-2 rounded-md p-2.5 text-sm"
+      data-testid={testId}
+    >
       <AlertIcon size={18} className="mt-0.5 shrink-0" /> {error}
     </p>
   );
@@ -28,7 +32,13 @@ const LABELS: Record<Exclude<FulfilmentStatus, "unfulfilled">, string> = {
 };
 
 /** The one next fulfilment step; "shipped" asks for the carrier and tracking number. */
-export function FulfilmentForm({ orderId, next }: { orderId: string; next: Exclude<FulfilmentStatus, "unfulfilled"> }) {
+export function FulfilmentForm({
+  orderId,
+  next,
+}: {
+  orderId: string;
+  next: Exclude<FulfilmentStatus, "unfulfilled">;
+}) {
   const [state, action, pending] = useActionState<OrderActionState, FormData>(fulfilmentAction, {});
   return (
     <form action={action} className="flex flex-col gap-3" data-testid="fulfilment-form">
@@ -37,8 +47,20 @@ export function FulfilmentForm({ orderId, next }: { orderId: string; next: Exclu
       <ErrorLine error={state.error} testId="fulfilment-error" />
       {next === "shipped" && (
         <>
-          <Input label="Carrier" name="carrier" required maxLength={60} placeholder="e.g. Nile Post" />
-          <Input label="Tracking number" name="trackingNumber" required maxLength={60} spellCheck={false} />
+          <Input
+            label="Carrier"
+            name="carrier"
+            required
+            maxLength={60}
+            placeholder="e.g. Nile Post"
+          />
+          <Input
+            label="Tracking number"
+            name="trackingNumber"
+            required
+            maxLength={60}
+            spellCheck={false}
+          />
         </>
       )}
       <div>
@@ -65,14 +87,20 @@ export function NoteForm({ orderId }: { orderId: string }) {
         rows={3}
         maxLength={1000}
         required
-        className={cn(fieldClasses.replace("h-11 ", ""), "min-h-20 py-2 leading-6")}
+        className={cn(fieldClasses.replace("h-11", ""), "min-h-20 py-2 leading-6")}
         aria-describedby="note-hint"
       />
       <p id="note-hint" className="text-muted text-xs">
         Only staff see notes. They are never shown to the customer.
       </p>
       <div>
-        <Button type="submit" variant="secondary" size="sm" loading={pending} data-testid="note-save">
+        <Button
+          type="submit"
+          variant="secondary"
+          size="sm"
+          loading={pending}
+          data-testid="note-save"
+        >
           Add note
         </Button>
       </div>

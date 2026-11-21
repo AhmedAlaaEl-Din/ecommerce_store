@@ -2,7 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StockAdjustForm } from "@/components/admin/StockAdjustForm";
-import { EmptyRow, PageHeader, Panel, Pill, TableWrap, tdClass, thClass } from "@/components/admin/ui";
+import {
+  EmptyRow,
+  PageHeader,
+  Panel,
+  Pill,
+  TableWrap,
+  tdClass,
+  thClass,
+} from "@/components/admin/ui";
 import { Pagination } from "@/components/ui/Pagination";
 import { fmtDateTime, pageParam, param } from "@/lib/admin/format";
 import { requireAdmin } from "@/lib/admin/guard";
@@ -13,13 +21,22 @@ import { REASON_LABELS, type StockReason } from "@/lib/inventory/stock";
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Stock history" };
 
-export default async function StockHistoryPage({ params, searchParams }: PageProps<"/admin/inventory/[id]">) {
+export default async function StockHistoryPage({
+  params,
+  searchParams,
+}: PageProps<"/admin/inventory/[id]">) {
   await requireAdmin();
   const { id } = await params;
   const sp = await searchParams;
   const product = await db.product.findUnique({
     where: { id },
-    select: { id: true, name: true, stock: true, archivedAt: true, category: { select: { name: true } } },
+    select: {
+      id: true,
+      name: true,
+      stock: true,
+      archivedAt: true,
+      category: { select: { name: true } },
+    },
   });
   if (!product) notFound();
   const [threshold, history] = await Promise.all([
@@ -35,7 +52,10 @@ export default async function StockHistoryPage({ params, searchParams }: PagePro
         description={product.category.name}
         back={{ href: "/admin/inventory", label: "Inventory" }}
         actions={
-          <Link href={`/admin/products/${product.id}`} className="text-primary text-sm font-medium underline underline-offset-2">
+          <Link
+            href={`/admin/products/${product.id}`}
+            className="text-primary text-sm font-medium underline underline-offset-2"
+          >
             Product details
           </Link>
         }
@@ -44,9 +64,14 @@ export default async function StockHistoryPage({ params, searchParams }: PagePro
         <div>
           <div className="mb-3 flex flex-wrap items-center gap-3 text-sm">
             <span>
-              In stock: <strong className="font-display text-2xl tabular-nums" data-testid="current-stock">{product.stock}</strong>
+              In stock:{" "}
+              <strong className="font-display text-2xl tabular-nums" data-testid="current-stock">
+                {product.stock}
+              </strong>
             </span>
-            {product.stock <= threshold && <Pill tone={product.stock === 0 ? "bad" : "warn"}>Low stock</Pill>}
+            {product.stock <= threshold && (
+              <Pill tone={product.stock === 0 ? "bad" : "warn"}>Low stock</Pill>
+            )}
             <span className="text-muted" data-testid="balance-check">
               {balanced
                 ? `Movements add up to ${history.sumOfMovements} ✓`
@@ -56,27 +81,46 @@ export default async function StockHistoryPage({ params, searchParams }: PagePro
           <TableWrap label="Stock movements">
             <thead>
               <tr>
-                <th scope="col" className={thClass}>When</th>
-                <th scope="col" className={thClass}>Reason</th>
-                <th scope="col" className={`${thClass} text-right`}>Change</th>
-                <th scope="col" className={`${thClass} text-right`}>After</th>
-                <th scope="col" className={thClass}>By / order</th>
-                <th scope="col" className={thClass}>Note</th>
+                <th scope="col" className={thClass}>
+                  When
+                </th>
+                <th scope="col" className={thClass}>
+                  Reason
+                </th>
+                <th scope="col" className={`${thClass} text-right`}>
+                  Change
+                </th>
+                <th scope="col" className={`${thClass} text-right`}>
+                  After
+                </th>
+                <th scope="col" className={thClass}>
+                  By / order
+                </th>
+                <th scope="col" className={thClass}>
+                  Note
+                </th>
               </tr>
             </thead>
             <tbody>
               {history.rows.length === 0 && <EmptyRow colSpan={6} title="No stock movements yet" />}
               {history.rows.map((m) => (
                 <tr key={m.id} data-testid="movement-row">
-                  <td className={`${tdClass} text-muted whitespace-nowrap`}>{fmtDateTime(m.createdAt)}</td>
+                  <td className={`${tdClass} text-muted whitespace-nowrap`}>
+                    {fmtDateTime(m.createdAt)}
+                  </td>
                   <td className={tdClass}>{REASON_LABELS[m.reason as StockReason] ?? m.reason}</td>
-                  <td className={`${tdClass} text-right font-semibold tabular-nums ${m.delta > 0 ? "text-success" : "text-danger"}`}>
+                  <td
+                    className={`${tdClass} text-right font-semibold tabular-nums ${m.delta > 0 ? "text-success" : "text-danger"}`}
+                  >
                     {m.delta > 0 ? `+${m.delta}` : `−${Math.abs(m.delta)}`}
                   </td>
                   <td className={`${tdClass} text-right tabular-nums`}>{m.stockAfter}</td>
                   <td className={tdClass}>
                     {m.order ? (
-                      <Link href={`/admin/orders/${m.order.id}`} className="text-primary underline-offset-2 hover:underline">
+                      <Link
+                        href={`/admin/orders/${m.order.id}`}
+                        className="text-primary underline-offset-2 hover:underline"
+                      >
                         {m.order.orderNumber}
                       </Link>
                     ) : (
@@ -98,7 +142,9 @@ export default async function StockHistoryPage({ params, searchParams }: PagePro
         </div>
         <Panel title="Adjust stock" id="adjust">
           {product.archivedAt ? (
-            <p className="text-muted text-sm">This product is archived. Restore it to change its stock.</p>
+            <p className="text-muted text-sm">
+              This product is archived. Restore it to change its stock.
+            </p>
           ) : (
             <StockAdjustForm productId={product.id} />
           )}

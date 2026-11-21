@@ -26,18 +26,25 @@ export function centsToInput(cents: number | null | undefined): string {
 }
 
 const bool = z
-  .union([z.literal("on"), z.literal("true"), z.literal("1"), z.literal(""), z.null(), z.undefined()])
+  .union([
+    z.literal("on"),
+    z.literal("true"),
+    z.literal("1"),
+    z.literal(""),
+    z.null(),
+    z.undefined(),
+  ])
   .transform((v) => v === "on" || v === "true" || v === "1");
 
 export const productFormSchema = z
   .object({
-    name: z.string().trim().min(2, "Enter a name (2–80 characters).").max(80, "Use 80 characters or fewer."),
-    slug: z
+    name: z
       .string()
       .trim()
-      .toLowerCase()
-      .max(SLUG_MAX, `Use ${SLUG_MAX} characters or fewer.`)
-      .refine((s) => s === "" || SLUG_RE.test(s), "Use lowercase letters, numbers and single hyphens."),
+      .min(2, "Enter a name (2–80 characters).")
+      .max(80, "Use 80 characters or fewer."),
+    // Checked in the transform below, so every field error is reported in one go.
+    slug: z.string().trim().toLowerCase(),
     shortDescription: z
       .string()
       .trim()
@@ -56,6 +63,19 @@ export const productFormSchema = z
     isFeatured: bool,
   })
   .transform((v, ctx) => {
+    if (v.slug.length > SLUG_MAX) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["slug"],
+        message: `Use ${SLUG_MAX} characters or fewer.`,
+      });
+    } else if (v.slug !== "" && !SLUG_RE.test(v.slug)) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["slug"],
+        message: "Use lowercase letters, numbers and single hyphens.",
+      });
+    }
     const priceCents = parsePriceToCents(v.price);
     if (priceCents === null || priceCents < 1) {
       ctx.addIssue({ code: "custom", path: ["price"], message: "Enter a price like 24.00." });
@@ -64,7 +84,11 @@ export const productFormSchema = z
     if (v.compareAt) {
       compareAtCents = parsePriceToCents(v.compareAt);
       if (compareAtCents === null) {
-        ctx.addIssue({ code: "custom", path: ["compareAt"], message: "Enter a price like 30.00, or leave it empty." });
+        ctx.addIssue({
+          code: "custom",
+          path: ["compareAt"],
+          message: "Enter a price like 30.00, or leave it empty.",
+        });
       } else if (priceCents !== null && compareAtCents <= priceCents) {
         ctx.addIssue({
           code: "custom",
@@ -75,7 +99,11 @@ export const productFormSchema = z
     }
     const stock = Number(v.stock);
     if (!/^\d{1,6}$/.test(v.stock) || !Number.isSafeInteger(stock)) {
-      ctx.addIssue({ code: "custom", path: ["stock"], message: "Enter a whole number from 0 to 999,999." });
+      ctx.addIssue({
+        code: "custom",
+        path: ["stock"],
+        message: "Enter a whole number from 0 to 999,999.",
+      });
     }
     return {
       name: v.name,
@@ -179,7 +207,9 @@ export async function createProduct(
     return { ok: true, id: product.id, slug: product.slug };
   } catch (err) {
     if ((err as { code?: string }).code === "P2002") {
-      return fail("Check the highlighted fields.", { slug: "Another product already uses this slug." });
+      return fail("Check the highlighted fields.", {
+        slug: "Another product already uses this slug.",
+      });
     }
     throw err;
   }
@@ -214,7 +244,10 @@ export async function updateProduct(
     await db.$transaction(async (tx) => {
       await tx.product.update({
         where: { id },
-        data: { ...next, ...(image ? { imagePath: image.imagePath, thumbPath: image.thumbPath } : {}) },
+        data: {
+          ...next,
+          ...(image ? { imagePath: image.imagePath, thumbPath: image.thumbPath } : {}),
+        },
       });
       const changes = changedFields(before, next, AUDITED);
       if (image) changes.image = ["previous", "uploaded"];
@@ -228,7 +261,9 @@ export async function updateProduct(
     });
   } catch (err) {
     if ((err as { code?: string }).code === "P2002") {
-      return fail("Check the highlighted fields.", { slug: "Another product already uses this slug." });
+      return fail("Check the highlighted fields.", {
+        slug: "Another product already uses this slug.",
+      });
     }
     throw err;
   }
@@ -275,9 +310,20 @@ export async function deleteProduct(db: Db, actor: Actor, id: string): Promise<D
   return db.$transaction(async (tx) => {
     const p = await tx.product.findUnique({
       where: { id },
-      select: { name: true, slug: true, imagePath: true, thumbPath: true, _count: { select: { orderItems: true } } },
+      select: {
+        name: true,
+        slug: true,
+        imagePath: true,
+        thumbPath: true,
+        _count: { select: { orderItems: true } },
+      },
     });
-    if (!p) return { ok: false as const, error: "That product no longer exists.", code: "NOT_FOUND" as const };
+    if (!p)
+      return {
+        ok: false as const,
+        error: "That product no longer exists.",
+        code: "NOT_FOUND" as const,
+      };
     if (p._count.orderItems > 0) {
       return {
         ok: false as const,

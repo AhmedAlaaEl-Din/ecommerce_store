@@ -21,10 +21,35 @@ export const HISTORY_EMAIL_FILTER = { contains: ".history", endsWith: "@example.
 const DAY = 86_400_000;
 
 const FIRST = [
-  "Nadia", "Omar", "Layla", "Karim", "Salma", "Yusuf", "Hana", "Tarek", "Mariam", "Ziad",
-  "Farah", "Adam", "Noor", "Samir", "Dina", "Hassan", "Rania", "Malik", "Yara", "Idris",
+  "Nadia",
+  "Omar",
+  "Layla",
+  "Karim",
+  "Salma",
+  "Yusuf",
+  "Hana",
+  "Tarek",
+  "Mariam",
+  "Ziad",
+  "Farah",
+  "Adam",
+  "Noor",
+  "Samir",
+  "Dina",
+  "Hassan",
+  "Rania",
+  "Malik",
+  "Yara",
+  "Idris",
 ];
-const STREETS = ["Papyrus Road", "Lotus Lane", "Reed Street", "Delta Avenue", "Sycamore Walk", "Granary Row"];
+const STREETS = [
+  "Papyrus Road",
+  "Lotus Lane",
+  "Reed Street",
+  "Delta Avenue",
+  "Sycamore Walk",
+  "Granary Row",
+];
 const PLACES: Array<{ country: string; city: string; postal: string }> = [
   { country: "EG", city: "Delta Town", postal: "11511" },
   { country: "AE", city: "Palm Bay", postal: "00000" },
@@ -77,7 +102,9 @@ export async function seedHistory(db: PrismaClient, opts: { now?: Date; count?: 
   for (let i = 0; i < count; i++) {
     // Spread over 45 days, a little denser recently.
     const ageDays = Math.floor(Math.pow(rand(), 1.3) * 45);
-    const createdAt = new Date(now.getTime() - ageDays * DAY - Math.floor(rand() * 20) * 3_600_000 - 600_000);
+    const createdAt = new Date(
+      now.getTime() - ageDays * DAY - Math.floor(rand() * 20) * 3_600_000 - 600_000,
+    );
     const first = pick(FIRST);
     const place = pick(PLACES);
     const lineCount = 1 + Math.floor(rand() * 3);
@@ -103,7 +130,9 @@ export async function seedHistory(db: PrismaClient, opts: { now?: Date; count?: 
     const packedAt = ["packed", "shipped", "delivered"].includes(fulfilment) ? at(5) : null;
     const shippedAt = ["shipped", "delivered"].includes(fulfilment) ? at(20) : null;
     const deliveredAt = fulfilment === "delivered" ? at(70) : null;
-    const carrier = shippedAt ? pick(["Nile Post (demo)", "Delta Express (demo)", "Oasis Freight (demo)"]) : null;
+    const carrier = shippedAt
+      ? pick(["Nile Post (demo)", "Delta Express (demo)", "Oasis Freight (demo)"])
+      : null;
     const trackingNumber = shippedAt ? `DEMO${String(100000 + Math.floor(rand() * 899999))}` : null;
 
     await db.$transaction(async (tx) => {
@@ -151,15 +180,34 @@ export async function seedHistory(db: PrismaClient, opts: { now?: Date; count?: 
         },
       });
       const events: Array<{ type: string; message: string; createdAt: Date }> = [
-        { type: "created", message: "Demo history order (invented; npm run db:seed:history)", createdAt },
+        {
+          type: "created",
+          message: "Demo history order (invented; npm run db:seed:history)",
+          createdAt,
+        },
       ];
       if (cancelled) {
-        events.push({ type: "cancelled", message: "Order cancelled; reserved stock released", createdAt: new Date(createdAt.getTime() + 20 * 60_000) });
+        events.push({
+          type: "cancelled",
+          message: "Order cancelled; reserved stock released",
+          createdAt: new Date(createdAt.getTime() + 20 * 60_000),
+        });
       } else {
         events.push({ type: "paid", message: "Payment received", createdAt: paidAt! });
-        if (packedAt) events.push({ type: "packed", message: "Marked as packed", createdAt: packedAt });
-        if (shippedAt) events.push({ type: "shipped", message: `Marked as shipped with ${carrier} (${trackingNumber})`, createdAt: shippedAt });
-        if (deliveredAt) events.push({ type: "delivered", message: "Marked as delivered", createdAt: deliveredAt });
+        if (packedAt)
+          events.push({ type: "packed", message: "Marked as packed", createdAt: packedAt });
+        if (shippedAt)
+          events.push({
+            type: "shipped",
+            message: `Marked as shipped with ${carrier} (${trackingNumber})`,
+            createdAt: shippedAt,
+          });
+        if (deliveredAt)
+          events.push({
+            type: "delivered",
+            message: "Marked as delivered",
+            createdAt: deliveredAt,
+          });
       }
       await tx.orderEvent.createMany({ data: events.map((e) => ({ ...e, orderId: order.id })) });
     });

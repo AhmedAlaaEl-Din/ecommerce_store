@@ -194,7 +194,9 @@ export async function resolveSession(
   const id = hashSessionToken(token);
   const session = await db.adminSession.findUnique({
     where: { id },
-    include: { user: { select: { id: true, email: true, name: true, role: true, isActive: true } } },
+    include: {
+      user: { select: { id: true, email: true, name: true, role: true, isActive: true } },
+    },
   });
   if (!session) return null;
   const state = sessionState(session, now);
@@ -239,7 +241,13 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
  */
 export async function createAdminUser(
   db: Db,
-  input: { email: string; name: string; role: AdminRole; actorId: string | null; password?: string },
+  input: {
+    email: string;
+    name: string;
+    role: AdminRole;
+    actorId: string | null;
+    password?: string;
+  },
 ): Promise<CreateUserResult> {
   const email = normalizeEmail(input.email);
   if (!EMAIL_RE.test(email) || email.length > 254) return { ok: false, code: "INVALID_EMAIL" };
@@ -250,7 +258,12 @@ export async function createAdminUser(
   try {
     const user = await db.$transaction(async (tx) => {
       const created = await tx.adminUser.create({
-        data: { email, name: input.name.trim() || email.split("@")[0]!, role: input.role, passwordHash },
+        data: {
+          email,
+          name: input.name.trim() || email.split("@")[0]!,
+          role: input.role,
+          passwordHash,
+        },
         select: { id: true, email: true, name: true, role: true },
       });
       await writeAudit(tx, {
@@ -258,7 +271,11 @@ export async function createAdminUser(
         action: "user.create",
         entityType: "AdminUser",
         entityId: created.id,
-        summary: { email: maskEmail(email), role: input.role, via: input.actorId ? "admin" : "cli" },
+        summary: {
+          email: maskEmail(email),
+          role: input.role,
+          via: input.actorId ? "admin" : "cli",
+        },
       });
       return created;
     });

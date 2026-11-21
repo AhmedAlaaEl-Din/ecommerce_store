@@ -27,8 +27,13 @@ export async function inviteUserAction(_prev: InviteState, fd: FormData): Promis
     name: fd.get("name") ?? "",
     role: fd.get("role") ?? "",
   });
-  if (!parsed.success || !isAdminRole(parsed.data.role)) return { error: "Enter an email and choose a role." };
-  const res = await inviteUser(db, user, { email: parsed.data.email, name: parsed.data.name, role: parsed.data.role });
+  if (!parsed.success || !isAdminRole(parsed.data.role))
+    return { error: "Enter an email and choose a role." };
+  const res = await inviteUser(db, user, {
+    email: parsed.data.email,
+    name: parsed.data.name,
+    role: parsed.data.role,
+  });
   if (!res.ok) return { error: res.error };
   revalidatePath("/admin/users");
   return { created: { email: res.value.email, password: res.value.password } };

@@ -34,10 +34,15 @@ export async function inviteUser(
   const res = await createAdminUser(db, { ...input, actorId: actor.id });
   if (!res.ok) {
     return fail(
-      res.code === "EMAIL_TAKEN" ? "An account with that email already exists." : "Enter a valid email address.",
+      res.code === "EMAIL_TAKEN"
+        ? "An account with that email already exists."
+        : "Enter a valid email address.",
     );
   }
-  return { ok: true as const, value: { id: res.user.id, email: res.user.email, password: res.password } };
+  return {
+    ok: true as const,
+    value: { id: res.user.id, email: res.user.email, password: res.password },
+  };
 }
 
 async function otherActiveAdmins(tx: Tx, excludeId: string) {
@@ -48,7 +53,10 @@ export async function changeRole(db: Db, actor: Actor, userId: string, role: Adm
   assertCan(actor, "users.manage");
   if (userId === actor.id) return fail("You can't change your own role.");
   return db.$transaction(async (tx) => {
-    const u = await tx.adminUser.findUnique({ where: { id: userId }, select: { role: true, isActive: true, email: true } });
+    const u = await tx.adminUser.findUnique({
+      where: { id: userId },
+      select: { role: true, isActive: true, email: true },
+    });
     if (!u) return fail("That user no longer exists.");
     if (u.role === role) return { ok: true as const };
     if (u.role === "admin" && u.isActive && (await otherActiveAdmins(tx, userId)) === 0) {
@@ -70,7 +78,10 @@ export async function setUserActive(db: Db, actor: Actor, userId: string, active
   assertCan(actor, "users.manage");
   if (userId === actor.id && !active) return fail("You can't disable your own account.");
   return db.$transaction(async (tx) => {
-    const u = await tx.adminUser.findUnique({ where: { id: userId }, select: { role: true, isActive: true, email: true } });
+    const u = await tx.adminUser.findUnique({
+      where: { id: userId },
+      select: { role: true, isActive: true, email: true },
+    });
     if (!u) return fail("That user no longer exists.");
     if (u.isActive === active) return { ok: true as const };
     if (!active && u.role === "admin" && (await otherActiveAdmins(tx, userId)) === 0) {

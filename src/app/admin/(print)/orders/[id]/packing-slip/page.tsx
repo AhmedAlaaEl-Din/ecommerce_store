@@ -11,7 +11,9 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Packing slip" };
 
 /** Print-friendly packing slip: what is in the box and where it goes. No prices. */
-export default async function PackingSlipPage({ params }: PageProps<"/admin/orders/[id]/packing-slip">) {
+export default async function PackingSlipPage({
+  params,
+}: PageProps<"/admin/orders/[id]/packing-slip">) {
   await requireAdmin();
   const { id } = await params;
   const order = await db.order.findUnique({
@@ -22,9 +24,15 @@ export default async function PackingSlipPage({ params }: PageProps<"/admin/orde
   const units = order.items.reduce((n, i) => n + i.quantity, 0);
 
   return (
-    <div className="mx-auto max-w-2xl px-6 py-8 print:max-w-none print:p-0" data-testid="packing-slip-page">
+    <div
+      className="mx-auto max-w-2xl px-6 py-8 print:max-w-none print:p-0"
+      data-testid="packing-slip-page"
+    >
       <div className="mb-6 flex items-center justify-between print:hidden">
-        <Link href={`/admin/orders/${order.id}`} className="text-primary text-sm font-medium underline underline-offset-2">
+        <Link
+          href={`/admin/orders/${order.id}`}
+          className="text-primary text-sm font-medium underline underline-offset-2"
+        >
           Back to the order
         </Link>
         <PrintButton />
@@ -43,8 +51,10 @@ export default async function PackingSlipPage({ params }: PageProps<"/admin/orde
       </header>
       <section className="mt-6 grid grid-cols-2 gap-6 text-sm">
         <div>
-          <h2 className="text-muted font-sans text-xs font-semibold tracking-[0.08em] uppercase">Ship to</h2>
-          <address className="mt-1 not-italic leading-6">
+          <h2 className="text-muted font-sans text-xs font-semibold tracking-[0.08em] uppercase">
+            Ship to
+          </h2>
+          <address className="mt-1 leading-6 not-italic">
             {order.customerName}
             <br />
             {order.addressLine1}
@@ -61,7 +71,9 @@ export default async function PackingSlipPage({ params }: PageProps<"/admin/orde
           </address>
         </div>
         <div>
-          <h2 className="text-muted font-sans text-xs font-semibold tracking-[0.08em] uppercase">Shipping</h2>
+          <h2 className="text-muted font-sans text-xs font-semibold tracking-[0.08em] uppercase">
+            Shipping
+          </h2>
           <p className="mt-1 leading-6">
             {order.carrier ? `${order.carrier}, ${order.trackingNumber}` : "Carrier not set yet"}
           </p>
@@ -70,16 +82,25 @@ export default async function PackingSlipPage({ params }: PageProps<"/admin/orde
       <table className="mt-8 w-full text-sm">
         <thead>
           <tr className="border-ink border-b text-left">
-            <th scope="col" className="w-10 py-2">✓</th>
-            <th scope="col" className="py-2">Item</th>
-            <th scope="col" className="py-2 text-right">Qty</th>
+            <th scope="col" className="w-10 py-2">
+              ✓
+            </th>
+            <th scope="col" className="py-2">
+              Item
+            </th>
+            <th scope="col" className="py-2 text-right">
+              Qty
+            </th>
           </tr>
         </thead>
         <tbody>
           {order.items.map((i) => (
             <tr key={i.id} className="border-line border-b">
               <td className="py-3">
-                <span className="border-ink inline-block size-4 rounded-sm border" aria-hidden="true" />
+                <span
+                  className="border-ink inline-block size-4 rounded-sm border"
+                  aria-hidden="true"
+                />
               </td>
               <td className="py-3">{i.productNameSnapshot}</td>
               <td className="py-3 text-right tabular-nums">{i.quantity}</td>
@@ -89,13 +110,16 @@ export default async function PackingSlipPage({ params }: PageProps<"/admin/orde
         <tfoot>
           <tr>
             <td />
-            <th scope="row" className="py-3 text-left font-semibold">Total units</th>
+            <th scope="row" className="py-3 text-left font-semibold">
+              Total units
+            </th>
             <td className="py-3 text-right font-semibold tabular-nums">{units}</td>
           </tr>
         </tfoot>
       </table>
       <p className="text-muted mt-10 text-xs">
-        Thank you for shopping with Nile Goods (an invented demo brand). Questions? Reply to your order email.
+        Thank you for shopping with Nile Goods (an invented demo brand). Questions? Reply to your
+        order email.
       </p>
     </div>
   );

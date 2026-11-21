@@ -56,7 +56,13 @@ export async function getDashboard(db: Db, now = new Date()) {
     db.product.findMany({
       where: { archivedAt: null, stock: { lte: threshold } },
       orderBy: [{ stock: "asc" }, { name: "asc" }],
-      select: { id: true, name: true, stock: true, isActive: true, category: { select: { name: true } } },
+      select: {
+        id: true,
+        name: true,
+        stock: true,
+        isActive: true,
+        category: { select: { name: true } },
+      },
     }),
     db.order.findMany({
       orderBy: { createdAt: "desc" },

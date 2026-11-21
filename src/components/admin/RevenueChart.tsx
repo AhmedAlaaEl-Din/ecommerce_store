@@ -14,7 +14,11 @@ function niceMax(v: number): number {
 }
 
 const shortDay = (iso: string) =>
-  new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+  new Date(`${iso}T00:00:00Z`).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    timeZone: "UTC",
+  });
 
 /**
  * Revenue by day as a plain SVG bar chart (server-rendered, no chart library).
@@ -47,7 +51,14 @@ export function RevenueChart({ days, currency }: { days: DayRevenue[]; currency:
           const y = PAD.top + innerH - (t / max) * innerH;
           return (
             <g key={t}>
-              <line x1={PAD.left} x2={W - PAD.right} y1={y} y2={y} stroke="var(--border)" strokeWidth={1} />
+              <line
+                x1={PAD.left}
+                x2={W - PAD.right}
+                y1={y}
+                y2={y}
+                stroke="var(--border)"
+                strokeWidth={1}
+              />
               <text x={PAD.left - 8} y={y + 4} textAnchor="end" fontSize={11} fill="var(--muted)">
                 {formatMoney(t, currency).replace(/\.00$/, "")}
               </text>
@@ -64,7 +75,13 @@ export function RevenueChart({ days, currency }: { days: DayRevenue[]; currency:
                 <title>{`${shortDay(d.day)}: ${formatMoney(d.revenueCents, currency)} (${d.orders} order${d.orders === 1 ? "" : "s"})`}</title>
               </rect>
               {(i % 5 === 0 || i === days.length - 1) && (
-                <text x={x + barW / 2} y={H - 8} textAnchor="middle" fontSize={11} fill="var(--muted)">
+                <text
+                  x={x + barW / 2}
+                  y={H - 8}
+                  textAnchor="middle"
+                  fontSize={11}
+                  fill="var(--muted)"
+                >
                   {shortDay(d.day)}
                 </text>
               )}
@@ -82,17 +99,27 @@ export function RevenueChart({ days, currency }: { days: DayRevenue[]; currency:
             <caption className="sr-only">Revenue by day</caption>
             <thead>
               <tr className="text-muted text-left text-xs uppercase">
-                <th scope="col" className="py-1 pr-4">Day (UTC)</th>
-                <th scope="col" className="py-1 pr-4 text-right">Paid orders</th>
-                <th scope="col" className="py-1 text-right">Revenue</th>
+                <th scope="col" className="py-1 pr-4">
+                  Day (UTC)
+                </th>
+                <th scope="col" className="py-1 pr-4 text-right">
+                  Paid orders
+                </th>
+                <th scope="col" className="py-1 text-right">
+                  Revenue
+                </th>
               </tr>
             </thead>
             <tbody>
               {days.map((d) => (
                 <tr key={d.day} className="border-line border-t">
-                  <th scope="row" className="py-1 pr-4 text-left font-normal">{d.day}</th>
+                  <th scope="row" className="py-1 pr-4 text-left font-normal">
+                    {d.day}
+                  </th>
                   <td className="py-1 pr-4 text-right tabular-nums">{d.orders}</td>
-                  <td className="py-1 text-right tabular-nums">{formatMoney(d.revenueCents, currency)}</td>
+                  <td className="py-1 text-right tabular-nums">
+                    {formatMoney(d.revenueCents, currency)}
+                  </td>
                 </tr>
               ))}
             </tbody>

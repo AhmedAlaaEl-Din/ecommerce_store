@@ -25,7 +25,10 @@ const DONE = {
   unarchived: "Product restored. It stays inactive until you tick Active and save.",
 };
 
-export default async function AdminProductPage({ params, searchParams }: PageProps<"/admin/products/[id]">) {
+export default async function AdminProductPage({
+  params,
+  searchParams,
+}: PageProps<"/admin/products/[id]">) {
   const { user } = await requireAdmin();
   const { id } = await params;
   const sp = await searchParams;
@@ -57,7 +60,13 @@ export default async function AdminProductPage({ params, searchParams }: PagePro
         actions={
           <>
             {!product.archivedAt && product.isActive && (
-              <ButtonLink href={`/products/${product.slug}`} variant="secondary" size="sm" target="_blank" icon={<ExternalIcon size={16} />}>
+              <ButtonLink
+                href={`/products/${product.slug}`}
+                variant="secondary"
+                size="sm"
+                target="_blank"
+                icon={<ExternalIcon size={16} />}
+              >
                 View in store
               </ButtonLink>
             )}
@@ -69,9 +78,13 @@ export default async function AdminProductPage({ params, searchParams }: PagePro
       />
       <DoneNotice code={done} messages={DONE} />
       {done === "has_orders" && (
-        <Notice tone="error">This product appears in orders, so it can’t be deleted. Archive it instead.</Notice>
+        <Notice tone="error">
+          This product appears in orders, so it can’t be deleted. Archive it instead.
+        </Notice>
       )}
-      {done === "error" && <Notice tone="error">That didn’t work. Reload the page and try again.</Notice>}
+      {done === "error" && (
+        <Notice tone="error">That didn’t work. Reload the page and try again.</Notice>
+      )}
 
       {canEdit ? (
         <>
@@ -110,7 +123,11 @@ export default async function AdminProductPage({ params, searchParams }: PagePro
                   <form action={archiveProductAction}>
                     <input type="hidden" name="id" value={product.id} />
                     <input type="hidden" name="archive" value="0" />
-                    <button type="submit" className="border-line-strong hover:border-ink inline-flex min-h-11 items-center rounded-md border px-3.5 text-sm font-medium sm:min-h-9" data-testid="unarchive">
+                    <button
+                      type="submit"
+                      className="border-line-strong hover:border-ink inline-flex min-h-11 items-center rounded-md border px-3.5 text-sm font-medium sm:min-h-9"
+                      data-testid="unarchive"
+                    >
                       Restore
                     </button>
                   </form>
@@ -123,7 +140,8 @@ export default async function AdminProductPage({ params, searchParams }: PagePro
                     action={archiveProductAction}
                     hidden={{ id: product.id, archive: "1" }}
                   >
-                    It disappears from the store and from every cart. Past orders are not changed. You can restore it later.
+                    It disappears from the store and from every cart. Past orders are not changed.
+                    You can restore it later.
                   </ConfirmDialog>
                 )}
                 {product._count.orderItems === 0 && (
@@ -168,7 +186,10 @@ export default async function AdminProductPage({ params, searchParams }: PagePro
             </dl>
             <p className="text-muted mt-4 text-sm">
               Staff can view products and adjust stock. Editing is for admins.{" "}
-              <Link href={`/admin/inventory/${product.id}`} className="text-primary underline underline-offset-2">
+              <Link
+                href={`/admin/inventory/${product.id}`}
+                className="text-primary underline underline-offset-2"
+              >
                 Adjust stock
               </Link>
             </p>

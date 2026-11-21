@@ -22,8 +22,11 @@ export async function adjustStockAction(_prev: AdjustState, fd: FormData): Promi
     return { error: "Enter a quantity from 1 to 100,000." };
   }
   const delta = reason === "damaged" ? -qty : reason === "correction" ? direction * qty : qty;
-  if (!reasonAllowsDelta(reason, delta)) return { error: "That reason can’t move stock in that direction." };
-  const note = String(fd.get("note") ?? "").trim().slice(0, 200);
+  if (!reasonAllowsDelta(reason, delta))
+    return { error: "That reason can’t move stock in that direction." };
+  const note = String(fd.get("note") ?? "")
+    .trim()
+    .slice(0, 200);
   const res = await adjustStock(db, user, { productId, delta, reason, note: note || undefined });
   if (!res.ok) return { error: res.error };
   revalidatePath("/", "layout");

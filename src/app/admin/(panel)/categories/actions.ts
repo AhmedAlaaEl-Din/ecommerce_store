@@ -19,7 +19,8 @@ export async function createCategoryAction(
 ): Promise<CategoryFormState> {
   const { user } = await requireAdmin("admin");
   const parsed = parseCategoryForm(fd);
-  if (!parsed.ok) return { error: "Check the highlighted fields.", fieldErrors: parsed.fieldErrors };
+  if (!parsed.ok)
+    return { error: "Check the highlighted fields.", fieldErrors: parsed.fieldErrors };
   const res = await createCategory(db, user, parsed.data);
   if (!res.ok) return { error: res.error, fieldErrors: res.fieldErrors };
   revalidatePath("/", "layout");
@@ -33,7 +34,8 @@ export async function updateCategoryAction(
 ): Promise<CategoryFormState> {
   const { user } = await requireAdmin("admin");
   const parsed = parseCategoryForm(fd);
-  if (!parsed.ok) return { error: "Check the highlighted fields.", fieldErrors: parsed.fieldErrors };
+  if (!parsed.ok)
+    return { error: "Check the highlighted fields.", fieldErrors: parsed.fieldErrors };
   const res = await updateCategory(db, user, String(id), parsed.data);
   if (!res.ok) return { error: res.error, fieldErrors: res.fieldErrors };
   revalidatePath("/", "layout");

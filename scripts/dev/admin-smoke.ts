@@ -24,10 +24,21 @@ async function main() {
   for (const p of paths) {
     res = await page.goto(`${BASE}${p}`);
     console.log(p, "->", res?.status(), (await page.locator("h1").first().textContent())?.trim());
-    if (process.env.SMOKE_SHOTS) await page.screenshot({ path: `${process.env.SMOKE_SHOTS}/${p.replace(/\W+/g, "_")}.png`, fullPage: true });
+    if (process.env.SMOKE_SHOTS)
+      await page.screenshot({
+        path: `${process.env.SMOKE_SHOTS}/${p.replace(/\W+/g, "_")}.png`,
+        fullPage: true,
+      });
   }
   const cookie = (await page.context().cookies()).find((c) => c.name === "ng_admin");
-  console.log("cookie path", cookie?.path, "httpOnly", cookie?.httpOnly, "sameSite", cookie?.sameSite);
+  console.log(
+    "cookie path",
+    cookie?.path,
+    "httpOnly",
+    cookie?.httpOnly,
+    "sameSite",
+    cookie?.sameSite,
+  );
   await browser.close();
 }
 main().catch((e) => {

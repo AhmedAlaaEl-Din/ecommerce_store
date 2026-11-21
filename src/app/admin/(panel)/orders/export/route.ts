@@ -4,7 +4,14 @@ import { FULFILMENT_STEPS } from "@/lib/admin/order-rules";
 import { exportOrdersCsv, ORDER_SORTS } from "@/lib/admin/orders";
 import { db } from "@/lib/db";
 
-const PAYMENT = ["pending_payment", "paid", "payment_failed", "cancelled", "expired", "refunded"] as const;
+const PAYMENT = [
+  "pending_payment",
+  "paid",
+  "payment_failed",
+  "cancelled",
+  "expired",
+  "refunded",
+] as const;
 
 /** Admins only: the filtered order list as CSV (formula-injection safe). */
 export async function GET(req: Request) {

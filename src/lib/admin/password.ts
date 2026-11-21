@@ -6,7 +6,12 @@ import { hash, verify } from "@node-rs/argon2";
 import { randomBytes } from "node:crypto";
 
 // OWASP's argon2id baseline: 19 MiB memory, 2 iterations, 1 lane.
-const ARGON2_OPTIONS = { algorithm: 2 /* Argon2id */, memoryCost: 19_456, timeCost: 2, parallelism: 1 };
+const ARGON2_OPTIONS = {
+  algorithm: 2 /* Argon2id */,
+  memoryCost: 19_456,
+  timeCost: 2,
+  parallelism: 1,
+};
 
 export const PASSWORD_MIN_LENGTH = 12;
 export const PASSWORD_MAX_LENGTH = 128;
@@ -32,9 +37,12 @@ export function checkPasswordPolicy(password: string, email?: string): PolicyRes
     return { ok: false, message: `Use at most ${PASSWORD_MAX_LENGTH} characters.` };
   if (COMMON.has(password.toLowerCase()))
     return { ok: false, message: "That password is too common." };
-  if (/^(.)\1+$/.test(password))
-    return { ok: false, message: "Don't repeat a single character." };
-  if (email && password.toLowerCase().includes(email.toLowerCase().split("@")[0]!) && email.split("@")[0]!.length >= 4)
+  if (/^(.)\1+$/.test(password)) return { ok: false, message: "Don't repeat a single character." };
+  if (
+    email &&
+    password.toLowerCase().includes(email.toLowerCase().split("@")[0]!) &&
+    email.split("@")[0]!.length >= 4
+  )
     return { ok: false, message: "Don't use your email address in the password." };
   return { ok: true };
 }

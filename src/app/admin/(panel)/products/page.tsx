@@ -73,7 +73,12 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
         description="Search, filter and edit the catalog. Archived products stay in past orders but leave the store."
         actions={
           canEdit && (
-            <ButtonLink href="/admin/products/new" size="sm" icon={<PlusIcon size={18} />} data-testid="new-product">
+            <ButtonLink
+              href="/admin/products/new"
+              size="sm"
+              icon={<PlusIcon size={18} />}
+              data-testid="new-product"
+            >
               New product
             </ButtonLink>
           )
@@ -81,10 +86,21 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
       />
       <DoneNotice code={param(sp, "done")} messages={DONE} />
 
-      <form method="get" className="mb-3 flex flex-wrap items-end gap-2" role="search" aria-label="Filter products">
+      <form
+        method="get"
+        className="mb-3 flex flex-wrap items-end gap-2"
+        role="search"
+        aria-label="Filter products"
+      >
         <label className="flex flex-col gap-1 text-xs font-semibold">
           Search
-          <input type="search" name="q" defaultValue={params.q} placeholder="Name or slug" className={`${smallField} w-56`} />
+          <input
+            type="search"
+            name="q"
+            defaultValue={params.q}
+            placeholder="Name or slug"
+            className={`${smallField} w-56`}
+          />
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold">
           Category
@@ -107,19 +123,36 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
           </select>
         </label>
         <label className="inline-flex h-10 items-center gap-2 text-sm">
-          <input type="checkbox" name="low" value="1" defaultChecked={!!params.low} className="accent-primary size-4" />
+          <input
+            type="checkbox"
+            name="low"
+            value="1"
+            defaultChecked={!!params.low}
+            className="accent-primary size-4"
+          />
           Low stock (≤ {threshold})
         </label>
-        <button type="submit" className="bg-ink hover:bg-ink/85 h-10 rounded-sm px-4 text-sm font-medium text-white">
+        <button
+          type="submit"
+          className="bg-ink hover:bg-ink/85 h-10 rounded-sm px-4 text-sm font-medium text-white"
+        >
           Apply
         </button>
-        <Link href={path} className="text-primary inline-flex h-10 items-center px-2 text-sm underline underline-offset-2">
+        <Link
+          href={path}
+          className="text-primary inline-flex h-10 items-center px-2 text-sm underline underline-offset-2"
+        >
           Reset
         </Link>
       </form>
 
       <div className="mb-2 flex items-center justify-between">
-        <ResultCount page={list.page} pageSize={PRODUCT_PAGE_SIZE} total={list.total} noun="products" />
+        <ResultCount
+          page={list.page}
+          pageSize={PRODUCT_PAGE_SIZE}
+          total={list.total}
+          noun="products"
+        />
       </div>
       <TableWrap label="Products">
         <thead>
@@ -127,12 +160,46 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
             <th scope="col" className={thClass}>
               <span className="sr-only">Image</span>
             </th>
-            <SortTh label="Name" column="name" path={path} params={params} sort={list.sort} dir={list.dir} />
-            <th scope="col" className={thClass}>Category</th>
-            <SortTh label="Price" column="priceCents" path={path} params={params} sort={list.sort} dir={list.dir} align="right" />
-            <SortTh label="Stock" column="stock" path={path} params={params} sort={list.sort} dir={list.dir} align="right" />
-            <th scope="col" className={thClass}>Status</th>
-            <SortTh label="Added" column="createdAt" path={path} params={params} sort={list.sort} dir={list.dir} />
+            <SortTh
+              label="Name"
+              column="name"
+              path={path}
+              params={params}
+              sort={list.sort}
+              dir={list.dir}
+            />
+            <th scope="col" className={thClass}>
+              Category
+            </th>
+            <SortTh
+              label="Price"
+              column="priceCents"
+              path={path}
+              params={params}
+              sort={list.sort}
+              dir={list.dir}
+              align="right"
+            />
+            <SortTh
+              label="Stock"
+              column="stock"
+              path={path}
+              params={params}
+              sort={list.sort}
+              dir={list.dir}
+              align="right"
+            />
+            <th scope="col" className={thClass}>
+              Status
+            </th>
+            <SortTh
+              label="Added"
+              column="createdAt"
+              path={path}
+              params={params}
+              sort={list.sort}
+              dir={list.dir}
+            />
           </tr>
         </thead>
         <tbody>
@@ -157,7 +224,10 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
                 />
               </td>
               <td className={tdClass}>
-                <Link href={`/admin/products/${p.id}`} className="font-medium underline-offset-2 hover:underline">
+                <Link
+                  href={`/admin/products/${p.id}`}
+                  className="font-medium underline-offset-2 hover:underline"
+                >
                   {p.name}
                 </Link>
                 <div className="text-muted text-xs">/{p.slug}</div>
@@ -166,11 +236,21 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
               <td className={`${tdClass} text-right tabular-nums`}>
                 {formatMoney(p.priceCents, p.currency)}
                 {p.compareAtCents && (
-                  <div className="text-muted text-xs line-through">{formatMoney(p.compareAtCents, p.currency)}</div>
+                  <div className="text-muted text-xs line-through">
+                    {formatMoney(p.compareAtCents, p.currency)}
+                  </div>
                 )}
               </td>
               <td className={`${tdClass} text-right tabular-nums`}>
-                <span className={p.stock <= threshold ? (p.stock === 0 ? "text-danger font-semibold" : "text-warning font-semibold") : undefined}>
+                <span
+                  className={
+                    p.stock <= threshold
+                      ? p.stock === 0
+                        ? "text-danger font-semibold"
+                        : "text-warning font-semibold"
+                      : undefined
+                  }
+                >
                   {p.stock}
                 </span>
               </td>
@@ -194,7 +274,11 @@ export default async function AdminProductsPage({ searchParams }: PageProps<"/ad
         </tbody>
       </TableWrap>
       <div className="mt-4">
-        <Pagination page={list.page} totalPages={list.pageCount} hrefFor={(n) => hrefWith(path, params, { page: String(n) })} />
+        <Pagination
+          page={list.page}
+          totalPages={list.pageCount}
+          hrefFor={(n) => hrefWith(path, params, { page: String(n) })}
+        />
       </div>
     </>
   );

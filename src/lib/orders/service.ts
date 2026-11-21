@@ -19,12 +19,7 @@ import type { CheckoutCustomer } from "./checkout-schema";
 export const RESERVATION_MINUTES = 30;
 
 export type OrderStatus =
-  | "pending_payment"
-  | "paid"
-  | "payment_failed"
-  | "cancelled"
-  | "expired"
-  | "refunded";
+  "pending_payment" | "paid" | "payment_failed" | "cancelled" | "expired" | "refunded";
 export type ReleaseStatus = Exclude<OrderStatus, "pending_payment" | "paid" | "refunded">;
 
 /** Phase 3: timeline entry for an order (shown in the admin). */

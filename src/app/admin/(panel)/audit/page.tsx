@@ -42,8 +42,18 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
     page: param(sp, "page"),
   };
   const [users, list] = await Promise.all([
-    db.adminUser.findMany({ orderBy: { email: "asc" }, select: { id: true, name: true, email: true } }),
-    listAudit(db, { actorId: params.user, entity: params.entity, q: params.q, from: params.from, to: params.to, page: pageParam(params.page) }),
+    db.adminUser.findMany({
+      orderBy: { email: "asc" },
+      select: { id: true, name: true, email: true },
+    }),
+    listAudit(db, {
+      actorId: params.user,
+      entity: params.entity,
+      q: params.q,
+      from: params.from,
+      to: params.to,
+      page: pageParam(params.page),
+    }),
   ]);
 
   return (
@@ -52,7 +62,12 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
         title="Audit log"
         description="Every admin change and every sign-in attempt. Summaries never contain customer details or passwords; emails are masked."
       />
-      <form method="get" className="mb-3 flex flex-wrap items-end gap-2" role="search" aria-label="Filter the audit log">
+      <form
+        method="get"
+        className="mb-3 flex flex-wrap items-end gap-2"
+        role="search"
+        aria-label="Filter the audit log"
+      >
         <label className="flex flex-col gap-1 text-xs font-semibold">
           User
           <select name="user" defaultValue={params.user ?? ""} className={smallField}>
@@ -77,7 +92,13 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold">
           Action or id
-          <input type="search" name="q" defaultValue={params.q} placeholder="e.g. refund, login_failed" className={`${smallField} w-52`} />
+          <input
+            type="search"
+            name="q"
+            defaultValue={params.q}
+            placeholder="e.g. refund, login_failed"
+            className={`${smallField} w-52`}
+          />
         </label>
         <label className="flex flex-col gap-1 text-xs font-semibold">
           From
@@ -87,34 +108,61 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
           To
           <input type="date" name="to" defaultValue={params.to} className={smallField} />
         </label>
-        <button type="submit" className="bg-ink hover:bg-ink/85 h-10 rounded-sm px-4 text-sm font-medium text-white">
+        <button
+          type="submit"
+          className="bg-ink hover:bg-ink/85 h-10 rounded-sm px-4 text-sm font-medium text-white"
+        >
           Apply
         </button>
-        <Link href="/admin/audit" className="text-primary inline-flex h-10 items-center px-2 text-sm underline underline-offset-2">
+        <Link
+          href="/admin/audit"
+          className="text-primary inline-flex h-10 items-center px-2 text-sm underline underline-offset-2"
+        >
           Reset
         </Link>
       </form>
       <div className="mb-2">
-        <ResultCount page={list.page} pageSize={AUDIT_PAGE_SIZE} total={list.total} noun="entries" />
+        <ResultCount
+          page={list.page}
+          pageSize={AUDIT_PAGE_SIZE}
+          total={list.total}
+          noun="entries"
+        />
       </div>
       <TableWrap label="Audit log">
         <thead>
           <tr>
-            <th scope="col" className={thClass}>When</th>
-            <th scope="col" className={thClass}>Who</th>
-            <th scope="col" className={thClass}>Action</th>
-            <th scope="col" className={thClass}>Entity</th>
-            <th scope="col" className={thClass}>Details</th>
+            <th scope="col" className={thClass}>
+              When
+            </th>
+            <th scope="col" className={thClass}>
+              Who
+            </th>
+            <th scope="col" className={thClass}>
+              Action
+            </th>
+            <th scope="col" className={thClass}>
+              Entity
+            </th>
+            <th scope="col" className={thClass}>
+              Details
+            </th>
           </tr>
         </thead>
         <tbody>
-          {list.rows.length === 0 && <EmptyRow colSpan={5} title="No entries match these filters" />}
+          {list.rows.length === 0 && (
+            <EmptyRow colSpan={5} title="No entries match these filters" />
+          )}
           {list.rows.map((r) => {
             const href = entityHref(r.entityType, r.entityId);
             return (
               <tr key={r.id} className="hover:bg-sunken/40" data-testid="audit-row">
-                <td className={`${tdClass} text-muted whitespace-nowrap`}>{fmtDateTime(r.createdAt)}</td>
-                <td className={tdClass}>{r.actor?.name ?? <span className="text-muted">Anonymous / system</span>}</td>
+                <td className={`${tdClass} text-muted whitespace-nowrap`}>
+                  {fmtDateTime(r.createdAt)}
+                </td>
+                <td className={tdClass}>
+                  {r.actor?.name ?? <span className="text-muted">Anonymous / system</span>}
+                </td>
                 <td className={`${tdClass} font-mono text-xs whitespace-nowrap`}>{r.action}</td>
                 <td className={`${tdClass} whitespace-nowrap`}>
                   {href ? (
@@ -125,14 +173,20 @@ export default async function AdminAuditPage({ searchParams }: PageProps<"/admin
                     r.entityType
                   )}
                 </td>
-                <td className={`${tdClass} text-muted max-w-xl text-xs break-words`}>{summaryText(r.summary)}</td>
+                <td className={`${tdClass} text-muted max-w-xl text-xs break-words`}>
+                  {summaryText(r.summary)}
+                </td>
               </tr>
             );
           })}
         </tbody>
       </TableWrap>
       <div className="mt-4">
-        <Pagination page={list.page} totalPages={list.pageCount} hrefFor={(n) => hrefWith("/admin/audit", params, { page: String(n) })} />
+        <Pagination
+          page={list.page}
+          totalPages={list.pageCount}
+          hrefFor={(n) => hrefWith("/admin/audit", params, { page: String(n) })}
+        />
       </div>
     </>
   );

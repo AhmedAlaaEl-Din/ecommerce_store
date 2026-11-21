@@ -6,7 +6,10 @@ const OUT = process.env.SMOKE_SHOTS ?? ".";
 
 async function main() {
   const browser = await chromium.launch();
-  for (const [name, viewport] of [["desktop", { width: 1280, height: 800 }], ["phone", { width: 390, height: 844 }]] as const) {
+  for (const [name, viewport] of [
+    ["desktop", { width: 1280, height: 800 }],
+    ["phone", { width: 390, height: 844 }],
+  ] as const) {
     const page = await browser.newPage({ viewport });
     await page.goto(`${BASE}/products/sahel-salad-bowl`);
     await page.getByTestId("add-to-cart").click();

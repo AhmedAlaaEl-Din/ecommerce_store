@@ -109,7 +109,9 @@ export async function archiveProductAction(fd: FormData): Promise<void> {
   const archive = fd.get("archive") === "1";
   const res = await setArchived(db, user, id, archive);
   revalidatePath("/", "layout");
-  redirect(`/admin/products/${encodeURIComponent(id)}?done=${res.ok ? (archive ? "archived" : "unarchived") : "error"}`);
+  redirect(
+    `/admin/products/${encodeURIComponent(id)}?done=${res.ok ? (archive ? "archived" : "unarchived") : "error"}`,
+  );
 }
 
 export async function deleteProductAction(fd: FormData): Promise<void> {
@@ -117,7 +119,9 @@ export async function deleteProductAction(fd: FormData): Promise<void> {
   const id = String(fd.get("id") ?? "");
   const res = await deleteProduct(db, user, id);
   if (!res.ok) {
-    redirect(`/admin/products/${encodeURIComponent(id)}?done=${res.code === "HAS_ORDERS" ? "has_orders" : "error"}`);
+    redirect(
+      `/admin/products/${encodeURIComponent(id)}?done=${res.code === "HAS_ORDERS" ? "has_orders" : "error"}`,
+    );
   }
   await deleteStoredImage(res.images);
   revalidatePath("/", "layout");

@@ -10,6 +10,15 @@ export function testDb() {
 }
 
 export async function resetDb(db: ReturnType<typeof createDb>) {
+  // Phase 3 tables first (they reference orders, products and admin users).
+  await db.refund.deleteMany();
+  await db.orderNote.deleteMany();
+  await db.orderEvent.deleteMany();
+  await db.stockMovement.deleteMany();
+  await db.auditLog.deleteMany();
+  await db.adminSession.deleteMany();
+  await db.adminUser.deleteMany();
+  await db.setting.deleteMany();
   await db.processedEvent.deleteMany();
   await db.orderItem.deleteMany();
   await db.order.deleteMany();

@@ -1,7 +1,15 @@
+import { fileURLToPath } from "node:url";
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  resolve: { tsconfigPaths: true },
+  resolve: {
+    tsconfigPaths: true,
+    // "server-only" throws outside React Server Components. Tests import server
+    // modules directly (e.g. the requireAdmin walk test), so use its no-op build.
+    alias: {
+      "server-only": fileURLToPath(new URL("./node_modules/server-only/empty.js", import.meta.url)),
+    },
+  },
   test: {
     projects: [
       {

@@ -8,13 +8,20 @@ import { SLUG_MAX, SLUG_RE, slugify } from "./slug";
 
 export const categoryFormSchema = z
   .object({
-    name: z.string().trim().min(2, "Enter a name (2–40 characters).").max(40, "Use 40 characters or fewer."),
+    name: z
+      .string()
+      .trim()
+      .min(2, "Enter a name (2–40 characters).")
+      .max(40, "Use 40 characters or fewer."),
     slug: z
       .string()
       .trim()
       .toLowerCase()
       .max(SLUG_MAX)
-      .refine((s) => s === "" || SLUG_RE.test(s), "Use lowercase letters, numbers and single hyphens."),
+      .refine(
+        (s) => s === "" || SLUG_RE.test(s),
+        "Use lowercase letters, numbers and single hyphens.",
+      ),
     description: z
       .string()
       .trim()
@@ -42,7 +49,8 @@ export function parseCategoryForm(fd: FormData) {
     : { ok: false as const, fieldErrors: fieldErrorsOf(parsed.error) };
 }
 
-type Result = { ok: true; id: string } | { ok: false; error: string; fieldErrors?: Record<string, string> };
+type Result =
+  { ok: true; id: string } | { ok: false; error: string; fieldErrors?: Record<string, string> };
 
 function slugTaken(err: unknown) {
   return (err as { code?: string }).code === "P2002";
@@ -64,12 +72,18 @@ export async function createCategory(db: Db, actor: Actor, data: CategoryData): 
     });
     return { ok: true, id: c.id };
   } catch (err) {
-    if (slugTaken(err)) return fail("Check the highlighted fields.", { slug: "Another category uses this slug." });
+    if (slugTaken(err))
+      return fail("Check the highlighted fields.", { slug: "Another category uses this slug." });
     throw err;
   }
 }
 
-export async function updateCategory(db: Db, actor: Actor, id: string, data: CategoryData): Promise<Result> {
+export async function updateCategory(
+  db: Db,
+  actor: Actor,
+  id: string,
+  data: CategoryData,
+): Promise<Result> {
   assertCan(actor, "categories.manage");
   const before = await db.category.findUnique({ where: { id } });
   if (!before) return fail("That category no longer exists.");
@@ -81,12 +95,15 @@ export async function updateCategory(db: Db, actor: Actor, id: string, data: Cat
         action: "category.update",
         entityType: "Category",
         entityId: id,
-        summary: { changes: changedFields(before, data, ["name", "slug", "description", "accentColor"]) },
+        summary: {
+          changes: changedFields(before, data, ["name", "slug", "description", "accentColor"]),
+        },
       });
     });
     return { ok: true, id };
   } catch (err) {
-    if (slugTaken(err)) return fail("Check the highlighted fields.", { slug: "Another category uses this slug." });
+    if (slugTaken(err))
+      return fail("Check the highlighted fields.", { slug: "Another category uses this slug." });
     throw err;
   }
 }

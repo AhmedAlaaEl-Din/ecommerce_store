@@ -22,7 +22,8 @@ export async function listAudit(db: Db, f: AuditFilters) {
   if (q) where.OR = [{ action: { contains: q } }, { entityId: { contains: q } }];
   const created: Prisma.DateTimeFilter = {};
   if (f.from && DATE_RE.test(f.from)) created.gte = new Date(`${f.from}T00:00:00Z`);
-  if (f.to && DATE_RE.test(f.to)) created.lt = new Date(new Date(`${f.to}T00:00:00Z`).getTime() + 86_400_000);
+  if (f.to && DATE_RE.test(f.to))
+    created.lt = new Date(new Date(`${f.to}T00:00:00Z`).getTime() + 86_400_000);
   if (created.gte || created.lt) where.createdAt = created;
   const page = Math.max(1, f.page ?? 1);
   const [total, rows] = await Promise.all([
@@ -51,7 +52,8 @@ export function summaryText(json: string): string {
             .join("; ");
           return ch ? `changed ${ch}` : "no changes";
         }
-        if (Array.isArray(val) && val.length === 2) return `${k}: ${String(val[0])} → ${String(val[1])}`;
+        if (Array.isArray(val) && val.length === 2)
+          return `${k}: ${String(val[0])} → ${String(val[1])}`;
         if (typeof val === "object") return `${k}: ${JSON.stringify(val)}`;
         return `${k}: ${String(val)}`;
       });

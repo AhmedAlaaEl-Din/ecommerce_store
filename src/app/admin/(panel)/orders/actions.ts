@@ -19,7 +19,10 @@ function orderPath(id: string) {
 }
 
 /** Staff and admins: move fulfilment one step (shipped needs carrier + tracking). */
-export async function fulfilmentAction(_prev: OrderActionState, fd: FormData): Promise<OrderActionState> {
+export async function fulfilmentAction(
+  _prev: OrderActionState,
+  fd: FormData,
+): Promise<OrderActionState> {
   const { user } = await requireAdmin();
   const orderId = String(fd.get("orderId") ?? "");
   const to = oneOf(String(fd.get("to") ?? ""), STEPS) as FulfilmentStatus | undefined;
@@ -29,7 +32,10 @@ export async function fulfilmentAction(_prev: OrderActionState, fd: FormData): P
     user,
     orderId,
     to,
-    { carrier: String(fd.get("carrier") ?? ""), trackingNumber: String(fd.get("trackingNumber") ?? "") },
+    {
+      carrier: String(fd.get("carrier") ?? ""),
+      trackingNumber: String(fd.get("trackingNumber") ?? ""),
+    },
     (id) => writeNoticeEmail(db, id, "shipped"),
   );
   if (!res.ok) return { error: res.error };
@@ -39,7 +45,10 @@ export async function fulfilmentAction(_prev: OrderActionState, fd: FormData): P
 }
 
 /** Staff and admins: internal note (never shown to customers). */
-export async function addNoteAction(_prev: OrderActionState, fd: FormData): Promise<OrderActionState> {
+export async function addNoteAction(
+  _prev: OrderActionState,
+  fd: FormData,
+): Promise<OrderActionState> {
   const { user } = await requireAdmin();
   const orderId = String(fd.get("orderId") ?? "");
   const res = await addNote(db, user, orderId, String(fd.get("body") ?? ""));

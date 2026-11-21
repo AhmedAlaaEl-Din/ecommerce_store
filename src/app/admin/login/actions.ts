@@ -3,11 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import {
-  LOGIN_FAILED_MESSAGE,
-  LOGIN_THROTTLED_MESSAGE,
-  login,
-} from "@/lib/admin/auth-service";
+import { LOGIN_FAILED_MESSAGE, LOGIN_THROTTLED_MESSAGE, login } from "@/lib/admin/auth-service";
 import { adminCookieOptions } from "@/lib/admin/guard";
 import { clientIp } from "@/lib/admin/request";
 import { ADMIN_SESSION_COOKIE } from "@/lib/admin/session-rules";
@@ -31,7 +27,8 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     email: formData.get("email"),
     password: formData.get("password"),
   });
-  const email = typeof formData.get("email") === "string" ? String(formData.get("email")).slice(0, 254) : "";
+  const email =
+    typeof formData.get("email") === "string" ? String(formData.get("email")).slice(0, 254) : "";
   if (!parsed.success) return { error: "Enter your email and password.", email };
 
   const jar = await cookies();

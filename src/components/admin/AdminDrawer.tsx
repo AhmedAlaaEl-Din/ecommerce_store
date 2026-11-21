@@ -13,13 +13,7 @@ const FOCUSABLE =
  * Mobile admin navigation: a native <dialog> drawer (showModal makes the page
  * inert), with a Tab trap, Esc to close and focus returned to the menu button.
  */
-export function AdminDrawer({
-  items,
-  footer,
-}: {
-  items: AdminNavItem[];
-  footer: React.ReactNode;
-}) {
+export function AdminDrawer({ items, footer }: { items: AdminNavItem[]; footer: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDialogElement>(null);
   const button = useRef<HTMLButtonElement>(null);

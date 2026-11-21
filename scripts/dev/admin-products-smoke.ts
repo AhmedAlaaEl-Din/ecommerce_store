@@ -24,7 +24,9 @@ async function main() {
   // Wrong file type first.
   await page.getByLabel("Name", { exact: true }).fill("Smoke Test Carafe");
   await page.getByLabel("Short description").fill("A glass carafe for smoke testing.");
-  await page.getByLabel("Description", { exact: true }).fill("An invented glass carafe used only to test the admin.");
+  await page
+    .getByLabel("Description", { exact: true })
+    .fill("An invented glass carafe used only to test the admin.");
   await page.getByLabel("Price (USD)").fill("31.50");
   await page.getByLabel("Opening stock").fill("7");
   await page.getByTestId("image-input").setInputFiles("tests/fixtures/not-an-image.png");

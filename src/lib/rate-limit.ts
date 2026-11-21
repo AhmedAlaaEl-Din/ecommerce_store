@@ -31,6 +31,11 @@ export class RateLimiter {
     return true;
   }
 
+  /** Forgets every bucket (tests). */
+  clear() {
+    this.buckets.clear();
+  }
+
   private evictOldest() {
     const first = this.buckets.keys().next();
     if (!first.done) this.buckets.delete(first.value);

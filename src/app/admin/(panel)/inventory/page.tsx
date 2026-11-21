@@ -34,7 +34,11 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
     getLowStockThreshold(db),
     db.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } }),
   ]);
-  const rows = await listInventory(db, { q: params.q, categoryId: params.category, low: !!params.low }, threshold);
+  const rows = await listInventory(
+    db,
+    { q: params.q, categoryId: params.category, low: !!params.low },
+    threshold,
+  );
   const done = param(sp, "done");
   const changed = Number.parseInt(param(sp, "changed") ?? "0", 10) || 0;
   const back = hrefWith("", params);
@@ -54,16 +58,30 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
       />
       {done === "bulk_conflicts" && (
         <Notice tone="error">
-          {changed} product{changed === 1 ? "" : "s"} updated. Some rows were skipped because their stock changed while you were editing (an order or another user). Check them and try again.
+          {changed} product{changed === 1 ? "" : "s"} updated. Some rows were skipped because their
+          stock changed while you were editing (an order or another user). Check them and try again.
         </Notice>
       )}
-      {done === "threshold_invalid" && <Notice tone="error">Enter a whole number from 0 to 1,000.</Notice>}
+      {done === "threshold_invalid" && (
+        <Notice tone="error">Enter a whole number from 0 to 1,000.</Notice>
+      )}
 
       <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
-        <form method="get" className="flex flex-wrap items-end gap-2" role="search" aria-label="Filter inventory">
+        <form
+          method="get"
+          className="flex flex-wrap items-end gap-2"
+          role="search"
+          aria-label="Filter inventory"
+        >
           <label className="flex flex-col gap-1 text-xs font-semibold">
             Search
-            <input type="search" name="q" defaultValue={params.q} placeholder="Name or slug" className={`${smallField} w-52`} />
+            <input
+              type="search"
+              name="q"
+              defaultValue={params.q}
+              placeholder="Name or slug"
+              className={`${smallField} w-52`}
+            />
           </label>
           <label className="flex flex-col gap-1 text-xs font-semibold">
             Category
@@ -77,20 +95,43 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
             </select>
           </label>
           <label className="inline-flex h-10 items-center gap-2 text-sm">
-            <input type="checkbox" name="low" value="1" defaultChecked={!!params.low} className="accent-primary size-4" />
+            <input
+              type="checkbox"
+              name="low"
+              value="1"
+              defaultChecked={!!params.low}
+              className="accent-primary size-4"
+            />
             Low stock only
           </label>
-          <button type="submit" className="bg-ink hover:bg-ink/85 h-10 rounded-sm px-4 text-sm font-medium text-white">
+          <button
+            type="submit"
+            className="bg-ink hover:bg-ink/85 h-10 rounded-sm px-4 text-sm font-medium text-white"
+          >
             Apply
           </button>
         </form>
         {can(user.role, "inventory.settings") ? (
-          <form action={thresholdAction} className="flex items-end gap-2" data-testid="threshold-form">
+          <form
+            action={thresholdAction}
+            className="flex items-end gap-2"
+            data-testid="threshold-form"
+          >
             <label className="flex flex-col gap-1 text-xs font-semibold">
               Low-stock threshold
-              <input type="number" name="threshold" min={0} max={1000} defaultValue={threshold} className={`${smallField} w-24`} />
+              <input
+                type="number"
+                name="threshold"
+                min={0}
+                max={1000}
+                defaultValue={threshold}
+                className={`${smallField} w-24`}
+              />
             </label>
-            <button type="submit" className="border-line-strong hover:border-ink h-10 rounded-sm border px-3 text-sm font-medium">
+            <button
+              type="submit"
+              className="border-line-strong hover:border-ink h-10 rounded-sm border px-3 text-sm font-medium"
+            >
               Save
             </button>
           </form>
@@ -104,10 +145,18 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
         <TableWrap label="Inventory">
           <thead>
             <tr>
-              <th scope="col" className={thClass}>Product</th>
-              <th scope="col" className={thClass}>Category</th>
-              <th scope="col" className={`${thClass} text-right`}>In stock</th>
-              <th scope="col" className={thClass}>Counted (bulk edit)</th>
+              <th scope="col" className={thClass}>
+                Product
+              </th>
+              <th scope="col" className={thClass}>
+                Category
+              </th>
+              <th scope="col" className={`${thClass} text-right`}>
+                In stock
+              </th>
+              <th scope="col" className={thClass}>
+                Counted (bulk edit)
+              </th>
               <th scope="col" className={thClass}>
                 <span className="sr-only">History</span>
               </th>
@@ -116,18 +165,32 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
           <tbody>
             {rows.length === 0 && (
               <EmptyRow colSpan={5} title="No products match">
-                <Link href="/admin/inventory" className="text-primary underline underline-offset-2">Show everything</Link>
+                <Link href="/admin/inventory" className="text-primary underline underline-offset-2">
+                  Show everything
+                </Link>
               </EmptyRow>
             )}
             {rows.map((p) => (
               <tr key={p.id} className="hover:bg-sunken/40" data-testid="inventory-row">
                 <td className={tdClass}>
                   <span className="font-medium">{p.name}</span>
-                  {!p.isActive && <span className="ml-2"><Pill tone="warn">Inactive</Pill></span>}
+                  {!p.isActive && (
+                    <span className="ml-2">
+                      <Pill tone="warn">Inactive</Pill>
+                    </span>
+                  )}
                 </td>
                 <td className={tdClass}>{p.category.name}</td>
                 <td className={`${tdClass} text-right tabular-nums`}>
-                  <span className={p.stock <= threshold ? (p.stock === 0 ? "text-danger font-semibold" : "text-warning font-semibold") : undefined}>
+                  <span
+                    className={
+                      p.stock <= threshold
+                        ? p.stock === 0
+                          ? "text-danger font-semibold"
+                          : "text-warning font-semibold"
+                        : undefined
+                    }
+                  >
                     {p.stock}
                   </span>
                 </td>
@@ -149,7 +212,10 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
                   />
                 </td>
                 <td className={`${tdClass} text-right`}>
-                  <Link href={`/admin/inventory/${p.id}`} className="text-primary inline-flex min-h-9 items-center px-2 text-sm font-medium underline underline-offset-2">
+                  <Link
+                    href={`/admin/inventory/${p.id}`}
+                    className="text-primary inline-flex min-h-9 items-center px-2 text-sm font-medium underline underline-offset-2"
+                  >
                     History &amp; adjust
                   </Link>
                 </td>
@@ -160,9 +226,14 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
         {rows.length > 0 && (
           <div className="border-line bg-surface sticky bottom-0 mt-3 flex flex-wrap items-center justify-between gap-3 rounded-lg border px-4 py-3">
             <p className="text-muted text-sm">
-              Type counted numbers in any rows, then save them all at once. Each change is recorded as a correction.
+              Type counted numbers in any rows, then save them all at once. Each change is recorded
+              as a correction.
             </p>
-            <button type="submit" className="bg-primary hover:bg-primary-hover h-10 rounded-md px-4 text-sm font-medium text-white" data-testid="bulk-save">
+            <button
+              type="submit"
+              className="bg-primary hover:bg-primary-hover h-10 rounded-md px-4 text-sm font-medium text-white"
+              data-testid="bulk-save"
+            >
               Save counted stock
             </button>
           </div>
@@ -170,7 +241,9 @@ export default async function AdminInventoryPage({ searchParams }: PageProps<"/a
       </form>
       <Panel className="mt-6" title="About stock numbers" id="about-stock">
         <p className="text-muted text-sm">
-          Stock is the number available to sell. Checkout reserves stock for 30 minutes (a “reserved” movement); a cancelled, declined or expired checkout puts it back (“released”). Refunds can restock items. Manual changes need a reason.
+          Stock is the number available to sell. Checkout reserves stock for 30 minutes (a
+          “reserved” movement); a cancelled, declined or expired checkout puts it back (“released”).
+          Refunds can restock items. Manual changes need a reason.
         </p>
       </Panel>
     </>

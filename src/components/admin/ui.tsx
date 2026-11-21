@@ -94,22 +94,33 @@ const FULFILMENT_TONES: Record<FulfilmentStatus, string> = {
   delivered: "bg-success/15 text-success",
 };
 
-const pill = "inline-flex items-center whitespace-nowrap rounded-sm px-2 py-0.5 font-sans text-xs font-semibold tracking-normal";
+const pill =
+  "inline-flex items-center whitespace-nowrap rounded-sm px-2 py-0.5 font-sans text-xs font-semibold tracking-normal";
 
 export function PaymentBadge({ status }: { status: string }) {
   const s = status as PaymentStatus;
-  return <span className={cn(pill, PAYMENT_TONES[s] ?? "bg-sunken")}>{PAYMENT_LABELS[s] ?? status}</span>;
+  return (
+    <span className={cn(pill, PAYMENT_TONES[s] ?? "bg-sunken")}>{PAYMENT_LABELS[s] ?? status}</span>
+  );
 }
 
 export function FulfilmentBadge({ status, muted }: { status: string; muted?: boolean }) {
   const s = status as FulfilmentStatus;
   if (muted) return <span className="text-muted text-xs">—</span>;
   return (
-    <span className={cn(pill, FULFILMENT_TONES[s] ?? "bg-sunken")}>{FULFILMENT_LABELS[s] ?? status}</span>
+    <span className={cn(pill, FULFILMENT_TONES[s] ?? "bg-sunken")}>
+      {FULFILMENT_LABELS[s] ?? status}
+    </span>
   );
 }
 
-export function Pill({ tone = "neutral", children }: { tone?: "neutral" | "good" | "warn" | "bad" | "info"; children: ReactNode }) {
+export function Pill({
+  tone = "neutral",
+  children,
+}: {
+  tone?: "neutral" | "good" | "warn" | "bad" | "info";
+  children: ReactNode;
+}) {
   const tones = {
     neutral: "bg-sunken text-ink",
     good: "bg-success/15 text-success",
@@ -121,7 +132,15 @@ export function Pill({ tone = "neutral", children }: { tone?: "neutral" | "good"
 }
 
 /** Success / error banner. Messages come from a fixed list, never from the URL. */
-export function Notice({ tone, children, testId = "notice" }: { tone: "success" | "error"; children: ReactNode; testId?: string }) {
+export function Notice({
+  tone,
+  children,
+  testId = "notice",
+}: {
+  tone: "success" | "error";
+  children: ReactNode;
+  testId?: string;
+}) {
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
@@ -142,7 +161,13 @@ export function Notice({ tone, children, testId = "notice" }: { tone: "success" 
 }
 
 /** Shows a notice for ?done=<code> using a whitelist of messages. */
-export function DoneNotice({ code, messages }: { code: string | undefined; messages: Record<string, string> }) {
+export function DoneNotice({
+  code,
+  messages,
+}: {
+  code: string | undefined;
+  messages: Record<string, string>;
+}) {
   if (!code || !(code in messages)) return null;
   return <Notice tone="success">{messages[code]}</Notice>;
 }
@@ -151,7 +176,15 @@ export function DoneNotice({ code, messages }: { code: string | undefined; messa
  * Table wrapper: scrolls inside its own box so the header row can stick to the
  * top while scrolling long lists (and scrolls sideways on small screens).
  */
-export function TableWrap({ children, label, className }: { children: ReactNode; label: string; className?: string }) {
+export function TableWrap({
+  children,
+  label,
+  className,
+}: {
+  children: ReactNode;
+  label: string;
+  className?: string;
+}) {
   return (
     <div
       className={cn(
@@ -215,7 +248,15 @@ export function SortTh({
   );
 }
 
-export function EmptyRow({ colSpan, title, children }: { colSpan: number; title: string; children?: ReactNode }) {
+export function EmptyRow({
+  colSpan,
+  title,
+  children,
+}: {
+  colSpan: number;
+  title: string;
+  children?: ReactNode;
+}) {
   return (
     <tr>
       <td colSpan={colSpan} className="px-4 py-12 text-center" data-testid="empty-state">
@@ -226,7 +267,17 @@ export function EmptyRow({ colSpan, title, children }: { colSpan: number; title:
   );
 }
 
-export function Kpi({ label, value, sub, testId }: { label: string; value: ReactNode; sub?: ReactNode; testId?: string }) {
+export function Kpi({
+  label,
+  value,
+  sub,
+  testId,
+}: {
+  label: string;
+  value: ReactNode;
+  sub?: ReactNode;
+  testId?: string;
+}) {
   return (
     <div className="border-line bg-surface shadow-1 rounded-lg border p-4" data-testid={testId}>
       <p className="text-muted text-xs font-semibold tracking-[0.06em] uppercase">{label}</p>
@@ -237,8 +288,23 @@ export function Kpi({ label, value, sub, testId }: { label: string; value: React
 }
 
 /** Small "x–y of z" line for lists. */
-export function ResultCount({ page, pageSize, total, noun }: { page: number; pageSize: number; total: number; noun: string }) {
-  if (total === 0) return <p className="text-muted text-sm" data-testid="result-count">No {noun}</p>;
+export function ResultCount({
+  page,
+  pageSize,
+  total,
+  noun,
+}: {
+  page: number;
+  pageSize: number;
+  total: number;
+  noun: string;
+}) {
+  if (total === 0)
+    return (
+      <p className="text-muted text-sm" data-testid="result-count">
+        No {noun}
+      </p>
+    );
   const from = (page - 1) * pageSize + 1;
   const to = Math.min(total, page * pageSize);
   return (

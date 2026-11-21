@@ -12,7 +12,12 @@ async function main() {
     .jpeg({ quality: 85 })
     .withExif({
       IFD0: { Make: "DemoCam", Model: "Example 1", Copyright: "Invented test image" },
-      IFD3: { GPSLatitudeRef: "N", GPSLatitude: "30/1 2/1 0/1", GPSLongitudeRef: "E", GPSLongitude: "31/1 14/1 0/1" },
+      IFD3: {
+        GPSLatitudeRef: "N",
+        GPSLatitude: "30/1 2/1 0/1",
+        GPSLongitudeRef: "E",
+        GPSLongitude: "31/1 14/1 0/1",
+      },
     })
     .toFile("tests/fixtures/sample-photo.jpg");
   const meta = await sharp("tests/fixtures/sample-photo.jpg").metadata();

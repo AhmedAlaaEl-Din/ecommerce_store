@@ -19,12 +19,13 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
             data-testid="back-to-cart"
           >
             <ChevronLeftIcon size={18} />
-            <span>
-              Back to cart
-            </span>
+            <span>Back to cart</span>
           </Link>
           <Wordmark className="absolute left-1/2 -translate-x-1/2" />
-          <p className="text-muted inline-flex items-center gap-1.5 text-sm" data-testid="secure-note">
+          <p
+            className="text-muted inline-flex items-center gap-1.5 text-sm"
+            data-testid="secure-note"
+          >
             <LockIcon size={16} className="text-success" />
             <span className="hidden sm:inline">Secure checkout</span>
             <span className="sm:hidden">Secure</span>

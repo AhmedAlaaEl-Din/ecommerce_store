@@ -36,13 +36,19 @@ export function hrefWith(path: string, current: Params, overrides: Params = {}):
 }
 
 /** Reads a single string from Next's searchParams (arrays take the first value). */
-export function param(sp: Record<string, string | string[] | undefined>, key: string): string | undefined {
+export function param(
+  sp: Record<string, string | string[] | undefined>,
+  key: string,
+): string | undefined {
   const v = sp[key];
   const s = Array.isArray(v) ? v[0] : v;
   return typeof s === "string" ? s.slice(0, 200) : undefined;
 }
 
-export function oneOf<T extends string>(value: string | undefined, options: readonly T[]): T | undefined {
+export function oneOf<T extends string>(
+  value: string | undefined,
+  options: readonly T[],
+): T | undefined {
   return value && (options as readonly string[]).includes(value) ? (value as T) : undefined;
 }
 
