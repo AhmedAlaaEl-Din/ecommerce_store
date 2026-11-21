@@ -20,7 +20,7 @@ instead of `E:\handoff\ecommerce_phase2`.
 - [x] 15. Lighthouse performance work and scores — default preset, same CPU state (~750): 67/75/74 → 82/81/79; A11y/BP/SEO 100. 90 not reliably reachable here: CPU benchmark ~750 (91 at ~1,700) and React's fixed runtime cost (no-JS = 99). docs/reviews/phase2-lighthouse.md
 - [x] 16. Frames, storyboard and review screenshots; copy to handoff — `npm run frames:phase2`: 31 desktop + 33 mobile frames + storyboard.json (captions say "mock payment"); 23 review shots; copied to E:\handoff\ecommerce_phase1\phase2_evidence (owner override), verified identical.
 - [x] 17. docs/PHASE2_REPORT.md, docs/HOW_TO_TEST_PHASE2.md, README update — report sections 1–6, 36-step Git Bash test guide incl. Stripe test mode, README Phase 2 section + scripts.
-- [ ] 18. Privacy check and final `npm run verify`
+- [x] 18. Privacy check and final `npm run verify` — no keys/secrets, only @example.com demo people, no paths/hostnames in repo, evidence or handoff; verify green: unit 74, integration 65, e2e 35, axe 15.
 
 ## Blocked
 

@@ -279,8 +279,72 @@ Node's `fetch` for local health checks.
 
 ## 7. Privacy check (step 18)
 
-See the final section, which is filled in after the last verify.
+Run in Git Bash from the project root after the final verify:
+
+```bash
+# 1. Stripe keys or webhook secrets in tracked files (live or test)
+git ls-files -z | xargs -0 grep -nIE "sk_(live|test)_[A-Za-z0-9]{8,}|rk_(live|test)_[A-Za-z0-9]{8,}|whsec_[A-Za-z0-9]{8,}|pk_live_"
+#    -> no output
+
+# 2. Email addresses other than the invented @example.com ones (package scopes excluded)
+git ls-files -z | xargs -0 grep -nIoE "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}" \
+  | grep -vE "@example\.com|@types/|@prisma/|@axe-core|@playwright|@tailwindcss|@vercel|noreply@anthropic\.com|@[0-9]"
+#    -> tests/unit/orders.test.ts: Mona@Example.com  (the same demo address, testing lower-casing)
+
+# 3. Windows user paths, the machine's user name and the owner's real name (patterns not repeated here)
+git ls-files -z | xargs -0 grep -nIiE "C:\\\\Users|C:/Users|AppData|<user name>|<real name>"
+#    -> no output (outside this report and the Phase 1 report, which only show these commands)
+
+# 4. Env, database or outbox files tracked by git
+git ls-files | grep -E "\.env|\.db$|outbox"
+#    -> .env.example (placeholders only) and three source files named "outbox"; no data files
+
+# 5. Evidence and handoff folders (storyboard, Lighthouse JSON/HTML): paths, names, keys
+for d in evidence/phase2 /e/handoff/ecommerce_phase1/phase2_evidence; do
+  grep -rlIiE "C:\\\\Users|C:/Users|AppData|<user name>|<real name>|sk_(live|test)_[A-Za-z0-9]{8,}|whsec_[A-Za-z0-9]{8,}" "$d"
+done
+#    -> no output for either folder
+
+# 6. The machine's hostname in repo, evidence or handoff
+git ls-files -z | xargs -0 grep -nIi "$(hostname)"; grep -rlIi "$(hostname)" evidence/phase2 /e/handoff/ecommerce_phase1/phase2_evidence
+#    -> no output
+```
+
+Results:
+
+- **No secrets anywhere.** No `sk_live`, `sk_test`, `rk_` or `whsec_` values appear in the repo,
+  evidence or frames. `.env.example` has empty Stripe placeholders. The unit tests build their fake key
+  strings at runtime, so no key-shaped literal exists in the source.
+- **Only invented people.** Every customer is a demo identity at `@example.com` (Mona Example, Omar
+  Example, Race Example), with invented addresses and countries. The frames and screenshots show only
+  the demo site: page content, no browser chrome, no file paths.
+- **Personal data stays in ignored local folders.** Outbox emails and SQLite databases are under
+  git-ignored paths (`var/`, `prisma/*.db`).
+- **One thing to know:** the Phase 2 commits are authored with your global git identity, as in Phase 1.
 
 ## 8. Commits
 
-See the final section.
+`phase-2`, on top of `main` (19e0ca9 "Merge branch 'phase-1'"), oldest first:
+
+```
+07c2457 chore: start phase 2 (prompt, progress checklist, updated agent settings)
+b162a51 feat(db): order, order item, processed event and order counter models; payment env vars
+12b1290 feat(payments): provider interface, mock and Stripe Checkout providers, config rules, signed events
+613cca5 feat(payments): webhook route with signature verification and idempotency; order service, outbox, rate limiter
+8de1afb feat(checkout): checkout page with server-validated form, order summary and cancel route
+e5250c0 feat(orders): npm run orders:expire releases stale reservations
+c140531 feat(checkout): mock pay page, order page with status polling, outbox email and dev outbox
+8ffebbf fix(security): sanitized error logging, catch order creation failures
+dd28d81 test: unit tests for orders, checkout schema, idempotency guard and security helpers
+9448a80 test(e2e): checkout journeys with the mock provider, mobile and keyboard checkout, axe on new pages
+4ffb143 fix(ui): visual self-review fixes for checkout, mock pay and order pages; phase 2 review screenshot script
+a4ba127 fix(security): apply phase 2 security review findings
+b4d8ce0 fix(ui): apply phase 2 design review findings (live error clearing, decline copy, savings row, badge sync, mock page copy)
+98cb21a perf: single-weight display font, lazy-loaded mobile menu; phase 2 Lighthouse before/after
+ee5c94b feat(demo): phase 2 frame recorder and storyboard (mock payments)
+595ff1e docs: phase 2 report, home test guide (Git Bash, Stripe test mode) and README
+(final)  chore: privacy check, final verify, report sections 7-8   <- this commit
+```
+
+Nothing was pushed or merged. The push and merge commands for you are in `docs/HOW_TO_TEST_PHASE2.md`,
+step 36.
