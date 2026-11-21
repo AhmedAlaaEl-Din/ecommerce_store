@@ -1,6 +1,6 @@
 # Phase 1 progress
 
-- [ ] 1. git init on `main`, scaffold, first commit; create branch `phase-1`
+- [x] 1. git init on `main`, scaffold, first commit; create branch `phase-1`
 - [ ] 2. Write docs/DESIGN.md (direction, tokens, components)
 - [ ] 3. Prisma schema, migration, seed, SVG product illustrations
 - [ ] 4. Design tokens and base components
@@ -19,6 +19,7 @@
 - [ ] 17. Privacy check and final `npm run verify`
 
 ## Notes
+- 1: Next 16.4.6 scaffold on main, branch phase-1. Cache Components disabled (real 404s). prisma@latest is 8.0 RC, pinned stable 7.10.1. Prisma init added vendor agent-skill folders; removed. npm 11 allowScripts approved for better-sqlite3, prisma, @prisma/engines, esbuild.
 
 ## Needed permissions
 

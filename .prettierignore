@@ -1,0 +1,9 @@
+node_modules
+.next
+src/generated
+evidence
+test-results
+playwright-report
+package-lock.json
+prisma/migrations
+docs/PHASE1_PROMPT.md
