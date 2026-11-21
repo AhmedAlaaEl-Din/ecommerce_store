@@ -39,7 +39,7 @@ test.describe("checkout with the mock provider", () => {
     await expect(page.getByTestId("order-total")).toHaveText(amount!);
     await expect(page.getByTestId("order-lines")).toContainText("Market Glass Carafe × 2");
     await expect(page.getByTestId("order-address")).toContainText("12 Reed Lane");
-    await expect(page.getByTestId("order-address")).toContainText("Nilera");
+    await expect(page.getByTestId("order-address")).toContainText("Egypt");
     await expect(page.getByTestId("cart-count")).toHaveCount(0); // badge hidden at 0
 
     // Refreshing the success page is safe and shows the same order.
@@ -66,7 +66,7 @@ test.describe("checkout with the mock provider", () => {
     await expect(page.getByTestId("checkout-notice")).toContainText("Your payment was declined.");
     await expect(page.getByLabel("Email")).toHaveValue("omar@example.com");
     await expect(page.getByLabel("Full name")).toHaveValue("Omar Example");
-    await expect(page.getByLabel("Country")).toHaveValue("nilera");
+    await expect(page.getByLabel("Country")).toHaveValue("EG");
     expect(await stockOf("reed-linen-cushion")).toBe(before);
     await expect(page.getByTestId("cart-count")).toHaveText("1"); // cart kept
 
@@ -127,7 +127,7 @@ test.describe("checkout with the mock provider", () => {
     );
     await expect(page.getByLabel("Full name")).toHaveValue(MONA.name);
     await expect(page.getByLabel("Town or city")).toHaveValue(MONA.city);
-    await expect(page.getByLabel("Country")).toHaveValue("nilera");
+    await expect(page.getByLabel("Country")).toHaveValue("EG");
 
     await page.getByLabel("Email").fill(MONA.email);
     await page.getByLabel("Postal code").fill(MONA.postalCode);

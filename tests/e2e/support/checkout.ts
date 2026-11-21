@@ -11,7 +11,7 @@ export const MONA = {
   addressLine2: "Studio 4",
   city: "Delta Town",
   postalCode: "DT 1024",
-  country: "nilera",
+  country: "EG",
 };
 
 export type Shopper = typeof MONA;

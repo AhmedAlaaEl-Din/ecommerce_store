@@ -26,7 +26,7 @@ async function main() {
   await page.getByLabel("Street address").fill("12 Reed Lane");
   await page.getByLabel("Town or city").fill("Delta Town");
   await page.getByLabel("Postal code").fill("DT 1024");
-  await page.getByLabel("Country").selectOption("nilera");
+  await page.getByLabel("Country").selectOption("EG");
   await page.getByTestId("place-order").click();
   await page.waitForURL(/\/mock-pay\//);
   await page.screenshot({ path: `${OUT}/3-mock-pay.png`, fullPage: true });

@@ -75,7 +75,7 @@ test("axe: checkout (empty form, then with errors), mock pay and order pages", a
   await page.getByLabel("Street address").fill("12 Reed Lane");
   await page.getByLabel("Town or city").fill("Delta Town");
   await page.getByLabel("Postal code").fill("DT 1024");
-  await page.getByLabel("Country").selectOption("nilera");
+  await page.getByLabel("Country").selectOption("EG");
   await page.getByTestId("place-order").click();
   await expect(page).toHaveURL(/\/mock-pay\//);
   expect(await seriousViolations(page)).toEqual([]);
@@ -103,7 +103,7 @@ test("axe: checkout on a phone with the summary open, and the cancelled notice",
   await page.getByLabel("Street address").fill("12 Reed Lane");
   await page.getByLabel("Town or city").fill("Delta Town");
   await page.getByLabel("Postal code").fill("DT 1024");
-  await page.getByLabel("Country").selectOption("nilera");
+  await page.getByLabel("Country").selectOption("EG");
   await page.getByTestId("place-order").click();
   await expect(page).toHaveURL(/\/mock-pay\//);
   await page.getByTestId("mock-cancel").click();

@@ -30,7 +30,8 @@
     "orders:expire": "tsx scripts/expire-orders.ts",
     "review:shots:phase2": "tsx scripts/review-shots-phase2.ts",
     "frames:phase2": "tsx scripts/record-frames-phase2.ts",
-    "admin:create": "tsx scripts/admin-create.ts"
+    "admin:create": "tsx scripts/admin-create.ts",
+    "db:seed:history": "tsx prisma/seed-history.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",

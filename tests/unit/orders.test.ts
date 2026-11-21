@@ -3,6 +3,7 @@ import { cartTotals, FLAT_SHIPPING_CENTS, shippingCents } from "@/lib/cart/math"
 import type { Db } from "@/lib/db";
 import {
   COUNTRIES,
+  countryName,
   EMPTY_CHECKOUT_VALUES,
   readCheckoutForm,
   validateCheckout,
@@ -58,7 +59,7 @@ describe("checkout form validation", () => {
     addressLine2: "",
     city: "Delta Town",
     postalCode: "dt 1024",
-    country: "nilera",
+    country: "EG",
   };
 
   it("normalises valid input", () => {
@@ -72,7 +73,7 @@ describe("checkout form validation", () => {
         addressLine2: "",
         city: "Delta Town",
         postalCode: "DT 1024",
-        country: "nilera",
+        country: "EG",
       },
     });
   });
@@ -117,14 +118,12 @@ describe("checkout form validation", () => {
     expect("totalCents" in v).toBe(false);
   });
 
-  it("uses an invented country list", () => {
-    expect(COUNTRIES.map((c) => c.name)).toEqual([
-      "Nilera",
-      "Deltamar",
-      "Sahelia",
-      "Oasis Isles",
-      "Riverland",
-    ]);
+  it("uses a short list of real countries with ISO codes (Phase 3)", () => {
+    expect(COUNTRIES.map((c) => c.code)).toEqual(["EG", "AE", "SA", "GB", "DE", "FR", "US", "CA"]);
+    expect(COUNTRIES.map((c) => c.name)).toContain("United Arab Emirates");
+    // Orders placed with the Phase 2 invented countries still display a name.
+    expect(countryName("nilera")).toBe("Nilera (demo)");
+    expect(countryName("GB")).toBe("United Kingdom");
   });
 });
 

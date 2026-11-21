@@ -22,7 +22,7 @@ async function main() {
       addressLine2: "",
       city: "Delta Town",
       postalCode: "DT 1000",
-      country: "nilera",
+      country: "EG",
     },
   });
   process.stdout.write(JSON.stringify(r.ok ? { ok: true } : { ok: false, code: r.code }));

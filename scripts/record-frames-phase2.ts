@@ -127,7 +127,7 @@ async function quickFill(page: Page) {
   await page.getByLabel("Street address").fill("7 Papyrus Road");
   await page.getByLabel("Town or city").fill("Oasis Bay");
   await page.getByLabel("Postal code").fill("OB 2040");
-  await page.getByLabel("Country").selectOption("oasis-isles");
+  await page.getByLabel("Country").selectOption("AE");
 }
 
 async function story(page: Page, rec: Recorder, mobile: boolean) {
@@ -196,8 +196,8 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
     "DT 1024",
     2,
   );
-  await page.getByLabel("Country").selectOption("nilera");
-  await rec.snap("form", "Countries are invented, like everything else in the store.", 1.2);
+  await page.getByLabel("Country").selectOption("EG");
+  await rec.snap("form", "A short list of real countries; the customer and address are invented.", 1.2);
 
   // 4. Validation error, then the fix
   await page.getByTestId("place-order").click();

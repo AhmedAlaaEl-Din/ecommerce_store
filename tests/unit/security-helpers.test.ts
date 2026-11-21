@@ -63,7 +63,7 @@ describe("outbox email", () => {
     addressLine2: null,
     city: "Delta Town",
     postalCode: "DT 1024",
-    country: "nilera",
+    country: "EG",
     subtotalCents: 4400,
     shippingCents: 595,
     totalCents: 4995,
@@ -84,7 +84,7 @@ describe("outbox email", () => {
     expect(html).not.toContain("<b>Example</b>");
     expect(html).toContain("http://localhost:3000/order/tok");
     expect(html).toContain("$49.95");
-    expect(html).toContain("Nilera");
+    expect(html).toContain("Egypt");
     expect(html).toContain("Nothing was sent");
     expect(escapeHtml(`"'&`)).toBe("&quot;&#39;&amp;");
   });

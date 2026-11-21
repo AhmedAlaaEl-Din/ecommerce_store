@@ -4,7 +4,13 @@
  * whose buttons post signed events through the same webhook handler as Stripe.
  */
 import { randomBytes } from "node:crypto";
-import type { CheckoutSession, CheckoutSessionInput, PaymentProvider } from "./types";
+import type {
+  CheckoutSession,
+  CheckoutSessionInput,
+  PaymentProvider,
+  RefundInput,
+  RefundResult,
+} from "./types";
 
 export const MOCK_SESSION_PREFIX = "mock_cs_";
 export const MOCK_SESSION_ID_RE = /^mock_cs_[A-Za-z0-9_-]{20,64}$/;
@@ -28,5 +34,11 @@ export class MockProvider implements PaymentProvider {
 
   async cancelSession(): Promise<void> {
     // Nothing to do: a mock session cannot be paid once its order is no longer pending.
+  }
+
+  /** Mock refunds always succeed: the order is simply marked refunded. */
+  async refundPayment(input: RefundInput): Promise<RefundResult> {
+    void input;
+    return { refundId: "mock_re_" + randomBytes(12).toString("base64url") };
   }
 }

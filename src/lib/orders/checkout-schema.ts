@@ -1,21 +1,34 @@
 /**
- * Checkout form validation (server side). The country list is invented, like
- * everything else in this demo store.
+ * Checkout form validation (server side). Phase 3: a short list of real
+ * countries (ISO 3166-1 alpha-2 codes). Customers and addresses in the demo
+ * data stay invented.
  */
 import { z } from "zod";
 
 export const COUNTRIES = [
-  { code: "nilera", name: "Nilera" },
-  { code: "deltamar", name: "Deltamar" },
-  { code: "sahelia", name: "Sahelia" },
-  { code: "oasis-isles", name: "Oasis Isles" },
-  { code: "riverland", name: "Riverland" },
+  { code: "EG", name: "Egypt" },
+  { code: "AE", name: "United Arab Emirates" },
+  { code: "SA", name: "Saudi Arabia" },
+  { code: "GB", name: "United Kingdom" },
+  { code: "DE", name: "Germany" },
+  { code: "FR", name: "France" },
+  { code: "US", name: "United States" },
+  { code: "CA", name: "Canada" },
 ] as const;
 
 export type CountryCode = (typeof COUNTRIES)[number]["code"];
 
+/** Invented countries used by Phase 2 orders, so old orders still display a name. */
+const LEGACY_COUNTRIES: Record<string, string> = {
+  nilera: "Nilera (demo)",
+  deltamar: "Deltamar (demo)",
+  sahelia: "Sahelia (demo)",
+  "oasis-isles": "Oasis Isles (demo)",
+  riverland: "Riverland (demo)",
+};
+
 export function countryName(code: string): string {
-  return COUNTRIES.find((c) => c.code === code)?.name ?? code;
+  return COUNTRIES.find((c) => c.code === code)?.name ?? LEGACY_COUNTRIES[code] ?? code;
 }
 
 const text = (label: string, min: number, max: number) =>

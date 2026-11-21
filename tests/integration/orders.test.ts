@@ -27,7 +27,7 @@ const customer: CheckoutCustomer = {
   addressLine2: "",
   city: "Delta Town",
   postalCode: "DT 1024",
-  country: "nilera",
+  country: "EG",
 };
 
 const SECRET = "integration-test-secret";

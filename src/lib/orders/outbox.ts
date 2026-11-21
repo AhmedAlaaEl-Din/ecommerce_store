@@ -17,7 +17,7 @@ export function outboxDir(): string {
 }
 
 /** Only names we generate are ever read back (no path traversal). */
-export const OUTBOX_FILE_RE = /^NG-\d{4}-\d{6,}-\d{13}\.html$/;
+export const OUTBOX_FILE_RE = /^NG-\d{4}-\d{6,}-(?:shipped-|refund-)?\d{13}\.html$/;
 
 export function escapeHtml(s: string): string {
   return s
@@ -152,4 +152,72 @@ export async function readOutboxFile(name: string): Promise<string | null> {
   } catch {
     return null;
   }
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3: "Your order has shipped" and "Refund issued"
+// ---------------------------------------------------------------------------
+
+type NoticeOrder = {
+  orderNumber: string;
+  publicToken: string;
+  email: string;
+  customerName: string;
+  totalCents: number;
+  currency: string;
+  carrier: string | null;
+  trackingNumber: string | null;
+};
+
+export type NoticeKind = "shipped" | "refund";
+
+export function renderNoticeEmail(kind: NoticeKind, order: NoticeOrder, siteUrl: string): string {
+  const e = escapeHtml;
+  const firstName = order.customerName.split(" ")[0] ?? order.customerName;
+  const orderUrl = `${siteUrl.replace(/\/$/, "")}/order/${order.publicToken}`;
+  const title =
+    kind === "shipped"
+      ? `Your order ${order.orderNumber} has shipped`
+      : `Refund issued for order ${order.orderNumber}`;
+  const body =
+    kind === "shipped"
+      ? `<p style="margin:0 0 16px;color:#4b443c">Good news, ${e(firstName)}: your order <strong>${e(order.orderNumber)}</strong> is on its way.</p>
+  <table style="font-size:15px;border-collapse:collapse">
+    <tr><td style="padding:4px 16px 4px 0;color:#6b6257">Carrier</td><td style="padding:4px 0">${e(order.carrier ?? "")}</td></tr>
+    <tr><td style="padding:4px 16px 4px 0;color:#6b6257">Tracking number</td><td style="padding:4px 0">${e(order.trackingNumber ?? "")}</td></tr>
+  </table>`
+      : `<p style="margin:0 0 16px;color:#4b443c">Hi ${e(firstName)}, we have refunded <strong>${e(formatMoney(order.totalCents, order.currency))}</strong> for order <strong>${e(order.orderNumber)}</strong> (demo: mock or test mode, no real money).</p>
+  <p style="margin:0;color:#4b443c">Refunds usually show on your statement within 5 to 10 business days.</p>`;
+  return `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>${e(title)}</title>
+</head>
+<body style="margin:0;background:#f6f1ea;font-family:Arial,Helvetica,sans-serif;color:#1f2a24">
+<p style="margin:0;padding:8px 16px;background:#1f2a24;color:#fff;font-size:12px">Demo email written to a local file. Nothing was sent. To: ${e(order.email)}</p>
+<div style="max-width:560px;margin:24px auto;background:#fffdf9;border:1px solid #e7dfd3;border-radius:12px;padding:32px">
+  <p style="margin:0 0 4px;font-size:22px;font-weight:bold;font-family:Georgia,serif">Nile <span style="color:#a4522f;font-style:italic">Goods</span></p>
+  <h1 style="font-family:Georgia,serif;font-size:24px;margin:24px 0 12px">${e(title)}</h1>
+  ${body}
+  <p style="margin:32px 0 0"><a href="${e(orderUrl)}" style="display:inline-block;background:#2f5d50;color:#fff;text-decoration:none;padding:12px 20px;border-radius:8px">View your order</a></p>
+</div>
+</body>
+</html>
+`;
+}
+
+/** Writes a shipped/refund notice for an order. Returns the file name. */
+export async function writeNoticeEmail(db: Db, orderId: string, kind: NoticeKind): Promise<string> {
+  const order = await db.order.findUniqueOrThrow({ where: { id: orderId } });
+  const dir = outboxDir();
+  await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
+  const name = `${order.orderNumber}-${kind}-${Date.now()}.html`;
+  await writeFile(
+    join(/*turbopackIgnore: true*/ dir, name),
+    renderNoticeEmail(kind, order, appUrl()),
+    "utf8",
+  );
+  return name;
 }

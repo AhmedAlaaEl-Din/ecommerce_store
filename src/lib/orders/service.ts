@@ -13,12 +13,41 @@ import { randomBytes } from "node:crypto";
 import type { Db } from "../db";
 import { cartTotals, lineTotalCents } from "../cart/math";
 import type { ProviderName } from "../payments/config";
+import { applyStockChange, recordMovement } from "../inventory/stock";
 import type { CheckoutCustomer } from "./checkout-schema";
 
 export const RESERVATION_MINUTES = 30;
 
-export type OrderStatus = "pending_payment" | "paid" | "payment_failed" | "cancelled" | "expired";
-export type ReleaseStatus = Exclude<OrderStatus, "pending_payment" | "paid">;
+export type OrderStatus =
+  | "pending_payment"
+  | "paid"
+  | "payment_failed"
+  | "cancelled"
+  | "expired"
+  | "refunded";
+export type ReleaseStatus = Exclude<OrderStatus, "pending_payment" | "paid" | "refunded">;
+
+/** Phase 3: timeline entry for an order (shown in the admin). */
+export async function addOrderEvent(
+  tx: Pick<Tx, "orderEvent">,
+  e: { orderId: string; type: string; message: string; actorId?: string | null; now?: Date },
+) {
+  await tx.orderEvent.create({
+    data: {
+      orderId: e.orderId,
+      type: e.type,
+      message: e.message,
+      actorId: e.actorId ?? null,
+      ...(e.now ? { createdAt: e.now } : {}),
+    },
+  });
+}
+
+const RELEASE_MESSAGES: Record<ReleaseStatus, string> = {
+  payment_failed: "Payment declined; reserved stock released",
+  cancelled: "Order cancelled; reserved stock released",
+  expired: "Reservation expired; stock released",
+};
 
 type Tx = Parameters<Parameters<Db["$transaction"]>[0]>[0];
 
@@ -190,7 +219,7 @@ export async function createPendingOrder(
       const currency = lines[0]!.currency;
       const reservedUntil = new Date(now.getTime() + RESERVATION_MINUTES * 60_000);
 
-      return tx.order.create({
+      const created = await tx.order.create({
         data: {
           publicToken: newPublicToken(),
           orderNumber: await nextOrderNumber(tx, now),
@@ -223,6 +252,29 @@ export async function createPendingOrder(
         },
         include: { items: true },
       });
+      // Phase 3: stock history and timeline. The decrements above already ran in
+      // this transaction, so the current stock is the "after" value.
+      for (const item of created.items) {
+        const p = await tx.product.findUniqueOrThrow({
+          where: { id: item.productId },
+          select: { stock: true },
+        });
+        await recordMovement(tx, {
+          productId: item.productId,
+          delta: -item.quantity,
+          reason: "reservation",
+          stockAfter: p.stock,
+          orderId: created.id,
+          now,
+        });
+      }
+      await addOrderEvent(tx, {
+        orderId: created.id,
+        type: "created",
+        message: `Order placed; stock reserved for ${RESERVATION_MINUTES} minutes`,
+        now,
+      });
+      return created;
     }),
   );
 
@@ -321,11 +373,14 @@ export async function releaseOrderInTx(
     select: { productId: true, quantity: true },
   });
   for (const item of items) {
-    await tx.product.update({
-      where: { id: item.productId },
-      data: { stock: { increment: item.quantity } },
+    await applyStockChange(tx, {
+      productId: item.productId,
+      delta: item.quantity,
+      reason: "release",
+      orderId,
     });
   }
+  await addOrderEvent(tx, { orderId, type: to, message: RELEASE_MESSAGES[to] });
   return true;
 }
 
@@ -352,11 +407,14 @@ export async function markOrderPaidInTx(tx: Tx, orderId: string, now: Date): Pro
   if (order.status !== "pending_payment") {
     result = "paid_after_release";
     for (const item of order.items) {
-      const res = await tx.product.updateMany({
-        where: { id: item.productId, stock: { gte: item.quantity } },
-        data: { stock: { decrement: item.quantity } },
+      const after = await applyStockChange(tx, {
+        productId: item.productId,
+        delta: -item.quantity,
+        reason: "sale",
+        orderId,
+        note: "Payment arrived after the reservation was released",
       });
-      if (res.count !== 1) result = "paid_oversold";
+      if (after === null) result = "paid_oversold";
     }
   }
   await tx.order.update({
@@ -367,6 +425,17 @@ export async function markOrderPaidInTx(tx: Tx, orderId: string, now: Date): Pro
       // Flag late/oversold payments for manual follow-up.
       fulfilmentNote: result === "paid" ? null : result,
     },
+  });
+  await addOrderEvent(tx, {
+    orderId,
+    type: "paid",
+    message:
+      result === "paid"
+        ? "Payment received"
+        : result === "paid_after_release"
+          ? "Payment received after the reservation expired; stock taken again"
+          : "Payment received after the reservation expired; stock was short (needs follow-up)",
+    now,
   });
   if (order.cartId) {
     // Remove only what was bought: items added to the cart after checkout stay.

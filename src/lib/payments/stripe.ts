@@ -11,7 +11,13 @@
  * the network.
  */
 import Stripe from "stripe";
-import type { CheckoutSession, CheckoutSessionInput, PaymentProvider } from "./types";
+import type {
+  CheckoutSession,
+  CheckoutSessionInput,
+  PaymentProvider,
+  RefundInput,
+  RefundResult,
+} from "./types";
 
 /** Stripe's minimum lifetime for a Checkout Session. */
 const MIN_SESSION_SECONDS = 30 * 60;
@@ -21,9 +27,15 @@ export type StripeCheckoutClient = {
     sessions: {
       create: Stripe["checkout"]["sessions"]["create"];
       expire: Stripe["checkout"]["sessions"]["expire"];
+      retrieve: Stripe["checkout"]["sessions"]["retrieve"];
     };
   };
+  refunds: {
+    create: Stripe["refunds"]["create"];
+  };
 };
+
+export class RefundError extends Error {}
 
 export function sessionExpiresAt(reservedUntil: Date, now = new Date()): number {
   const minimum = Math.floor(now.getTime() / 1000) + MIN_SESSION_SECONDS + 60;
@@ -79,5 +91,32 @@ export class StripeProvider implements PaymentProvider {
     } catch {
       // Already completed or expired: nothing to do.
     }
+  }
+
+  /**
+   * Full refund of the session's PaymentIntent. The amount is checked against
+   * what Stripe says was paid, and the idempotency key is per order, so a
+   * double click or a retry can never refund twice.
+   */
+  async refundPayment(input: RefundInput): Promise<RefundResult> {
+    const session = await this.client.checkout.sessions.retrieve(input.sessionId);
+    const pi =
+      typeof session.payment_intent === "string"
+        ? session.payment_intent
+        : session.payment_intent?.id;
+    if (!pi || session.payment_status !== "paid") {
+      throw new RefundError("This Stripe session has no completed payment to refund.");
+    }
+    if (
+      session.amount_total !== input.amountCents ||
+      session.currency?.toLowerCase() !== input.currency.toLowerCase()
+    ) {
+      throw new RefundError("The amount Stripe holds does not match the order total.");
+    }
+    const refund = await this.client.refunds.create(
+      { payment_intent: pi, metadata: { orderId: input.orderId } },
+      { idempotencyKey: `refund-${input.orderId}` },
+    );
+    return { refundId: refund.id };
   }
 }

@@ -27,9 +27,22 @@ export type CheckoutSession = {
   redirectUrl: string;
 };
 
+/** Phase 3: full refunds only. */
+export type RefundInput = {
+  orderId: string;
+  /** The provider's checkout session id stored on the order. */
+  sessionId: string;
+  amountCents: number;
+  currency: string;
+};
+
+export type RefundResult = { refundId: string };
+
 export interface PaymentProvider {
   readonly name: ProviderName;
   createCheckoutSession(input: CheckoutSessionInput): Promise<CheckoutSession>;
   /** Best-effort: stop a session that should no longer be paid (e.g. after cancel). */
   cancelSession(sessionId: string): Promise<void>;
+  /** Refunds the full amount paid for the session. Idempotent per order. */
+  refundPayment(input: RefundInput): Promise<RefundResult>;
 }
