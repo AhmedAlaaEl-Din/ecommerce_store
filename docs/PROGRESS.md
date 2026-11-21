@@ -6,7 +6,7 @@
 - [x] 4. Design tokens and base components
 - [x] 5. Layout (header, mobile menu, footer), home page
 - [x] 6. Catalog with filters, search, sort, pagination
-- [ ] 7. Product page and 404
+- [x] 7. Product page and 404
 - [ ] 8. Cart (server, cookie, actions, toasts, undo)
 - [ ] 9. Unit and integration tests
 - [ ] 10. E2E and axe tests, `npm run verify` passes
@@ -25,6 +25,7 @@
 - 4: Tokens in globals.css (@theme inline -> bg-surface, text-muted, bg-primary...). UI kit in src/components/ui (Button/ButtonLink, Input, Select, Badge, Price, QuantityStepper, Skeleton, Toast provider, EmptyState, Breadcrumbs, Pagination) + ProductCard. Light theme only by design.
 - 5: Root layout (fonts, skip link, cart-count + toast providers), sticky header w/ scroll shadow, native <dialog> mobile menu w/ focus trap, footer, home (hero collage, category tiles, featured excl. sale, trust strip, sale row), /info page for footer links. Cart service + cookie helpers already written (src/lib/cart).
 - 6: /products: zod-parsed URL state (category,q,sort,page; bad values fall back), debounced search, chips + sort select (desktop), bottom-sheet dialog (mobile), result count, empty state w/ reset, skeletons via shared transition + loading.tsx, 12/page pagination. Note: SQLite `contains` is case-insensitive (ASCII); Postgres in Phase 4 needs mode:"insensitive".
+- 7: /products/[slug] (breadcrumbs, big image, price+sale, stock badge, stepper, AddToCart, benefits, related) + OG/twitter meta; real 404 verified via curl for unknown/invalid slugs and made-up URLs. Catalog moved into route group products/(catalog) so its loading.tsx does not wrap [slug] (would stream 200 before notFound). Friendly error.tsx. Cart server actions (src/app/actions/cart.ts) written here for AddToCart.
 
 ## Needed permissions
 
