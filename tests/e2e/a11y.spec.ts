@@ -1,5 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
+import { ADMIN_STATE, STAFF_STATE } from "./support/admin";
 
 async function seriousViolations(page: Page) {
   const results = await new AxeBuilder({ page })
@@ -109,4 +110,85 @@ test("axe: checkout on a phone with the summary open, and the cancelled notice",
   await page.getByTestId("mock-cancel").click();
   await expect(page.getByTestId("checkout-notice")).toBeVisible();
   expect(await seriousViolations(page)).toEqual([]);
+});
+
+// ---------------------------------------------------------------------------
+// Phase 3: the admin
+// ---------------------------------------------------------------------------
+test("axe: admin login page", async ({ page }) => {
+  await page.goto("/admin/login");
+  expect(await seriousViolations(page)).toEqual([]);
+  await page.getByTestId("login-submit").click(); // empty submit shows the error box
+  await expect(page.getByTestId("login-error")).toBeVisible();
+  expect(await seriousViolations(page)).toEqual([]);
+});
+
+test.describe("admin pages (signed in as admin)", () => {
+  test.use({ storageState: ADMIN_STATE });
+
+  const adminPages = [
+    { name: "dashboard", path: "/admin" },
+    { name: "orders list", path: "/admin/orders" },
+    { name: "orders filtered (empty)", path: "/admin/orders?q=no-such-order" },
+    { name: "products list", path: "/admin/products" },
+    { name: "new product form", path: "/admin/products/new" },
+    { name: "inventory", path: "/admin/inventory" },
+    { name: "categories", path: "/admin/categories" },
+    { name: "customers", path: "/admin/customers" },
+    { name: "users", path: "/admin/users" },
+    { name: "audit log", path: "/admin/audit" },
+  ];
+  for (const { name, path } of adminPages) {
+    test(`axe: admin ${name}`, async ({ page }) => {
+      await page.goto(path);
+      await page.waitForLoadState("networkidle");
+      expect(await seriousViolations(page)).toEqual([]);
+    });
+  }
+
+  test("axe: admin detail pages (order with refund dialog, product edit, stock history, packing slip)", async ({
+    page,
+  }) => {
+    await page.goto("/admin/orders?status=paid");
+    await page.getByTestId("order-row").first().getByRole("link").click();
+    await expect(page.getByTestId("timeline")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.getByTestId("refund-order-open").click();
+    await expect(page.getByTestId("refund-order")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.keyboard.press("Escape");
+    await page.getByTestId("packing-slip").evaluate((a) => a.removeAttribute("target"));
+    await page.getByTestId("packing-slip").click();
+    await expect(page.getByTestId("packing-slip-page")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+
+    await page.goto("/admin/products");
+    await page.getByTestId("product-row").first().getByRole("link").click();
+    await expect(page.getByTestId("product-save")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.getByRole("link", { name: "Stock history" }).click();
+    await expect(page.getByTestId("adjust-form")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+  });
+
+  test("axe: admin form errors and the mobile drawer", async ({ page }) => {
+    await page.goto("/admin/products/new");
+    await page.getByTestId("product-save").click();
+    await expect(page.getByTestId("form-error")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/admin");
+    await page.getByTestId("admin-menu-button").click();
+    await expect(page.getByTestId("admin-drawer")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+  });
+});
+
+test.describe("admin 403 page (signed in as staff)", () => {
+  test.use({ storageState: STAFF_STATE });
+  test("axe: admin forbidden page", async ({ page }) => {
+    await page.goto("/admin/users");
+    await expect(page.getByTestId("forbidden")).toBeVisible();
+    expect(await seriousViolations(page)).toEqual([]);
+  });
 });

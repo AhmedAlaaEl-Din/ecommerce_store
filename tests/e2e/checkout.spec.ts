@@ -68,7 +68,9 @@ test.describe("checkout with the mock provider", () => {
     await expect(page.getByLabel("Full name")).toHaveValue("Omar Example");
     await expect(page.getByLabel("Country")).toHaveValue("EG");
     expect(await stockOf("reed-linen-cushion")).toBe(before);
-    await expect(page.getByTestId("cart-count")).toHaveText("1"); // cart kept
+    // Cart kept: the order summary still lists the item (the focused checkout
+    // layout has no cart badge since Phase 3).
+    await expect(page.getByTestId("checkout-summary")).toContainText("Reed Linen Cushion");
 
     // Trying again works.
     await expect(page.getByTestId("place-order")).toContainText("Try payment again");
@@ -275,4 +277,21 @@ test.describe("checkout guards", () => {
     await expect(page).toHaveURL(/\/order\//);
     await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
   });
+});
+
+test("checkout uses a focused layout: logo, secure note and back to cart only", async ({
+  page,
+}) => {
+  await addToCart(page, "sahel-salad-bowl");
+  await page.goto("/checkout");
+  const header = page.getByTestId("checkout-header");
+  await expect(header).toBeVisible();
+  await expect(header.getByTestId("secure-note")).toContainText("Secure checkout");
+  // No store navigation, search, cart badge or footer columns on the way to paying.
+  await expect(page.getByRole("navigation", { name: "Main" })).toHaveCount(0);
+  await expect(page.getByTestId("cart-count")).toHaveCount(0);
+  await expect(page.getByRole("searchbox")).toHaveCount(0);
+  await expect(header.getByRole("link")).toHaveCount(2); // back to cart + logo
+  await header.getByTestId("back-to-cart").click();
+  await expect(page).toHaveURL(/\/cart$/);
 });

@@ -23,6 +23,8 @@ const env = {
   MOCK_WEBHOOK_SECRET: randomBytes(32).toString("hex"),
   MOCK_WEBHOOK_DELAY_MS: process.env.MOCK_WEBHOOK_DELAY_MS ?? "1500",
   OUTBOX_DIR: process.env.OUTBOX_DIR ?? "var/outbox-e2e",
+  // Phase 3: uploaded product images go to a throwaway folder, not public/uploads.
+  UPLOADS_DIR: process.env.UPLOADS_DIR ?? "var/uploads-e2e",
   STRIPE_SECRET_KEY: "",
   STRIPE_WEBHOOK_SECRET: "",
 };
@@ -31,8 +33,11 @@ for (const suffix of ["", "-journal", "-wal", "-shm"]) {
   rmSync(join(root, "prisma", `e2e.db${suffix}`), { force: true });
 }
 rmSync(join(root, env.OUTBOX_DIR), { recursive: true, force: true });
+rmSync(join(root, env.UPLOADS_DIR), { recursive: true, force: true });
 execSync("npx prisma migrate deploy", { cwd: root, env, stdio: "pipe" });
 execSync("npx tsx prisma/seed.ts --reset-carts", { cwd: root, env, stdio: "inherit" });
+// Phase 3: invented order history for the admin (dashboard, fulfilment, refunds).
+execSync("npx tsx prisma/seed-history.ts", { cwd: root, env, stdio: "inherit" });
 
 if (!existsSync(join(root, ".next", "BUILD_ID"))) {
   execSync("npx next build", { cwd: root, env, stdio: "inherit" });
