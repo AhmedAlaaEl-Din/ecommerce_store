@@ -19,7 +19,10 @@
     "illustrations": "tsx scripts/generate-illustrations.ts",
     "test:unit": "vitest run --project unit",
     "test:integration": "vitest run --project integration",
-    "test": "vitest run"
+    "test": "vitest run",
+    "test:e2e": "playwright test --grep-invert \"axe:\"",
+    "test:axe": "playwright test tests/e2e/a11y.spec.ts --project=desktop",
+    "verify": "npm run lint && npm run typecheck && npm run test:unit && npm run test:integration && npm run build && npm run test:e2e && npm run test:axe"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.1",
