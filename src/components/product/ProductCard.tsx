@@ -29,7 +29,7 @@ export function ProductCard({
   const stock = getStockStatus(product.stock);
   const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
-    <article className="group relative flex flex-col" data-testid="product-card">
+    <article className="group relative flex w-full flex-col" data-testid="product-card">
       <div
         className="relative overflow-hidden rounded-lg"
         style={{ backgroundColor: product.category.accentColor }}
@@ -53,7 +53,7 @@ export function ProductCard({
         <p className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
           {product.category.name}
         </p>
-        <Heading className="font-sans text-base leading-6 font-semibold tracking-normal sm:text-lg sm:leading-7">
+        <Heading className="font-sans text-base leading-6 [text-wrap:pretty] font-semibold tracking-normal sm:text-lg sm:leading-7">
           <Link
             href={`/products/${product.slug}`}
             className="rounded-sm after:absolute after:inset-0 after:rounded-lg after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-primary"
