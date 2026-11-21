@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { CatalogControls } from "@/components/catalog/CatalogControls";
 import { CatalogNavProvider, CatalogResults } from "@/components/catalog/CatalogPending";
 import { ProductCard } from "@/components/product/ProductCard";
@@ -43,7 +44,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   ];
   if (category) crumbs.push({ label: category.name });
 
-  const heading = query.q ? "Search results" : category ? category.name : "All products";
+  const heading = query.q ? `Results for “${query.q}”` : category ? category.name : "All products";
   const from = result.total === 0 ? 0 : (result.page - 1) * PAGE_SIZE + 1;
   const to = Math.min(result.page * PAGE_SIZE, result.total);
 
@@ -53,9 +54,13 @@ export default async function ProductsPage({ searchParams }: Props) {
       <div className="mt-4 max-w-2xl">
         <h1 className="text-2xl sm:text-3xl">{heading}</h1>
         <p className="text-muted mt-2">
-          {category
-            ? category.description
-            : "Everything in the shop: quiet pieces for the home, tools for the kitchen, paper for the desk and bags for the road."}
+          {query.q
+            ? category
+              ? `Searching in ${category.name}.`
+              : "Searching every product by name."
+            : category
+              ? category.description
+              : "Everything in the shop: quiet pieces for the home, tools for the kitchen, paper for the desk and bags for the road."}
         </p>
       </div>
 
@@ -104,6 +109,21 @@ export default async function ProductsPage({ searchParams }: Props) {
                 <p>
                   Try a shorter search or another category. Our edit is small but carefully chosen.
                 </p>
+                <ul
+                  className="mt-4 flex flex-wrap justify-center gap-2"
+                  aria-label="Browse a category"
+                >
+                  {categories.map((c) => (
+                    <li key={c.slug}>
+                      <Link
+                        href={catalogHref({ category: c.slug })}
+                        className="border-line-strong/60 text-ink hover:border-ink inline-flex h-10 items-center rounded-full border px-4 text-sm font-medium"
+                      >
+                        {c.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
               </EmptyState>
             ) : (
               <ul className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">

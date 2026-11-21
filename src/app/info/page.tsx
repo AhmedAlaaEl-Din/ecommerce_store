@@ -42,21 +42,28 @@ const sections = [
 
 export default function InfoPage() {
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6 lg:pt-12">
-      <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Help & about" }]} />
-      <h1 className="mt-6 text-2xl sm:text-3xl">Help &amp; about</h1>
-      <p className="text-muted mt-3 text-lg">
-        Everything on this page is demo copy for a fictional shop.
-      </p>
-      <div className="divide-line border-line bg-surface mt-10 divide-y rounded-xl border">
-        {sections.map((s) => (
-          <section key={s.id} id={s.id} aria-labelledby={`${s.id}-heading`} className="p-6 sm:p-8">
-            <h2 id={`${s.id}-heading`} className="text-xl">
-              {s.title}
-            </h2>
-            <p className="text-muted mt-2">{s.body}</p>
-          </section>
-        ))}
+    <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-10 lg:pt-12">
+      <div className="max-w-3xl">
+        <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Help & about" }]} />
+        <h1 className="mt-6 text-2xl sm:text-3xl">Help &amp; about</h1>
+        <p className="text-muted mt-3 text-lg">
+          Everything on this page is demo copy for a fictional shop.
+        </p>
+        <div className="divide-line border-line bg-surface mt-10 divide-y rounded-xl border">
+          {sections.map((s) => (
+            <section
+              key={s.id}
+              id={s.id}
+              aria-labelledby={`${s.id}-heading`}
+              className="p-6 sm:p-8"
+            >
+              <h2 id={`${s.id}-heading`} className="text-xl">
+                {s.title}
+              </h2>
+              <p className="text-muted mt-2">{s.body}</p>
+            </section>
+          ))}
+        </div>
       </div>
     </div>
   );

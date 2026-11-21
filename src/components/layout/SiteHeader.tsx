@@ -38,7 +38,7 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
   return (
     <header
       className={cn(
-        "bg-surface/95 supports-[backdrop-filter]:bg-surface/85 sticky top-0 z-40 border-b backdrop-blur",
+        "bg-surface/98 supports-[backdrop-filter]:bg-surface/95 sticky top-0 z-40 border-b backdrop-blur",
         "ease-brand transition-[box-shadow,border-color] duration-200",
         scrolled ? "border-line shadow-2" : "border-transparent",
       )}
@@ -67,7 +67,11 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
         </Suspense>
 
         <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <form action="/products" role="search" className="hidden md:block">
+          <form
+            action="/products"
+            role="search"
+            className={cn("hidden", pathname !== "/products" && "md:block")}
+          >
             <label htmlFor="header-search" className="sr-only">
               Search products
             </label>

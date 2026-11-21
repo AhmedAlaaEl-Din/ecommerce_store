@@ -269,6 +269,13 @@ function CartLineRow({
 }
 
 function OrderSummary({ cart }: { cart: CartData }) {
+  const savings = cart.lines.reduce(
+    (sum, l) =>
+      l.compareAtCents != null && l.compareAtCents > l.priceCents
+        ? sum + (l.compareAtCents - l.priceCents) * l.quantity
+        : sum,
+    0,
+  );
   const progress = Math.min(
     100,
     Math.round((cart.subtotalCents / FREE_SHIPPING_THRESHOLD_CENTS) * 100),
@@ -317,6 +324,14 @@ function OrderSummary({ cart }: { cart: CartData }) {
             {formatMoney(cart.subtotalCents)}
           </dd>
         </div>
+        {savings > 0 && (
+          <div className="flex justify-between">
+            <dt className="text-muted">Sale savings</dt>
+            <dd className="text-accent font-medium tabular-nums" data-testid="savings">
+              −{formatMoney(savings)}
+            </dd>
+          </div>
+        )}
         <div className="flex justify-between">
           <dt className="text-muted">Shipping</dt>
           <dd className="font-medium tabular-nums" data-testid="shipping">

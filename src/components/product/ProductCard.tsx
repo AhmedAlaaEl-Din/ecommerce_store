@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 import { Badge } from "../ui/Badge";
 import { Price } from "../ui/Price";
 import { getSaleInfo, getStockStatus } from "@/lib/pricing";
@@ -41,7 +42,10 @@ export function ProductCard({
           height={600}
           unoptimized
           priority={priority}
-          className="ease-brand aspect-square h-auto w-full transition-transform duration-200 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
+          className={cn(
+            "ease-brand aspect-square h-auto w-full transition-transform duration-200 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100",
+            stock === "out" && "opacity-55 grayscale-[35%]",
+          )}
         />
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
           {sale.onSale && stock !== "out" && <Badge tone="sale">Sale −{sale.percentOff}%</Badge>}

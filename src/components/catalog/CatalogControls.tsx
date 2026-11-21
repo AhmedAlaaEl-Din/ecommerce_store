@@ -170,7 +170,7 @@ function SearchBox({ query, onSearch }: { query: CatalogQuery; onSearch: (q: str
           value={value}
           maxLength={80}
           autoComplete="off"
-          placeholder="Search products"
+          placeholder="Search"
           onChange={(e) => {
             setValue(e.target.value);
             schedule(e.target.value);

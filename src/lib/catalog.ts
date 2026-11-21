@@ -116,7 +116,7 @@ export async function getRelatedProducts(
   db: Db = defaultDb,
 ) {
   return db.product.findMany({
-    where: { isActive: true, categoryId, id: { not: productId } },
+    where: { isActive: true, categoryId, id: { not: productId }, stock: { gt: 0 } },
     orderBy: [{ stock: "desc" }, { createdAt: "desc" }],
     take: limit,
     select: productCardSelect,

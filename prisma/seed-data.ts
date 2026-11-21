@@ -27,7 +27,7 @@ export const SEED_EPOCH = new Date("2026-11-01T09:00:00.000Z");
 export const categories: SeedCategory[] = [
   {
     slug: "home",
-    name: "Home",
+    name: "Home & Living",
     description: "Quiet pieces that make a room feel lived in: ceramics, linen and warm light.",
     accentColor: "#E8D9C4",
   },

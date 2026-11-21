@@ -66,6 +66,7 @@ export default async function ProductPage({ params }: Props) {
     <div className="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-10 lg:pt-10">
       <Breadcrumbs
         items={[
+          { label: "Home", href: "/" },
           { label: "Shop", href: "/products" },
           { label: product.category.name, href: `/products?category=${product.category.slug}` },
           { label: product.name },

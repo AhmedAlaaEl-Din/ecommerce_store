@@ -13,7 +13,7 @@ type PriceProps = {
 const sizes = {
   sm: { now: "text-base", was: "text-sm" },
   md: { now: "text-lg", was: "text-sm" },
-  lg: { now: "text-2xl font-display", was: "text-lg" },
+  lg: { now: "text-[1.75rem] leading-9 tracking-tight", was: "text-lg" },
 };
 
 /** Price with sale display: accent current price and struck-through compare-at price. */

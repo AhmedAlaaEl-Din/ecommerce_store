@@ -104,7 +104,7 @@ function Hero() {
               Shop the collection
               <ArrowRightIcon size={18} />
             </ButtonLink>
-            <ButtonLink href="/products?category=kitchen" size="lg" variant="ghost">
+            <ButtonLink href="/products?category=kitchen" size="lg" variant="secondary">
               Explore the kitchen
             </ButtonLink>
           </div>
