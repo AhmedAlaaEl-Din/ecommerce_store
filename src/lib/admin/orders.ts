@@ -6,6 +6,7 @@ import type { Prisma } from "@/generated/prisma/client";
 import type { Db } from "../db";
 import { applyStockChange } from "../inventory/stock";
 import { logError } from "../log";
+import { countryName } from "../orders/checkout-schema";
 import { addOrderEvent, releaseOrderInTx } from "../orders/service";
 import type { PaymentProvider } from "../payments/types";
 import { assertCan, fail, type Actor } from "./actor";
@@ -140,7 +141,7 @@ export async function exportOrdersCsv(db: Db, actor: Actor, f: OrderFilters): Pr
       o.customerName,
       o.email,
       o.city,
-      o.country,
+      countryName(o.country),
       o.items.reduce((n, i) => n + i.quantity, 0),
       (o.subtotalCents / 100).toFixed(2),
       (o.shippingCents / 100).toFixed(2),

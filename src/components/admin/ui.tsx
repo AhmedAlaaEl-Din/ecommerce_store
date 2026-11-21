@@ -94,7 +94,7 @@ const FULFILMENT_TONES: Record<FulfilmentStatus, string> = {
   delivered: "bg-success/15 text-success",
 };
 
-const pill = "inline-flex items-center whitespace-nowrap rounded-sm px-2 py-0.5 text-xs font-semibold";
+const pill = "inline-flex items-center whitespace-nowrap rounded-sm px-2 py-0.5 font-sans text-xs font-semibold tracking-normal";
 
 export function PaymentBadge({ status }: { status: string }) {
   const s = status as PaymentStatus;
