@@ -370,7 +370,7 @@ function OrderSummary({ cart }: { cart: CartData }) {
         Checkout
       </ButtonLink>
       <p className="text-muted mt-3 text-center text-xs">
-        Demo store: payments run in test mode only. No real money is taken.
+        Demo store: mock or test-mode payments only. No real money is taken.
       </p>
     </aside>
   );

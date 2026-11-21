@@ -53,7 +53,7 @@ export default async function MockPayPage({ params, searchParams }: Props) {
   return (
     <div>
       <p
-        className="bg-accent px-4 py-3 text-center text-sm font-semibold text-white"
+        className="bg-ink px-4 py-3 text-center text-sm font-semibold text-white"
         data-testid="mock-banner"
       >
         Mock payment page. No real payment provider is used.
@@ -148,8 +148,7 @@ export default async function MockPayPage({ params, searchParams }: Props) {
           </div>
         </section>
         <p className="text-muted mt-4 text-center text-xs">
-          This page only exists while <code>PAYMENT_PROVIDER=mock</code>. With Stripe, shoppers see
-          Stripe’s hosted checkout instead.
+          Demo only: a real store would show a secure card form here (Stripe Checkout in test mode).
         </p>
       </div>
     </div>

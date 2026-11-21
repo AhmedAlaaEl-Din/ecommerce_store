@@ -63,9 +63,7 @@ test.describe("checkout with the mock provider", () => {
 
     await page.getByTestId("mock-decline").click();
     await expect(page).toHaveURL(/\/checkout\?order=.+&status=failed$/);
-    await expect(page.getByTestId("checkout-notice")).toContainText(
-      "Your payment didn’t go through.",
-    );
+    await expect(page.getByTestId("checkout-notice")).toContainText("Your payment was declined.");
     await expect(page.getByLabel("Email")).toHaveValue("omar@example.com");
     await expect(page.getByLabel("Full name")).toHaveValue("Omar Example");
     await expect(page.getByLabel("Country")).toHaveValue("nilera");
@@ -73,9 +71,25 @@ test.describe("checkout with the mock provider", () => {
     await expect(page.getByTestId("cart-count")).toHaveText("1"); // cart kept
 
     // Trying again works.
+    await expect(page.getByTestId("place-order")).toContainText("Try payment again");
     await page.getByTestId("place-order").click();
     await page.getByTestId("mock-pay").click();
     await expect(page.getByTestId("order-paid")).toBeVisible({ timeout: 15_000 });
+  });
+
+  test("going back and submitting again replaces the pending order (no double hold)", async ({
+    page,
+  }) => {
+    const before = await stockOf("felucca-weekender-duffel");
+    await addToCart(page, "felucca-weekender-duffel", 2);
+    await goToMockPay(page);
+    expect(await stockOf("felucca-weekender-duffel")).toBe(before - 2);
+    await page.goBack();
+    await expect(page).toHaveURL(/\/checkout$/);
+    await fillCheckout(page);
+    await page.getByTestId("place-order").click();
+    await expect(page).toHaveURL(/\/mock-pay\//);
+    expect(await stockOf("felucca-weekender-duffel")).toBe(before - 2);
   });
 
   test("cancel returns to the filled form and releases the stock", async ({ page }) => {
@@ -101,8 +115,11 @@ test.describe("checkout with the mock provider", () => {
     await expect(summary.getByRole("listitem")).toHaveCount(6);
     await expect(page.getByLabel("Email")).toHaveAttribute("aria-invalid", "true");
 
-    // Fix some fields, break one: typed values survive the round trip.
+    // Errors disappear as the fields are edited...
     await fillCheckout(page, { email: "mona@", postalCode: "!!" });
+    await expect(summary).toBeHidden();
+    await expect(page.getByLabel("Email")).not.toHaveAttribute("aria-invalid", "true");
+    // ...and the server checks again on submit; typed values survive the round trip.
     await page.getByTestId("place-order").click();
     await expect(summary.getByRole("listitem")).toHaveCount(2);
     await expect(page.locator("#checkout-email-error")).toHaveText(
@@ -161,8 +178,9 @@ test.describe("checkout with the mock provider", () => {
     await b.getByTestId("place-order").click();
     await expect(b).toHaveURL(/\/cart\?adjusted=/);
     await expect(b.getByTestId("stock-adjusted")).toContainText(
-      "Sorry, some items sold out while you were checking out.",
+      "Sorry, the Atlas Fountain Pen sold out while you were checking out.",
     );
+    await expect(b.getByTestId("cart-count")).toHaveCount(0); // badge matches the empty cart
     await expect(b.getByTestId("stock-adjusted")).toContainText(
       "Atlas Fountain Pen: sold out, removed",
     );

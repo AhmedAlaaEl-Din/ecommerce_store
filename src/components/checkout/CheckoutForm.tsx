@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
 import { placeOrderAction, type CheckoutState } from "@/app/checkout/actions";
 import type { CheckoutField, CheckoutValues } from "@/lib/orders/checkout-schema";
 import { AlertIcon, ShieldIcon } from "../icons";
@@ -18,6 +18,9 @@ const FIELD_ORDER: CheckoutField[] = [
   "country",
 ];
 
+/** Generic message the server sends with field errors (shown as the count instead). */
+const VALIDATION_MESSAGE = "Please check the highlighted fields.";
+
 const FIELD_LABELS: Record<CheckoutField, string> = {
   email: "Email",
   name: "Full name",
@@ -33,11 +36,14 @@ export function CheckoutForm({
   countries,
   totalLabel,
   providerNote,
+  retry = false,
 }: {
   initialValues: CheckoutValues;
   countries: ReadonlyArray<{ code: string; name: string }>;
   totalLabel: string;
   providerNote: string;
+  /** Coming back from a declined or cancelled payment. */
+  retry?: boolean;
 }) {
   const [state, formAction, pending] = useActionState<CheckoutState, FormData>(placeOrderAction, {
     values: initialValues,
@@ -47,8 +53,26 @@ export function CheckoutForm({
   const formRef = useRef<HTMLFormElement>(null);
   const summaryRef = useRef<HTMLDivElement>(null);
   const v = state.values;
-  const e = state.errors;
+
+  // Fields the shopper has changed since the last submit: their error is hidden
+  // straight away (the server validates again on the next submit).
+  const [edited, setEdited] = useState<{ attempt: number; fields: CheckoutField[] }>({
+    attempt: 0,
+    fields: [],
+  });
+  const editedNow = edited.attempt === state.attempt ? edited.fields : [];
+  const e: Partial<Record<CheckoutField, string>> = {};
+  for (const f of FIELD_ORDER) {
+    if (state.errors[f] && !editedNow.includes(f)) e[f] = state.errors[f];
+  }
   const errorFields = FIELD_ORDER.filter((f) => e[f]);
+  const showFormError = state.formError && state.formError !== VALIDATION_MESSAGE;
+
+  function onChange(event: FormEvent<HTMLFormElement>) {
+    const name = (event.target as HTMLInputElement).name as CheckoutField;
+    if (!state.errors[name] || editedNow.includes(name)) return;
+    setEdited({ attempt: state.attempt, fields: [...editedNow, name] });
+  }
 
   // After a failed submit, move focus to the error summary (or the form error).
   useEffect(() => {
@@ -64,11 +88,12 @@ export function CheckoutForm({
       ref={formRef}
       action={formAction}
       noValidate
+      onChange={onChange}
       className="flex flex-col gap-8"
       aria-describedby={state.formError ? "checkout-form-error" : undefined}
       data-testid="checkout-form"
     >
-      {(state.formError || errorFields.length > 0) && (
+      {(showFormError || errorFields.length > 0) && (
         <div
           ref={summaryRef}
           tabIndex={-1}
@@ -79,17 +104,21 @@ export function CheckoutForm({
         >
           <p className="flex items-center gap-2 font-semibold">
             <AlertIcon size={18} className="text-danger shrink-0" />
-            {state.formError ?? "Please check the highlighted fields."}
+            {showFormError
+              ? state.formError
+              : errorFields.length === 1
+                ? "Please check 1 field:"
+                : `Please check ${errorFields.length} fields:`}
           </p>
           {errorFields.length > 0 && (
-            <ul className="mt-2 ml-7 flex list-disc flex-col gap-1">
+            <ul className="mt-2 ml-7 flex flex-wrap gap-x-4 gap-y-1">
               {errorFields.map((f) => (
                 <li key={f}>
                   <a
                     href={`#checkout-${f}`}
-                    className="block min-h-6 py-0.5 underline underline-offset-4"
+                    className="inline-flex min-h-6 items-center underline underline-offset-4"
                   >
-                    {FIELD_LABELS[f]}: {e[f]}
+                    {FIELD_LABELS[f]}
                   </a>
                 </li>
               ))}
@@ -194,7 +223,9 @@ export function CheckoutForm({
           icon={<ShieldIcon size={18} />}
           data-testid="place-order"
         >
-          {pending ? "Reserving your items…" : `Continue to payment · ${totalLabel}`}
+          {pending
+            ? "Reserving your items…"
+            : `${retry ? "Try payment again" : "Continue to payment"} · ${totalLabel}`}
         </Button>
         <p className="text-muted text-center text-sm">{providerNote}</p>
       </div>

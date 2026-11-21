@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { CartCountSync } from "@/components/cart/CartCountSync";
 import { CartView } from "@/components/cart/CartView";
 import { AlertIcon } from "@/components/icons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -51,7 +52,9 @@ export default async function CartPage({ searchParams }: Props) {
           <AlertIcon size={20} className="text-danger mt-0.5 shrink-0" />
           <div className="text-sm">
             <p className="text-base font-semibold">
-              Sorry, some items sold out while you were checking out.
+              {adjusted.length === 1
+                ? `Sorry, the ${adjusted[0]!.name} sold out while you were checking out.`
+                : "Sorry, some items sold out while you were checking out."}
             </p>
             <p className="mt-1">We updated your cart to what we have left. Nothing was charged.</p>
             <ul className="mt-2 ml-4 list-disc">
@@ -65,6 +68,7 @@ export default async function CartPage({ searchParams }: Props) {
           </div>
         </div>
       )}
+      <CartCountSync count={cart.itemCount} />
       {/* key: remount with fresh server data whenever the cart contents differ */}
       <CartView
         key={cart.lines.map((l) => `${l.productId}:${l.quantity}`).join("|")}

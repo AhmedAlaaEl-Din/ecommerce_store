@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { CartCountSync } from "@/components/cart/CartCountSync";
+import { DemoRibbon } from "@/components/checkout/DemoRibbon";
 import { AlertIcon, ArrowRightIcon, CheckIcon } from "@/components/icons";
 import { OrderStatusPoller } from "@/components/order/OrderStatusPoller";
 import { ButtonLink } from "@/components/ui/Button";
@@ -33,16 +34,19 @@ export default async function OrderPage({ params }: Props) {
   const cartCount = order.status === "paid" ? await getCartItemCount(db, await readCartId()) : null;
 
   return (
-    <div className="mx-auto max-w-3xl px-4 pt-8 pb-4 sm:px-6 lg:pt-14">
-      {cartCount !== null && <CartCountSync count={cartCount} />}
-      {order.status === "paid" ? (
-        <Paid order={order} />
-      ) : order.status === "pending_payment" ? (
-        <Pending order={order} />
-      ) : (
-        <NotCompleted order={order} />
-      )}
-    </div>
+    <>
+      {order.provider === "mock" && <DemoRibbon />}
+      <div className="mx-auto max-w-3xl px-4 pt-8 pb-4 sm:px-6 lg:pt-14">
+        {cartCount !== null && <CartCountSync count={cartCount} />}
+        {order.status === "paid" ? (
+          <Paid order={order} />
+        ) : order.status === "pending_payment" ? (
+          <Pending order={order} />
+        ) : (
+          <NotCompleted order={order} />
+        )}
+      </div>
+    </>
   );
 }
 
@@ -59,6 +63,11 @@ function Pending({ order }: { order: OrderView }) {
         Thanks for your patience. We’re waiting for the payment provider to confirm order{" "}
         <strong className="text-ink whitespace-nowrap">{order.orderNumber}</strong>. This usually
         takes a few seconds, and this page updates by itself.
+      </p>
+      <p className="mt-4 text-sm">
+        Total{" "}
+        <strong className="tabular-nums">{formatMoney(order.totalCents, order.currency)}</strong> ·{" "}
+        {order.items.reduce((n, i) => n + i.quantity, 0)} item(s)
       </p>
       <OrderStatusPoller />
     </section>
@@ -81,8 +90,8 @@ function NotCompleted({ order }: { order: OrderView }) {
         {label}
       </h1>
       <p className="text-muted mt-2 max-w-prose">
-        Order {order.orderNumber} was not completed and nothing was charged. The items are back in
-        stock for everyone, and your cart is unchanged.
+        Order <span className="whitespace-nowrap">{order.orderNumber}</span> wasn’t completed.
+        Nothing was charged and your cart is saved.
       </p>
       <div className="mt-6 flex flex-wrap gap-3">
         <ButtonLink href={`/checkout?order=${order.publicToken}&status=${order.status}`} size="lg">
@@ -104,7 +113,7 @@ function Paid({ order }: { order: OrderView }) {
       <span className="bg-primary-soft text-success inline-flex size-14 items-center justify-center rounded-full">
         <CheckIcon size={28} />
       </span>
-      <p className="text-accent mt-5 text-xs font-semibold tracking-[0.12em] uppercase">
+      <p className="text-success mt-5 text-xs font-semibold tracking-[0.12em] uppercase">
         Order confirmed
       </p>
       <h1 id="order-heading" className="mt-1 text-2xl sm:text-4xl">
@@ -152,7 +161,12 @@ function Paid({ order }: { order: OrderView }) {
               </dd>
             </div>
             <div className="flex justify-between pt-1 text-base font-semibold">
-              <dt>Total paid</dt>
+              <dt>
+                Total paid{" "}
+                <span className="text-muted text-sm font-normal">
+                  ({order.provider === "mock" ? "mock payment" : "test mode"})
+                </span>
+              </dt>
               <dd className="tabular-nums" data-testid="order-total">
                 {m(order.totalCents)}
               </dd>
@@ -187,6 +201,16 @@ function Paid({ order }: { order: OrderView }) {
           </address>
         </section>
       </div>
+
+      <section aria-labelledby="next-heading" className="border-line mt-8 border-t pt-6 text-sm">
+        <h2 id="next-heading" className="font-sans text-base font-semibold tracking-normal">
+          What happens next
+        </h2>
+        <p className="text-muted mt-2 max-w-prose">
+          In a real store we would pack your order within two working days and email you a tracking
+          link. This is a demo, so nothing will ship. Keep this page’s link to see the order again.
+        </p>
+      </section>
 
       <div className="mt-8">
         <ButtonLink href="/products" size="lg">

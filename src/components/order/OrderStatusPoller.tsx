@@ -29,8 +29,8 @@ export function OrderStatusPoller() {
     return (
       <div className="mt-6 text-sm" data-testid="confirming-slow">
         <p>
-          This is taking longer than usual. Your payment may still be processing, and you don’t need
-          to pay again.
+          Still waiting? Your order is saved and you don’t need to pay again. This page can check
+          once more, or you can come back to it later.
         </p>
         <button
           type="button"

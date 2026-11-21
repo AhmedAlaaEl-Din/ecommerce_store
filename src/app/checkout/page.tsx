@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import { CheckoutForm } from "@/components/checkout/CheckoutForm";
-import { SummaryLines, SummaryTotalsList } from "@/components/checkout/CheckoutSummary";
+import {
+  SummaryFootnote,
+  SummaryLines,
+  SummaryTotalsList,
+} from "@/components/checkout/CheckoutSummary";
 import { DemoRibbon } from "@/components/checkout/DemoRibbon";
 import { AlertIcon, ChevronDownIcon, InfoIcon } from "@/components/icons";
 import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
@@ -31,18 +34,18 @@ type Props = PageProps<"/checkout">;
 const NOTICES = {
   failed: {
     tone: "error",
-    title: "Your payment didn’t go through.",
-    body: "Nothing was charged and your items are no longer on hold. Check your details and try again.",
+    title: "Your payment was declined.",
+    body: "Nothing was charged and your details are saved below. You can try the payment again.",
   },
   cancelled: {
     tone: "info",
     title: "Payment cancelled.",
-    body: "No money was taken. Your details are still here whenever you’re ready.",
+    body: "Nothing was charged. Your details are saved below whenever you’re ready.",
   },
   expired: {
     tone: "info",
     title: "Your payment session timed out.",
-    body: "We released the items we were holding. Your details are still here; try again when you’re ready.",
+    body: "Nothing was charged. Your details are saved below; try again when you’re ready.",
   },
 } as const;
 
@@ -98,6 +101,13 @@ export default async function CheckoutPage({ searchParams }: Props) {
     subtotalCents: cart.subtotalCents,
     shippingCents: cart.shippingCents,
     totalCents: cart.totalCents,
+    savingsCents: lines.reduce(
+      (sum, l) =>
+        l.compareAtCents != null && l.compareAtCents > l.priceCents
+          ? sum + (l.compareAtCents - l.priceCents) * l.quantity
+          : sum,
+      0,
+    ),
     currency,
   };
 
@@ -116,7 +126,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
 
         {notice && (
           <div
-            role="status"
+            role={notice.tone === "error" ? "alert" : "status"}
             data-testid="checkout-notice"
             className={
               notice.tone === "error"
@@ -156,6 +166,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
             <div className="border-line border-t px-4 pt-4 pb-4">
               <SummaryLines lines={summaryLines} currency={currency} />
               <SummaryTotalsList totals={totals} />
+              <SummaryFootnote />
             </div>
           </details>
 
@@ -164,9 +175,10 @@ export default async function CheckoutPage({ searchParams }: Props) {
               initialValues={initialValues}
               countries={COUNTRIES}
               totalLabel={total}
+              retry={notice !== null}
               providerNote={
                 mock
-                  ? "Next: a mock payment page (demo). No card details are needed."
+                  ? "Next: the mock payment page (demo). No card details are needed."
                   : "Next: Stripe’s secure checkout page in test mode. Use a Stripe test card."
               }
             />
@@ -182,15 +194,7 @@ export default async function CheckoutPage({ searchParams }: Props) {
             </h2>
             <SummaryLines lines={summaryLines} currency={currency} />
             <SummaryTotalsList totals={totals} />
-            <p className="text-muted mt-4 text-xs">
-              Prices and stock are checked again when you continue.{" "}
-              <Link
-                href="/cart"
-                className="text-primary font-semibold underline-offset-4 hover:underline"
-              >
-                Edit cart
-              </Link>
-            </p>
+            <SummaryFootnote />
           </aside>
         </div>
       </div>

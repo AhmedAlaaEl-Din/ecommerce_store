@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { formatMoney } from "@/lib/money";
 
 export type SummaryLine = {
@@ -15,6 +16,8 @@ export type SummaryTotals = {
   subtotalCents: number;
   shippingCents: number;
   totalCents: number;
+  /** Sale savings versus compare-at prices (0 when nothing is on sale). */
+  savingsCents: number;
   currency: string;
 };
 
@@ -35,9 +38,6 @@ export function SummaryLines({ lines, currency }: { lines: SummaryLine[]; curren
               unoptimized
               className="size-14"
             />
-            <span className="bg-ink absolute -top-0 -right-0 flex size-5 items-center justify-center rounded-bl-md text-[11px] font-semibold text-white tabular-nums">
-              {l.quantity}
-            </span>
           </span>
           <span className="min-w-0 flex-1 text-sm">
             <span className="block font-medium">{l.name}</span>
@@ -64,6 +64,14 @@ export function SummaryTotalsList({ totals }: { totals: SummaryTotals }) {
           {m(totals.subtotalCents)}
         </dd>
       </div>
+      {totals.savingsCents > 0 && (
+        <div className="flex justify-between">
+          <dt className="text-muted">Sale savings</dt>
+          <dd className="text-accent font-medium tabular-nums" data-testid="checkout-savings">
+            −{m(totals.savingsCents)}
+          </dd>
+        </div>
+      )}
       <div className="flex justify-between">
         <dt className="text-muted">Shipping</dt>
         <dd className="font-medium tabular-nums" data-testid="checkout-shipping">
@@ -77,5 +85,19 @@ export function SummaryTotalsList({ totals }: { totals: SummaryTotals }) {
         </dd>
       </div>
     </dl>
+  );
+}
+
+export function SummaryFootnote() {
+  return (
+    <p className="text-muted mt-4 flex flex-wrap items-center justify-between gap-x-3 text-sm">
+      Prices and stock are checked again when you continue.
+      <Link
+        href="/cart"
+        className="text-primary inline-flex min-h-11 items-center font-semibold underline-offset-4 hover:underline"
+      >
+        Edit cart
+      </Link>
+    </p>
   );
 }
