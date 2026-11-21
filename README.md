@@ -1,7 +1,8 @@
-# Nile Goods: demo store (Phase 1)
+# Nile Goods: demo store (Phases 1–2)
 
-A portfolio demo of a small home-goods shop: storefront, catalog and a server-side cart.
-**There are no real payments, orders or accounts.** The brand, products, prices and people are
+A portfolio demo of a small home-goods shop: storefront, catalog, a server-side cart and a full
+checkout with orders and payments. **Payments are mock (offline, the default) or Stripe in test mode
+only; no real money ever moves.** The brand, products, prices and people are
 invented, and every product image is a hand-made SVG in this repo.
 
 Design direction: **warm, calm, editorial, crafted** (see [docs/DESIGN.md](docs/DESIGN.md)).
@@ -11,6 +12,42 @@ Design direction: **warm, calm, editorial, crafted** (see [docs/DESIGN.md](docs/
 | Product page: added to cart (desktop)                                                                | Cart (mobile, 390 px)                                                                  |
 | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | ![Product page with the "Added to cart" toast and cart badge](docs/images/product-added-desktop.png) | ![Cart with three items and the order summary on a phone](docs/images/cart-mobile.png) |
+
+## What's in Phase 2: checkout, orders, payments
+
+- **Checkout** (`/checkout`):
+  - One page: contact (email) and shipping address, with correct `autocomplete` tokens. The country list
+    is invented.
+  - Validated on the server with zod. Errors appear in a summary and inline, clear as each field is fixed,
+    and the typed values are kept.
+  - The order summary sits on the right on desktop and is collapsible on top on phones.
+- **Stock reservation:**
+  - One database transaction re-reads prices, reserves stock with a conditional update (`stock >= qty`)
+    and creates a `pending_payment` order held for 30 minutes.
+  - If anything ran out, the shopper goes back to the cart with a clear message and adjusted quantities.
+  - A tested race between two processes guarantees only one shopper gets the last unit.
+- **Payments behind a `PaymentProvider` interface** (`src/lib/payments/`):
+  - `MockProvider` (default, fully offline): a clearly labelled `/mock-pay/[sessionId]` page with Pay,
+    Decline and Cancel.
+  - `StripeProvider`: Stripe Checkout (hosted page) in **test mode**. Line items come from the database
+    only, with a per-order idempotency key. Live keys are refused.
+  - Both finish through **one webhook handler** (`/api/webhooks/payments`). Signatures are verified on
+    the raw body (mock events are signed with the same Stripe helper), and duplicates are ignored via a
+    `ProcessedEvent` table.
+- **Orders:**
+  - Human-friendly numbers (`NG-2026-000123`). Orders are reachable only through an unguessable token
+    URL and are never indexed.
+  - The "Confirming your payment…" page polls every 2 s for up to 30 s.
+  - Decline or cancel returns to the filled-in form and releases the stock. `npm run orders:expire`
+    releases abandoned reservations.
+- **Confirmation "email":** written as an HTML file to `var/outbox/` (git-ignored) and viewable at
+  `/dev/outbox` in development. Nothing is ever sent.
+- **Security:**
+  - Server actions are Origin-checked.
+  - Token-bucket rate limits on checkout, mock pay and rejected webhook calls.
+  - Emails are masked in logs, and Prisma query arguments are never logged.
+
+See [docs/PHASE2_REPORT.md](docs/PHASE2_REPORT.md) and [docs/HOW_TO_TEST_PHASE2.md](docs/HOW_TO_TEST_PHASE2.md).
 
 ## What's in Phase 1
 
@@ -22,8 +59,8 @@ Design direction: **warm, calm, editorial, crafted** (see [docs/DESIGN.md](docs/
   add to cart with a loading state, toast and animated badge, and related products. Unknown or inactive
   products return a real HTTP 404.
 - **Cart** (`/cart`): stored on the server and keyed by a random id in an httpOnly, SameSite=Lax,
-  30-day cookie. Quantities update instantly, items can be removed with undo, there is a sticky order
-  summary, and the checkout button is disabled ("Checkout coming in Phase 2").
+  30-day cookie. Quantities update instantly, items can be removed with undo, and there is a sticky order
+  summary.
 - **Quality**: keyboard-friendly (skip link, focus rings, focus-trapped mobile menu), `prefers-reduced-motion`,
   44 px touch targets, axe-clean, security headers and a strict input-validation boundary (zod; prices are
   always read from the database).
@@ -31,7 +68,8 @@ Design direction: **warm, calm, editorial, crafted** (see [docs/DESIGN.md](docs/
 ## Stack
 
 Next.js 16 (App Router) · React 19 · TypeScript (strict) · Tailwind CSS 4 · Prisma 7 + SQLite
-(better-sqlite3 driver adapter; schema kept Postgres-friendly) · zod 4 · Vitest 5 · Playwright 1.65 +
+(better-sqlite3 driver adapter; schema kept Postgres-friendly) · zod 4 · Stripe Node SDK 23 (test mode,
+optional) · Vitest 5 · Playwright 1.65 +
 @axe-core/playwright · ESLint 9 + Prettier 3 · Fonts: Fraunces + DM Sans (SIL OFL, self-hosted by
 `next/font`). Exact versions: [docs/PHASE1_REPORT.md](docs/PHASE1_REPORT.md#2-versions).
 
@@ -60,8 +98,12 @@ copy .env.example .env
 npx playwright install chromium  # only needed for e2e tests, frames and Lighthouse
 npm run db:migrate               # creates prisma/dev.db
 npm run db:seed                  # 4 categories, 24 products (safe to re-run)
-npm run dev                      # http://localhost:3000
+npm run dev                      # http://localhost:3000 (mock payments)
 ```
+
+Payments default to the offline **mock** provider. A production build (`npm start`) refuses to run the
+mock unless `ALLOW_MOCK_PAYMENTS="true"` and `MOCK_WEBHOOK_SECRET` are set. To try Stripe test mode with
+your own sandbox keys, follow part 3 of [docs/HOW_TO_TEST_PHASE2.md](docs/HOW_TO_TEST_PHASE2.md).
 
 npm 11 may report that some packages have install scripts. The required ones (`better-sqlite3`,
 `prisma`, `@prisma/engines`, `esbuild`) are already approved in `package.json` under `allowScripts`.
@@ -71,12 +113,15 @@ npm 11 may report that some packages have install scripts. The required ones (`b
 | Command                                                       | What it does                                                                              |
 | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
 | `npm run dev` / `npm run build` / `npm start`                 | Dev server, production build, production server (localhost only)                          |
-| `npm run verify`                                              | Lint → typecheck → unit → integration → build → e2e → axe, in that order                  |
+| `npm run verify`                                              | Lint → typecheck → unit → integration → build → e2e → axe (74 / 65 / 35 / 15 tests)       |
 | `npm run lint` / `npm run typecheck`                          | ESLint (zero warnings) / `tsc --noEmit`                                                   |
 | `npm run test:unit` / `npm run test:integration`              | Vitest; integration uses its own `prisma/test.db`                                         |
 | `npm run test:e2e` / `npm run test:axe`                       | Playwright against `next build` + `next start` on port 3100 with a fresh `prisma/e2e.db`  |
 | `npm run db:migrate` / `npm run db:seed` / `npm run db:reset` | Database migrations, idempotent seed, full reset                                          |
 | `npm run db:prune-carts`                                      | Delete carts idle for over 30 days                                                        |
+| `npm run orders:expire`                                       | Release stock held by pending orders whose 30-minute reservation has passed               |
+| `npm run frames:phase2`                                       | Phase 2 demo frames (mock payments) + storyboard into `evidence/phase2/`                  |
+| `npm run review:shots:phase2`                                 | Review screenshots of every Phase 2 page/state (needs a running server on 3100)           |
 | `npm run review:shots`                                        | Review screenshots of every page at 390×844 and 1440×900 (needs a running server on 3100) |
 | `npm run frames`                                              | Demo video frames + storyboard into `evidence/phase1/` (starts its own server)            |
 | `npm run lighthouse`                                          | Lighthouse mobile preset, median of 3 runs (needs a running server on 3100)               |
@@ -93,14 +138,14 @@ public/products/   24 generated SVG illustrations
 scripts/           illustration generator, e2e server, frames, review shots, Lighthouse
 src/app/           routes (home, products, product, cart, info), server actions, error/404 pages
 src/components/    ui kit, layout, catalog, product and cart components
-src/lib/           data access, cart service, money/pricing maths, zod schemas
+src/lib/           data access, cart service, orders, payments (providers, webhook), zod schemas
 tests/             unit, integration (Vitest) and e2e + axe (Playwright)
 docs/              design system, reports, reviews, test guide
 ```
 
 ## Roadmap
 
-- **Phase 2**: checkout with Stripe in test mode (server-side totals, webhooks, order records).
+- **Phase 2** (done): checkout, orders, mock and Stripe test-mode payments, webhooks, outbox email.
 - **Phase 3**: admin (products, stock, orders) with authentication.
 - **Phase 4**: Docker + nginx + Postgres on Linux (HTTPS, `COOKIE_SECURE=true`, rate limiting,
   nonce-based CSP).
