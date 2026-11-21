@@ -5,7 +5,7 @@ export type Crumb = { label: string; href?: string };
 
 export function Breadcrumbs({ items }: { items: Crumb[] }) {
   return (
-    <nav aria-label="Breadcrumb" className="text-sm text-muted">
+    <nav aria-label="Breadcrumb" className="text-muted text-sm">
       <ol className="flex flex-wrap items-center gap-x-1">
         {items.map((item, i) => {
           const last = i === items.length - 1;
@@ -14,7 +14,7 @@ export function Breadcrumbs({ items }: { items: Crumb[] }) {
               {item.href && !last ? (
                 <Link
                   href={item.href}
-                  className="inline-flex min-h-11 items-center underline-offset-4 hover:text-ink hover:underline sm:min-h-6"
+                  className="hover:text-ink inline-flex min-h-11 items-center underline-offset-4 hover:underline sm:min-h-6"
                 >
                   {item.label}
                 </Link>

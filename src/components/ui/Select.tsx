@@ -31,7 +31,7 @@ export function Select({ label, hideLabel, options, className, id, ...props }: S
         </select>
         <ChevronDownIcon
           size={18}
-          className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted"
+          className="text-muted pointer-events-none absolute top-1/2 right-3 -translate-y-1/2"
         />
       </div>
     </div>

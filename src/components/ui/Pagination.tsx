@@ -33,7 +33,11 @@ export function Pagination({
   return (
     <nav aria-label="Pagination" className="flex items-center justify-center gap-1">
       {prev ? (
-        <Link href={hrefFor(prev)} className={cn(item, "hover:bg-sunken")} aria-label="Previous page">
+        <Link
+          href={hrefFor(prev)}
+          className={cn(item, "hover:bg-sunken")}
+          aria-label="Previous page"
+        >
           <ChevronLeftIcon size={18} />
         </Link>
       ) : (
@@ -53,10 +57,7 @@ export function Pagination({
                 href={hrefFor(p)}
                 aria-current={p === page ? "page" : undefined}
                 aria-label={`Page ${p}`}
-                className={cn(
-                  item,
-                  p === page ? "bg-ink text-white" : "text-ink hover:bg-sunken",
-                )}
+                className={cn(item, p === page ? "bg-ink text-white" : "text-ink hover:bg-sunken")}
               >
                 {p}
               </Link>

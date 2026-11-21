@@ -36,7 +36,7 @@ export function Input({
       </label>
       <div className="relative">
         {leadingIcon && (
-          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted">
+          <span className="text-muted pointer-events-none absolute inset-y-0 left-3 flex items-center">
             {leadingIcon}
           </span>
         )}
@@ -49,12 +49,12 @@ export function Input({
         />
       </div>
       {hint && !error && (
-        <p id={hintId} className="text-sm text-muted">
+        <p id={hintId} className="text-muted text-sm">
           {hint}
         </p>
       )}
       {error && (
-        <p id={errorId} className="text-sm text-danger">
+        <p id={errorId} className="text-danger text-sm">
           {error}
         </p>
       )}

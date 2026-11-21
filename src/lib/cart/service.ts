@@ -9,11 +9,7 @@ import { randomUUID } from "node:crypto";
 import type { Db } from "../db";
 import { cartTotals, clampQuantity, lineTotalCents } from "./math";
 
-export type CartErrorCode =
-  | "PRODUCT_NOT_FOUND"
-  | "OUT_OF_STOCK"
-  | "NOT_IN_CART"
-  | "CART_NOT_FOUND";
+export type CartErrorCode = "PRODUCT_NOT_FOUND" | "OUT_OF_STOCK" | "NOT_IN_CART" | "CART_NOT_FOUND";
 
 export type CartResult<T> = { ok: true; data: T } | { ok: false; code: CartErrorCode };
 
@@ -56,7 +52,9 @@ export async function getCart(db: Db, cartId: string | null): Promise<CartView> 
     include: {
       items: {
         orderBy: { id: "asc" },
-        include: { product: { include: { category: { select: { name: true, accentColor: true } } } } },
+        include: {
+          product: { include: { category: { select: { name: true, accentColor: true } } } },
+        },
       },
     },
   });

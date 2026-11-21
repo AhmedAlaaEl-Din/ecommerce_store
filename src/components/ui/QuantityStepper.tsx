@@ -35,7 +35,7 @@ export function QuantityStepper({
       role="group"
       aria-label={label}
       className={cn(
-        "inline-flex items-center overflow-hidden rounded-md border border-line-strong bg-surface",
+        "border-line-strong bg-surface inline-flex items-center overflow-hidden rounded-md border",
         size === "sm" && "sm:[&>button]:size-9",
         className,
       )}

@@ -54,7 +54,7 @@ export function AddToCart({
         <Button size="lg" fullWidth disabled data-testid="add-to-cart" className="sm:w-auto">
           Out of stock
         </Button>
-        <p className="text-sm text-muted">
+        <p className="text-muted text-sm">
           This one has sold out. Have a look at similar pieces below.
         </p>
       </div>
@@ -77,7 +77,7 @@ export function AddToCart({
         loading={pending}
         disabled={pending}
         icon={justAdded ? <CheckIcon size={20} /> : <BagIcon size={20} />}
-        className="w-full sm:w-auto sm:min-w-56 disabled:bg-primary disabled:text-white"
+        className="disabled:bg-primary w-full disabled:text-white sm:w-auto sm:min-w-56"
         data-testid="add-to-cart"
       >
         {pending ? "Adding…" : justAdded ? "Added" : "Add to cart"}

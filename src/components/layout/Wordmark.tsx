@@ -8,7 +8,7 @@ export function Wordmark({ className, onClick }: { className?: string; onClick?:
       href="/"
       onClick={onClick}
       className={cn(
-        "inline-flex min-h-11 items-center gap-1 font-display text-[1.375rem] leading-none font-semibold tracking-[-0.02em] text-ink",
+        "font-display text-ink inline-flex min-h-11 items-center gap-1 text-[1.375rem] leading-none font-semibold tracking-[-0.02em]",
         className,
       )}
       aria-label="Nile Goods, home"

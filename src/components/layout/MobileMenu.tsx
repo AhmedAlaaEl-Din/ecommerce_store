@@ -75,20 +75,20 @@ export function MobileMenu({
         if (e.target === ref.current) onClose(); // backdrop click
       }}
       className={cn(
-        "m-0 h-dvh max-h-none w-[min(22rem,88vw)] max-w-none bg-surface p-0 text-ink shadow-3",
+        "bg-surface text-ink shadow-3 m-0 h-dvh max-h-none w-[min(22rem,88vw)] max-w-none p-0",
         "backdrop:bg-ink/40 open:animate-drawer-in",
       )}
       data-testid="mobile-menu"
     >
       <div className="flex h-full flex-col">
-        <div className="flex h-16 items-center justify-between border-b border-line px-4">
+        <div className="border-line flex h-16 items-center justify-between border-b px-4">
           <Wordmark onClick={onClose} />
           <button
             type="button"
             data-autofocus
             onClick={onClose}
             aria-label="Close menu"
-            className="-mr-2 inline-flex size-11 items-center justify-center rounded-md hover:bg-sunken"
+            className="hover:bg-sunken -mr-2 inline-flex size-11 items-center justify-center rounded-md"
           >
             <CloseIcon size={22} />
           </button>
@@ -101,7 +101,7 @@ export function MobileMenu({
             </label>
             <SearchIcon
               size={18}
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+              className="text-muted pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
             />
             <input
               id="menu-search"
@@ -110,12 +110,12 @@ export function MobileMenu({
               placeholder="Search products"
               autoComplete="off"
               maxLength={80}
-              className={cn(fieldClasses, "rounded-full bg-background pl-9")}
+              className={cn(fieldClasses, "bg-background rounded-full pl-9")}
             />
           </form>
 
           <nav aria-label="Mobile">
-            <p className="px-3 pb-1 text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+            <p className="text-muted px-3 pb-1 text-xs font-semibold tracking-[0.08em] uppercase">
               Shop
             </p>
             <ul>
@@ -136,7 +136,7 @@ export function MobileMenu({
                 </li>
               ))}
             </ul>
-            <p className="mt-6 px-3 pb-1 text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+            <p className="text-muted mt-6 px-3 pb-1 text-xs font-semibold tracking-[0.08em] uppercase">
               More
             </p>
             <ul>
@@ -159,7 +159,7 @@ export function MobileMenu({
           </nav>
         </div>
 
-        <p className="border-t border-line px-6 py-4 text-sm text-muted">
+        <p className="border-line text-muted border-t px-6 py-4 text-sm">
           Demo store, portfolio project, no real orders.
         </p>
       </div>

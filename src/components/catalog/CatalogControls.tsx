@@ -27,7 +27,10 @@ export function CatalogControls({
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-end gap-3">
-        <SearchBox query={query} onSearch={(q) => navigate(withChanges(query, { q }), { replace: true })} />
+        <SearchBox
+          query={query}
+          onSearch={(q) => navigate(withChanges(query, { q }), { replace: true })}
+        />
         <div className="hidden md:block md:w-56">
           <Select
             label="Sort by"
@@ -49,7 +52,7 @@ export function CatalogControls({
         >
           Filters
           {activeFilters > 0 && (
-            <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary text-xs text-white">
+            <span className="bg-primary inline-flex size-5 items-center justify-center rounded-full text-xs text-white">
               {activeFilters}
             </span>
           )}
@@ -111,7 +114,7 @@ function CategoryChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex h-10 items-center rounded-full border px-4 text-sm font-medium transition-colors duration-150 ease-brand",
+        "ease-brand inline-flex h-10 items-center rounded-full border px-4 text-sm font-medium transition-colors duration-150",
         active
           ? "border-primary bg-primary text-white"
           : "border-line-strong/60 bg-surface text-ink hover:border-ink",
@@ -158,7 +161,7 @@ function SearchBox({ query, onSearch }: { query: CatalogQuery; onSearch: (q: str
       <div className="relative">
         <SearchIcon
           size={18}
-          className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+          className="text-muted pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
         />
         <input
           id="catalog-search"
@@ -179,7 +182,7 @@ function SearchBox({ query, onSearch }: { query: CatalogQuery; onSearch: (q: str
           <button
             type="button"
             aria-label="Clear search"
-            className="absolute top-1/2 right-0 inline-flex size-11 -translate-y-1/2 items-center justify-center text-muted hover:text-ink"
+            className="text-muted hover:text-ink absolute top-1/2 right-0 inline-flex size-11 -translate-y-1/2 items-center justify-center"
             onClick={() => {
               setValue("");
               window.clearTimeout(debounce.current);
@@ -233,7 +236,7 @@ function FilterSheet({
         onClose();
       }}
       onClick={(e) => e.target === ref.current && onClose()}
-      className="m-0 mt-auto max-h-[85dvh] w-full max-w-none rounded-t-xl bg-surface p-0 text-ink shadow-3 backdrop:bg-ink/40 open:animate-sheet-in"
+      className="bg-surface text-ink shadow-3 backdrop:bg-ink/40 open:animate-sheet-in m-0 mt-auto max-h-[85dvh] w-full max-w-none rounded-t-xl p-0"
       data-testid="filter-sheet"
     >
       <form
@@ -243,7 +246,7 @@ function FilterSheet({
           onApply(category, sort);
         }}
       >
-        <div className="flex items-center justify-between border-b border-line px-4 py-2">
+        <div className="border-line flex items-center justify-between border-b px-4 py-2">
           <h2 id="filter-sheet-title" className="text-xl">
             Filter &amp; sort
           </h2>
@@ -251,14 +254,14 @@ function FilterSheet({
             type="button"
             onClick={onClose}
             aria-label="Close filters"
-            className="-mr-2 inline-flex size-11 items-center justify-center rounded-md hover:bg-sunken"
+            className="hover:bg-sunken -mr-2 inline-flex size-11 items-center justify-center rounded-md"
           >
             <CloseIcon size={22} />
           </button>
         </div>
         <div className="flex-1 overflow-y-auto px-2 py-4">
           <fieldset>
-            <legend className="px-3 pb-2 text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+            <legend className="text-muted px-3 pb-2 text-xs font-semibold tracking-[0.08em] uppercase">
               Category
             </legend>
             <label className={optionClass}>
@@ -285,7 +288,7 @@ function FilterSheet({
             ))}
           </fieldset>
           <fieldset className="mt-6">
-            <legend className="px-3 pb-2 text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+            <legend className="text-muted px-3 pb-2 text-xs font-semibold tracking-[0.08em] uppercase">
               Sort by
             </legend>
             {SORT_OPTIONS.map((s) => (
@@ -302,7 +305,7 @@ function FilterSheet({
             ))}
           </fieldset>
         </div>
-        <div className="flex gap-3 border-t border-line p-4">
+        <div className="border-line flex gap-3 border-t p-4">
           <Button
             variant="secondary"
             className="flex-1"

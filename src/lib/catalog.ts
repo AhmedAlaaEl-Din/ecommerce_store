@@ -65,7 +65,9 @@ export async function getSaleProducts(limit = 4, db: Db = defaultDb) {
     orderBy: { createdAt: "desc" },
     select: productCardSelect,
   });
-  return rows.filter((p) => p.compareAtCents != null && p.compareAtCents > p.priceCents).slice(0, limit);
+  return rows
+    .filter((p) => p.compareAtCents != null && p.compareAtCents > p.priceCents)
+    .slice(0, limit);
 }
 
 const sortOrder: Record<CatalogQuery["sort"], Prisma.ProductOrderByWithRelationInput[]> = {

@@ -28,7 +28,10 @@ export function Price({
   const now = formatMoney(priceCents, currency);
   if (!sale.onSale) {
     return (
-      <p className={cn("font-semibold tabular-nums", sizes[size].now, className)} data-testid="price">
+      <p
+        className={cn("font-semibold tabular-nums", sizes[size].now, className)}
+        data-testid="price"
+      >
         {now}
       </p>
     );
@@ -42,7 +45,7 @@ export function Price({
       <span className="sr-only">
         Sale price {now}, was {was}.
       </span>
-      <span aria-hidden="true" className={cn("font-semibold text-accent", sizes[size].now)}>
+      <span aria-hidden="true" className={cn("text-accent font-semibold", sizes[size].now)}>
         {now}
       </span>
       <s aria-hidden="true" className={cn("text-muted", sizes[size].was)}>

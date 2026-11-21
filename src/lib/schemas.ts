@@ -9,11 +9,7 @@ export const productIdSchema = z
   .max(64)
   .regex(/^[a-z0-9]+$/i, "Invalid product id");
 
-export const quantitySchema = z.coerce
-  .number()
-  .int()
-  .min(1)
-  .max(MAX_QUANTITY_PER_LINE);
+export const quantitySchema = z.coerce.number().int().min(1).max(MAX_QUANTITY_PER_LINE);
 
 export const addToCartSchema = z.object({
   productId: productIdSchema,

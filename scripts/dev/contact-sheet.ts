@@ -5,9 +5,14 @@ import { join } from "node:path";
 
 async function main() {
   const dir = join(process.cwd(), "public", "products");
-  const files = readdirSync(dir).filter((f) => f.endsWith(".svg")).sort();
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith(".svg"))
+    .sort();
   const cells = files
-    .map((f) => `<figure><div>${readFileSync(join(dir, f), "utf8")}</div><figcaption>${f}</figcaption></figure>`)
+    .map(
+      (f) =>
+        `<figure><div>${readFileSync(join(dir, f), "utf8")}</div><figcaption>${f}</figcaption></figure>`,
+    )
     .join("");
   const html = `<html><body style="margin:0;font:12px sans-serif;display:grid;grid-template-columns:repeat(6,200px);gap:8px;padding:8px;background:#fff">${cells}<style>figure{margin:0}svg{width:200px;height:200px;display:block}</style></body></html>`;
   const browser = await chromium.launch();

@@ -3,7 +3,10 @@ export type SaleInfo =
   | { onSale: true; compareAtCents: number; savingsCents: number; percentOff: number };
 
 /** A product is on sale only when compare-at is set and strictly higher than the price. */
-export function getSaleInfo(priceCents: number, compareAtCents: number | null | undefined): SaleInfo {
+export function getSaleInfo(
+  priceCents: number,
+  compareAtCents: number | null | undefined,
+): SaleInfo {
   if (compareAtCents == null || compareAtCents <= priceCents || priceCents < 0) {
     return { onSale: false };
   }

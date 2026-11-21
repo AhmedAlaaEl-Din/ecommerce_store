@@ -18,22 +18,25 @@ export default async function HomePage() {
     <>
       <Hero />
 
-      <section aria-labelledby="categories-heading" className="mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:mt-28 lg:px-10">
+      <section
+        aria-labelledby="categories-heading"
+        className="mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:mt-28 lg:px-10"
+      >
         <SectionHeader eyebrow="Browse" title="Shop by room and ritual" id="categories-heading" />
         <ul className="mt-8 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4 lg:gap-6">
           {categories.map((c) => (
             <li key={c.slug}>
               <Link
                 href={`/products?category=${c.slug}`}
-                className="group relative flex h-full flex-col overflow-hidden rounded-lg p-4 transition-shadow duration-200 ease-brand hover:shadow-2 sm:p-5"
+                className="group ease-brand hover:shadow-2 relative flex h-full flex-col overflow-hidden rounded-lg p-4 transition-shadow duration-200 sm:p-5"
                 style={{ backgroundColor: c.accentColor }}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="text-xl">{c.name}</h3>
-                    <p className="text-sm text-ink/75">{c.productCount} products</p>
+                    <p className="text-ink/75 text-sm">{c.productCount} products</p>
                   </div>
-                  <span className="hidden size-9 shrink-0 items-center justify-center rounded-full bg-surface/70 transition-transform duration-200 ease-brand group-hover:translate-x-0.5 sm:inline-flex">
+                  <span className="bg-surface/70 ease-brand hidden size-9 shrink-0 items-center justify-center rounded-full transition-transform duration-200 group-hover:translate-x-0.5 sm:inline-flex">
                     <ArrowRightIcon size={18} />
                   </span>
                 </div>
@@ -44,10 +47,10 @@ export default async function HomePage() {
                     width={600}
                     height={600}
                     unoptimized
-                    className="mx-auto mt-2 aspect-square w-full max-w-56 transition-transform duration-200 ease-brand group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
+                    className="ease-brand mx-auto mt-2 aspect-square w-full max-w-56 transition-transform duration-200 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
                   />
                 )}
-                <p className="mt-2 hidden text-sm text-ink/80 sm:block">{c.description}</p>
+                <p className="text-ink/80 mt-2 hidden text-sm sm:block">{c.description}</p>
               </Link>
             </li>
           ))}
@@ -86,13 +89,13 @@ function Hero() {
     <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-10 lg:pt-14">
       <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.05fr] lg:gap-16">
         <div className="max-w-xl">
-          <p className="text-xs font-semibold tracking-[0.12em] text-accent uppercase">
+          <p className="text-accent text-xs font-semibold tracking-[0.12em] uppercase">
             The autumn edit · New in
           </p>
           <h1 className="mt-4 text-[2.5rem] leading-[1.08] sm:text-3xl sm:leading-[1.1] lg:text-[3.5rem]">
             Well-made things for slow, everyday living
           </h1>
-          <p className="mt-5 text-lg text-muted">
+          <p className="text-muted mt-5 text-lg">
             Ceramics, linen, paper and bags from small workshops, chosen to be used every day and
             kept for years.
           </p>
@@ -151,8 +154,8 @@ function HeroArt() {
           />
         </div>
       </div>
-      <div className="absolute -bottom-5 left-4 flex items-center gap-3 rounded-lg border border-line bg-surface px-4 py-3 shadow-2 sm:left-6">
-        <span className="inline-flex size-9 items-center justify-center rounded-full bg-accent-soft text-accent">
+      <div className="border-line bg-surface shadow-2 absolute -bottom-5 left-4 flex items-center gap-3 rounded-lg border px-4 py-3 sm:left-6">
+        <span className="bg-accent-soft text-accent inline-flex size-9 items-center justify-center rounded-full">
           <span className="font-display text-lg leading-none">24</span>
         </span>
         <span className="text-sm">
@@ -180,7 +183,7 @@ function SectionHeader({
   return (
     <div className="flex items-end justify-between gap-4">
       <div>
-        <p className="text-xs font-semibold tracking-[0.12em] text-accent uppercase">{eyebrow}</p>
+        <p className="text-accent text-xs font-semibold tracking-[0.12em] uppercase">{eyebrow}</p>
         <h2 id={id} className="mt-2 text-xl sm:text-2xl">
           {title}
         </h2>
@@ -188,7 +191,7 @@ function SectionHeader({
       {href && linkLabel && (
         <Link
           href={href}
-          className="inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold text-primary underline-offset-4 hover:underline"
+          className="text-primary inline-flex min-h-11 shrink-0 items-center gap-1 text-sm font-semibold underline-offset-4 hover:underline"
         >
           {linkLabel}
           <ArrowRightIcon size={16} />
@@ -234,20 +237,31 @@ function ProductRow({
 function TrustStrip() {
   const items = [
     { icon: <TruckIcon size={22} />, title: "Free shipping over $50", text: "Flat $6 below that." },
-    { icon: <ReturnIcon size={22} />, title: "30-day returns", text: "Changed your mind? Send it back." },
-    { icon: <ShieldIcon size={22} />, title: "Secure checkout", text: "Encrypted, card details never stored." },
+    {
+      icon: <ReturnIcon size={22} />,
+      title: "30-day returns",
+      text: "Changed your mind? Send it back.",
+    },
+    {
+      icon: <ShieldIcon size={22} />,
+      title: "Secure checkout",
+      text: "Encrypted, card details never stored.",
+    },
   ];
   return (
-    <section aria-label="Our promises" className="mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:mt-28 lg:px-10">
-      <ul className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
+    <section
+      aria-label="Our promises"
+      className="mx-auto mt-20 max-w-7xl px-4 sm:px-6 lg:mt-28 lg:px-10"
+    >
+      <ul className="border-line bg-line grid gap-px overflow-hidden rounded-xl border sm:grid-cols-3">
         {items.map((i) => (
-          <li key={i.title} className="flex items-center gap-4 bg-surface px-5 py-5 sm:px-6">
-            <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+          <li key={i.title} className="bg-surface flex items-center gap-4 px-5 py-5 sm:px-6">
+            <span className="bg-primary-soft text-primary inline-flex size-11 shrink-0 items-center justify-center rounded-full">
               {i.icon}
             </span>
             <span>
               <span className="block font-semibold">{i.title}</span>
-              <span className="text-sm text-muted">{i.text}</span>
+              <span className="text-muted text-sm">{i.text}</span>
             </span>
           </li>
         ))}

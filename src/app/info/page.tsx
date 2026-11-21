@@ -45,16 +45,16 @@ export default function InfoPage() {
     <div className="mx-auto max-w-3xl px-4 pt-8 sm:px-6 lg:pt-12">
       <Breadcrumbs items={[{ label: "Home", href: "/" }, { label: "Help & about" }]} />
       <h1 className="mt-6 text-2xl sm:text-3xl">Help &amp; about</h1>
-      <p className="mt-3 text-lg text-muted">
+      <p className="text-muted mt-3 text-lg">
         Everything on this page is demo copy for a fictional shop.
       </p>
-      <div className="mt-10 divide-y divide-line rounded-xl border border-line bg-surface">
+      <div className="divide-line border-line bg-surface mt-10 divide-y rounded-xl border">
         {sections.map((s) => (
           <section key={s.id} id={s.id} aria-labelledby={`${s.id}-heading`} className="p-6 sm:p-8">
             <h2 id={`${s.id}-heading`} className="text-xl">
               {s.title}
             </h2>
-            <p className="mt-2 text-muted">{s.body}</p>
+            <p className="text-muted mt-2">{s.body}</p>
           </section>
         ))}
       </div>

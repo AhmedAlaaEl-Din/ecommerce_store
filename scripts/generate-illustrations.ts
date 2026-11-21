@@ -116,8 +116,7 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
     category: "home",
     shadow: 170,
     draw: () => {
-      const d =
-        "M190 250 Q300 226 410 250 Q432 350 410 450 Q300 474 190 450 Q168 350 190 250 Z";
+      const d = "M190 250 Q300 226 410 250 Q432 350 410 450 Q300 474 190 450 Q168 350 190 250 Z";
       const id = `${idPrefix}-c${++clipId}`;
       return (
         solid(`<path d="${d}"/>`, P.sand) +
@@ -142,7 +141,12 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
       flat(`<rect x="214" y="352" width="172" height="58"/>`, P.sand) +
       flat(`<circle cx="300" cy="381" r="14"/>`, P.clay) +
       stroke("M300 298 L300 268", P.ink, 4) +
-      solid(`<path d="M300 210 C318 236 316 262 300 268 C284 262 282 236 300 210 Z"/>`, P.mustard, 304, false) +
+      solid(
+        `<path d="M300 210 C318 236 316 262 300 268 C284 262 282 236 300 210 Z"/>`,
+        P.mustard,
+        304,
+        false,
+      ) +
       flat(`<path d="M300 236 C307 248 306 260 300 263 C294 260 293 248 300 236 Z"/>`, P.cream),
   },
   "oasis-stoneware-planter": {
@@ -179,8 +183,16 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
     shadow: 160,
     draw: () =>
       stroke("M378 330 C462 318 466 446 396 444", P.ink, 16) +
-      solid(`<path d="M214 444 C130 396 150 320 116 288 L128 278 C170 312 162 384 228 410 Z"/>`, P.ink, 600, false) +
-      solid(`<path d="M196 470 L404 470 C404 360 372 296 300 296 C228 296 196 360 196 470 Z"/>`, P.clay) +
+      solid(
+        `<path d="M214 444 C130 396 150 320 116 288 L128 278 C170 312 162 384 228 410 Z"/>`,
+        P.ink,
+        600,
+        false,
+      ) +
+      solid(
+        `<path d="M196 470 L404 470 C404 360 372 296 300 296 C228 296 196 360 196 470 Z"/>`,
+        P.clay,
+      ) +
       flat(`<ellipse cx="300" cy="300" rx="62" ry="12"/>`, P.clayDark) +
       flat(`<circle cx="300" cy="282" r="14"/>`, P.ink) +
       flat(`<rect x="196" y="452" width="208" height="18" rx="4"/>`, P.clayDark),
@@ -215,7 +227,12 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
         P.wood,
       ) +
       flat(`<circle cx="300" cy="170" r="12"/>`, "#D9E4D6") +
-      stroke("M222 260 C262 280 252 330 290 350 C330 372 340 420 378 432", P.clayDark, 4, `opacity="0.45"`) +
+      stroke(
+        "M222 260 C262 280 252 330 290 350 C330 372 340 420 378 432",
+        P.clayDark,
+        4,
+        `opacity="0.45"`,
+      ) +
       stroke("M244 236 C270 252 282 268 300 300", P.clayDark, 3, `opacity="0.35"`) +
       stroke("M336 250 C346 300 380 320 384 360", P.clayDark, 3, `opacity="0.35"`) +
       stroke("M258 408 L346 300", P.greenDark, 4) +
@@ -242,7 +259,12 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
     shadow: 140,
     draw: () =>
       stroke("M402 340 C470 336 470 430 404 426", P.clayDark, 16) +
-      solid(`<path d="M206 400 C164 380 160 330 132 318 L140 304 C182 316 190 360 222 370 Z"/>`, P.cream, 600, false) +
+      solid(
+        `<path d="M206 400 C164 380 160 330 132 318 L140 304 C182 316 190 360 222 370 Z"/>`,
+        P.cream,
+        600,
+        false,
+      ) +
       solid(`<ellipse cx="304" cy="390" rx="118" ry="82"/>`, P.cream) +
       flat(`<path d="M230 322 Q304 286 378 322 Z"/>`, P.clay) +
       flat(`<ellipse cx="304" cy="318" rx="66" ry="12"/>`, P.clay) +
@@ -302,17 +324,17 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
       flat(`<rect x="186" y="236" width="234" height="22"/>`, P.clay) +
       [0, 1, 2, 3]
         .map((r) =>
-          [0, 1, 2, 3, 4].map(
-            (c) =>
-              `<rect x="${206 + c * 40}" y="${282 + r * 44}" width="30" height="32" rx="5" fill="${
-                r === 1 && c === 2 ? P.green : P.creamDark
-              }"/>`,
-          ).join(""),
+          [0, 1, 2, 3, 4]
+            .map(
+              (c) =>
+                `<rect x="${206 + c * 40}" y="${282 + r * 44}" width="30" height="32" rx="5" fill="${
+                  r === 1 && c === 2 ? P.green : P.creamDark
+                }"/>`,
+            )
+            .join(""),
         )
         .join("") +
-      [0, 1, 2, 3, 4, 5, 6]
-        .map((i) => stroke(`M${214 + i * 30} 182 v34`, P.ink, 6))
-        .join(""),
+      [0, 1, 2, 3, 4, 5, 6].map((i) => stroke(`M${214 + i * 30} 182 v34`, P.ink, 6)).join(""),
   },
   "meridian-desk-tray": {
     category: "stationery",
@@ -380,7 +402,10 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
     draw: () =>
       stroke("M276 186 C276 156 324 156 324 186", P.greenDark, 10) +
       solid(`<rect x="206" y="190" width="188" height="280" rx="60"/>`, P.green) +
-      flat(`<path d="M206 250 C206 200 240 190 300 190 C360 190 394 200 394 250 v12 h-188 z"/>`, P.greenDark) +
+      flat(
+        `<path d="M206 250 C206 200 240 190 300 190 C360 190 394 200 394 250 v12 h-188 z"/>`,
+        P.greenDark,
+      ) +
       solid(`<rect x="234" y="338" width="132" height="104" rx="26"/>`, P.greenDark, 300, false) +
       stroke("M234 360 h132", P.ink, 3, `opacity="0.35"`) +
       flat(`<rect x="258" y="250" width="16" height="90" rx="6"/>`, P.clay) +
@@ -406,7 +431,12 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
     draw: () =>
       stroke("M228 330 C200 120 400 120 372 330", P.ink, 9) +
       solid(`<rect x="210" y="300" width="180" height="150" rx="28"/>`, P.wood) +
-      solid(`<path d="M210 328 C210 310 222 300 240 300 h120 c18 0 30 10 30 28 v52 c-30 22 -150 22 -180 0 z"/>`, P.clayDark, 300, false) +
+      solid(
+        `<path d="M210 328 C210 310 222 300 240 300 h120 c18 0 30 10 30 28 v52 c-30 22 -150 22 -180 0 z"/>`,
+        P.clayDark,
+        300,
+        false,
+      ) +
       flat(`<rect x="290" y="372" width="20" height="28" rx="6"/>`, P.mustard) +
       stroke("M222 440 h156", P.clayDark, 3, `opacity="0.5" stroke-dasharray="5 6"`),
   },
@@ -428,10 +458,16 @@ export const ILLUSTRATIONS: Record<string, Drawing> = {
       const d = "M202 296 h196 l-16 174 h-164 z";
       const id = `${idPrefix}-c${++clipId}`;
       const h = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-        .map((i) => `<rect x="180" y="${300 + i * 20}" width="240" height="8" fill="${P.sandDark}" opacity="0.75"/>`)
+        .map(
+          (i) =>
+            `<rect x="180" y="${300 + i * 20}" width="240" height="8" fill="${P.sandDark}" opacity="0.75"/>`,
+        )
         .join("");
       const v = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-        .map((i) => `<rect x="${208 + i * 18}" y="290" width="4" height="190" fill="${P.sandDark}" opacity="0.45"/>`)
+        .map(
+          (i) =>
+            `<rect x="${208 + i * 18}" y="290" width="4" height="190" fill="${P.sandDark}" opacity="0.45"/>`,
+        )
         .join("");
       return (
         stroke("M244 300 C244 196 356 196 356 300", P.clayDark, 12) +

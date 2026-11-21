@@ -41,7 +41,7 @@ export function ProductCard({
           height={600}
           unoptimized
           priority={priority}
-          className="aspect-square h-auto w-full transition-transform duration-200 ease-brand group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
+          className="ease-brand aspect-square h-auto w-full transition-transform duration-200 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100"
         />
         <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5">
           {sale.onSale && stock !== "out" && <Badge tone="sale">Sale −{sale.percentOff}%</Badge>}
@@ -50,18 +50,20 @@ export function ProductCard({
         </div>
       </div>
       <div className="mt-3 flex flex-1 flex-col gap-1">
-        <p className="text-xs font-semibold tracking-[0.08em] text-muted uppercase">
+        <p className="text-muted text-xs font-semibold tracking-[0.08em] uppercase">
           {product.category.name}
         </p>
-        <Heading className="font-sans text-base leading-6 [text-wrap:pretty] font-semibold tracking-normal sm:text-lg sm:leading-7">
+        <Heading className="font-sans text-base leading-6 font-semibold tracking-normal [text-wrap:pretty] sm:text-lg sm:leading-7">
           <Link
             href={`/products/${product.slug}`}
-            className="rounded-sm after:absolute after:inset-0 after:rounded-lg after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4 focus-visible:after:outline-primary"
+            className="focus-visible:after:outline-primary rounded-sm after:absolute after:inset-0 after:rounded-lg after:content-[''] focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-4"
           >
             {product.name}
           </Link>
         </Heading>
-        <p className="line-clamp-2 hidden text-sm text-muted sm:block">{product.shortDescription}</p>
+        <p className="text-muted line-clamp-2 hidden text-sm sm:block">
+          {product.shortDescription}
+        </p>
         <Price
           priceCents={product.priceCents}
           compareAtCents={product.compareAtCents}

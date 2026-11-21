@@ -38,8 +38,8 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
   return (
     <header
       className={cn(
-        "sticky top-0 z-40 border-b bg-surface/95 backdrop-blur supports-[backdrop-filter]:bg-surface/85",
-        "transition-[box-shadow,border-color] duration-200 ease-brand",
+        "bg-surface/95 supports-[backdrop-filter]:bg-surface/85 sticky top-0 z-40 border-b backdrop-blur",
+        "ease-brand transition-[box-shadow,border-color] duration-200",
         scrolled ? "border-line shadow-2" : "border-transparent",
       )}
       data-scrolled={scrolled || undefined}
@@ -48,7 +48,7 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
         <button
           ref={menuButtonRef}
           type="button"
-          className="-ml-2 inline-flex size-11 items-center justify-center rounded-md hover:bg-sunken lg:hidden"
+          className="hover:bg-sunken -ml-2 inline-flex size-11 items-center justify-center rounded-md lg:hidden"
           aria-label="Open menu"
           aria-haspopup="dialog"
           aria-expanded={menuOpen}
@@ -60,7 +60,9 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
 
         <Wordmark />
 
-        <Suspense fallback={<DesktopNav categories={categories} pathname={pathname} category={null} />}>
+        <Suspense
+          fallback={<DesktopNav categories={categories} pathname={pathname} category={null} />}
+        >
           <DesktopNavWithParams categories={categories} pathname={pathname} />
         </Suspense>
 
@@ -72,7 +74,7 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
             <div className="relative">
               <SearchIcon
                 size={18}
-                className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+                className="text-muted pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
               />
               <input
                 id="header-search"
@@ -81,14 +83,14 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
                 placeholder="Search products"
                 autoComplete="off"
                 maxLength={80}
-                className={cn(fieldClasses, "h-10 w-56 rounded-full bg-background pl-9 xl:w-64")}
+                className={cn(fieldClasses, "bg-background h-10 w-56 rounded-full pl-9 xl:w-64")}
               />
             </div>
           </form>
 
           <button
             type="button"
-            className="inline-flex size-11 items-center justify-center rounded-md hover:bg-sunken md:hidden"
+            className="hover:bg-sunken inline-flex size-11 items-center justify-center rounded-md md:hidden"
             aria-label={searchOpen ? "Close search" : "Search"}
             aria-expanded={searchOpen}
             aria-controls="mobile-search"
@@ -102,14 +104,14 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
       </div>
 
       {searchOpen && (
-        <div id="mobile-search" className="border-t border-line px-4 py-3 md:hidden">
+        <div id="mobile-search" className="border-line border-t px-4 py-3 md:hidden">
           <form action="/products" role="search" className="relative">
             <label htmlFor="mobile-search-input" className="sr-only">
               Search products
             </label>
             <SearchIcon
               size={18}
-              className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-muted"
+              className="text-muted pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
             />
             <input
               id="mobile-search-input"
@@ -119,7 +121,7 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
               autoComplete="off"
               maxLength={80}
               autoFocus
-              className={cn(fieldClasses, "rounded-full bg-background pl-9")}
+              className={cn(fieldClasses, "bg-background rounded-full pl-9")}
             />
           </form>
         </div>
@@ -143,7 +145,7 @@ function CartButton() {
   return (
     <Link
       href="/cart"
-      className="relative -mr-2 inline-flex size-11 items-center justify-center rounded-md hover:bg-sunken"
+      className="hover:bg-sunken relative -mr-2 inline-flex size-11 items-center justify-center rounded-md"
       aria-label={label}
       data-testid="cart-button"
     >
@@ -154,7 +156,7 @@ function CartButton() {
           data-testid="cart-count"
           aria-hidden="true"
           className={cn(
-            "absolute top-0.5 right-0 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-accent px-1 text-xs font-bold text-white tabular-nums",
+            "bg-accent absolute top-0.5 right-0 inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1 text-xs font-bold text-white tabular-nums",
             bumpKey > 0 && "animate-badge-bump",
           )}
         >

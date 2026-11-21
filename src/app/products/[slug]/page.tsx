@@ -30,7 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${product.name} · Nile Goods`,
       description,
       url: `/products/${product.slug}`,
-      images: [{ url: product.imagePath, width: 600, height: 600, alt: `Illustration of the ${product.name}` }],
+      images: [
+        {
+          url: product.imagePath,
+          width: 600,
+          height: 600,
+          alt: `Illustration of the ${product.name}`,
+        },
+      ],
     },
     twitter: {
       card: "summary",
@@ -89,7 +96,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="flex flex-col lg:py-4">
           <Link
             href={`/products?category=${product.category.slug}`}
-            className="inline-flex min-h-11 items-center self-start text-xs font-semibold tracking-[0.12em] text-accent uppercase underline-offset-4 hover:underline sm:min-h-6"
+            className="text-accent inline-flex min-h-11 items-center self-start text-xs font-semibold tracking-[0.12em] uppercase underline-offset-4 hover:underline sm:min-h-6"
           >
             {product.category.name}
           </Link>
@@ -106,14 +113,14 @@ export default async function ProductPage({ params }: Props) {
               {stock === "out" && <Badge tone="out">Out of stock</Badge>}
               {stock === "low" && <Badge tone="low">Only {product.stock} left</Badge>}
               {stock === "in" && (
-                <span className="inline-flex items-center gap-1 text-sm font-medium text-success">
+                <span className="text-success inline-flex items-center gap-1 text-sm font-medium">
                   <CheckIcon size={16} /> In stock
                 </span>
               )}
             </span>
           </div>
           {sale.onSale && (
-            <p className="mt-1 text-sm text-accent">You save {formatMoney(sale.savingsCents)}</p>
+            <p className="text-accent mt-1 text-sm">You save {formatMoney(sale.savingsCents)}</p>
           )}
 
           <p className="mt-6 text-lg">{product.shortDescription}</p>
@@ -122,10 +129,10 @@ export default async function ProductPage({ params }: Props) {
             <AddToCart productId={product.id} productName={product.name} stock={product.stock} />
           </div>
 
-          <ul className="mt-8 flex flex-col gap-3 border-t border-line pt-6">
+          <ul className="border-line mt-8 flex flex-col gap-3 border-t pt-6">
             {benefits.map((b) => (
               <li key={b.text} className="flex items-center gap-3 text-sm">
-                <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full bg-primary-soft text-primary">
+                <span className="bg-primary-soft text-primary inline-flex size-9 shrink-0 items-center justify-center rounded-full">
                   {b.icon}
                 </span>
                 {b.text}
@@ -133,18 +140,18 @@ export default async function ProductPage({ params }: Props) {
             ))}
           </ul>
 
-          <section aria-labelledby="details-heading" className="mt-8 border-t border-line pt-6">
+          <section aria-labelledby="details-heading" className="border-line mt-8 border-t pt-6">
             <h2 id="details-heading" className="font-sans text-base font-semibold tracking-normal">
               Details
             </h2>
-            <p className="mt-2 text-muted">{product.description}</p>
+            <p className="text-muted mt-2">{product.description}</p>
           </section>
         </div>
       </div>
 
       {related.length > 0 && (
         <section aria-labelledby="related-heading" className="mt-20 lg:mt-28" data-testid="related">
-          <p className="text-xs font-semibold tracking-[0.12em] text-accent uppercase">
+          <p className="text-accent text-xs font-semibold tracking-[0.12em] uppercase">
             More from {product.category.name}
           </p>
           <h2 id="related-heading" className="mt-2 text-xl sm:text-2xl">

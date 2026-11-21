@@ -55,7 +55,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="flex min-h-dvh flex-col">
         <a
           href="#main-content"
-          className="fixed top-2 left-2 z-[60] -translate-y-24 rounded-md bg-ink px-4 py-3 font-medium text-white shadow-3 transition-transform duration-150 focus-visible:translate-y-0"
+          className="bg-ink shadow-3 fixed top-2 left-2 z-[60] -translate-y-24 rounded-md px-4 py-3 font-medium text-white transition-transform duration-150 focus-visible:translate-y-0"
         >
           Skip to content
         </a>

@@ -43,7 +43,11 @@ export async function seedDatabase(db: PrismaClient, opts: { resetCarts?: boolea
       isFeatured: p.isFeatured ?? false,
       createdAt: new Date(SEED_EPOCH.getTime() - p.ageDays * DAY),
     };
-    await db.product.upsert({ where: { slug: p.slug }, create: { slug: p.slug, ...data }, update: data });
+    await db.product.upsert({
+      where: { slug: p.slug },
+      create: { slug: p.slug, ...data },
+      update: data,
+    });
   }
 
   return { categories: categories.length, products: products.length };

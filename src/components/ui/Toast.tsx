@@ -109,7 +109,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
   return (
     <div
       data-testid="toast"
-      className="pointer-events-auto flex w-full max-w-sm animate-toast-in items-start gap-3 rounded-lg border border-line bg-surface p-3 pr-2 shadow-3"
+      className="animate-toast-in border-line bg-surface shadow-3 pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-lg border p-3 pr-2"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       onFocus={() => setPaused(true)}
@@ -125,14 +125,14 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
       </span>
       <div className="min-w-0 flex-1 py-1">
         <p className="font-semibold">{title}</p>
-        {description && <p className="mt-0.5 text-sm text-muted">{description}</p>}
+        {description && <p className="text-muted mt-0.5 text-sm">{description}</p>}
       </div>
       {action &&
         ("href" in action ? (
           <Link
             href={action.href}
             onClick={onDismiss}
-            className="inline-flex h-11 shrink-0 items-center rounded-md px-3 text-sm font-semibold text-primary underline-offset-4 hover:bg-primary-soft hover:underline"
+            className="text-primary hover:bg-primary-soft inline-flex h-11 shrink-0 items-center rounded-md px-3 text-sm font-semibold underline-offset-4 hover:underline"
           >
             {action.label}
           </Link>
@@ -143,7 +143,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
               action.onClick();
               onDismiss();
             }}
-            className="inline-flex h-11 shrink-0 items-center rounded-md px-3 text-sm font-semibold text-primary hover:bg-primary-soft"
+            className="text-primary hover:bg-primary-soft inline-flex h-11 shrink-0 items-center rounded-md px-3 text-sm font-semibold"
           >
             {action.label}
           </button>
@@ -152,7 +152,7 @@ function ToastCard({ toast, onDismiss }: { toast: ToastItem; onDismiss: () => vo
         type="button"
         onClick={onDismiss}
         aria-label="Dismiss notification"
-        className="inline-flex size-11 shrink-0 items-center justify-center rounded-md text-muted hover:bg-sunken hover:text-ink"
+        className="text-muted hover:bg-sunken hover:text-ink inline-flex size-11 shrink-0 items-center justify-center rounded-md"
       >
         <CloseIcon size={18} />
       </button>

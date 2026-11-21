@@ -1,7 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { createContext, useCallback, useContext, useMemo, useTransition, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useTransition,
+  type ReactNode,
+} from "react";
 import { ProductGridSkeleton } from "../ui/Skeleton";
 
 type Ctx = { pending: boolean; navigate: (href: string, opts?: { replace?: boolean }) => void };
@@ -31,11 +38,21 @@ export function useCatalogNav(): Ctx {
   return ctx;
 }
 
-export function CatalogResults({ children, skeletonCount }: { children: ReactNode; skeletonCount: number }) {
+export function CatalogResults({
+  children,
+  skeletonCount,
+}: {
+  children: ReactNode;
+  skeletonCount: number;
+}) {
   const { pending } = useCatalogNav();
   return (
     <div aria-busy={pending || undefined} data-testid="catalog-results">
-      {pending ? <ProductGridSkeleton count={Math.max(4, Math.min(skeletonCount, 12))} /> : children}
+      {pending ? (
+        <ProductGridSkeleton count={Math.max(4, Math.min(skeletonCount, 12))} />
+      ) : (
+        children
+      )}
     </div>
   );
 }

@@ -7,7 +7,7 @@
 - [x] 5. Layout (header, mobile menu, footer), home page
 - [x] 6. Catalog with filters, search, sort, pagination
 - [x] 7. Product page and 404
-- [ ] 8. Cart (server, cookie, actions, toasts, undo)
+- [x] 8. Cart (server, cookie, actions, toasts, undo)
 - [ ] 9. Unit and integration tests
 - [ ] 10. E2E and axe tests, `npm run verify` passes
 - [ ] 11. Visual self-review loop (section 5.4)
@@ -26,6 +26,7 @@
 - 5: Root layout (fonts, skip link, cart-count + toast providers), sticky header w/ scroll shadow, native <dialog> mobile menu w/ focus trap, footer, home (hero collage, category tiles, featured excl. sale, trust strip, sale row), /info page for footer links. Cart service + cookie helpers already written (src/lib/cart).
 - 6: /products: zod-parsed URL state (category,q,sort,page; bad values fall back), debounced search, chips + sort select (desktop), bottom-sheet dialog (mobile), result count, empty state w/ reset, skeletons via shared transition + loading.tsx, 12/page pagination. Note: SQLite `contains` is case-insensitive (ASCII); Postgres in Phase 4 needs mode:"insensitive".
 - 7: /products/[slug] (breadcrumbs, big image, price+sale, stock badge, stepper, AddToCart, benefits, related) + OG/twitter meta; real 404 verified via curl for unknown/invalid slugs and made-up URLs. Catalog moved into route group products/(catalog) so its loading.tsx does not wrap [slug] (would stream 200 before notFound). Friendly error.tsx. Cart server actions (src/app/actions/cart.ts) written here for AddToCart.
+- 8: /cart: server-read cart -> client CartView with optimistic qty/remove, latest-request-wins guard, undo toast (restoreCartItemAction), sticky summary, free-shipping progress, disabled "Checkout coming in Phase 2". Cookie ng_cart: random UUID, httpOnly, Lax, 30d, Secure when x-forwarded-proto=https. Smoke-tested (scripts/dev/smoke-cart.ts).
 
 ## Needed permissions
 

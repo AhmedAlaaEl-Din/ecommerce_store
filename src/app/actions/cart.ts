@@ -29,7 +29,12 @@ export type AddToCartResult =
   | { ok: false; message: string };
 
 export type CartMutationResult =
-  | { ok: true; cart: CartView; limited?: boolean; removed?: { productId: string; quantity: number } }
+  | {
+      ok: true;
+      cart: CartView;
+      limited?: boolean;
+      removed?: { productId: string; quantity: number };
+    }
   | { ok: false; message: string; cart?: CartView };
 
 const MESSAGES: Record<CartErrorCode | "INVALID" | "UNEXPECTED", string> = {
@@ -73,7 +78,12 @@ export async function updateCartItemAction(input: unknown): Promise<CartMutation
   if (!parsed.success) return { ok: false, message: MESSAGES.INVALID };
   try {
     const cartId = await readCartId();
-    const result = await updateItemQuantity(db, cartId, parsed.data.productId, parsed.data.quantity);
+    const result = await updateItemQuantity(
+      db,
+      cartId,
+      parsed.data.productId,
+      parsed.data.quantity,
+    );
     const cart = await getCart(db, cartId);
     if (!result.ok) return { ok: false, message: MESSAGES[result.code], cart };
     return { ok: true, cart, limited: result.data.limited };

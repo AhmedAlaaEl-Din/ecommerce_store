@@ -19,11 +19,11 @@ export function EmptyState({
   return (
     <div
       data-testid={testId}
-      className="mx-auto flex max-w-md flex-col items-center rounded-xl border border-dashed border-line-strong/40 bg-surface px-6 py-12 text-center"
+      className="border-line-strong/40 bg-surface mx-auto flex max-w-md flex-col items-center rounded-xl border border-dashed px-6 py-12 text-center"
     >
       {illustration ?? <EmptyBagIllustration />}
       <Heading className="mt-6 text-xl">{title}</Heading>
-      {children && <div className="mt-2 text-muted">{children}</div>}
+      {children && <div className="text-muted mt-2">{children}</div>}
       {action && <div className="mt-6">{action}</div>}
     </div>
   );

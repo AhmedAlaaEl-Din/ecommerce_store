@@ -37,7 +37,10 @@ export default async function ProductsPage({ searchParams }: Props) {
   const [categories, result] = await Promise.all([getCategories(), searchProducts(query)]);
   const category = categories.find((c) => c.slug === query.category);
 
-  const crumbs: Crumb[] = [{ label: "Home", href: "/" }, { label: "Shop", href: "/products" }];
+  const crumbs: Crumb[] = [
+    { label: "Home", href: "/" },
+    { label: "Shop", href: "/products" },
+  ];
   if (category) crumbs.push({ label: category.name });
 
   const heading = category ? category.name : "All products";
@@ -49,7 +52,7 @@ export default async function ProductsPage({ searchParams }: Props) {
       <Breadcrumbs items={crumbs} />
       <div className="mt-4 max-w-2xl">
         <h1 className="text-2xl sm:text-3xl">{heading}</h1>
-        <p className="mt-2 text-muted">
+        <p className="text-muted mt-2">
           {category
             ? category.description
             : "Everything in the shop: quiet pieces for the home, tools for the kitchen, paper for the desk and bags for the road."}
@@ -65,8 +68,8 @@ export default async function ProductsPage({ searchParams }: Props) {
           />
         </div>
 
-        <div className="mt-6 flex flex-wrap items-baseline justify-between gap-2 border-b border-line pb-3">
-          <p className="text-sm text-muted" aria-live="polite" data-testid="result-count">
+        <div className="border-line mt-6 flex flex-wrap items-baseline justify-between gap-2 border-b pb-3">
+          <p className="text-muted text-sm" aria-live="polite" data-testid="result-count">
             {result.total === 0
               ? "No products found"
               : result.total === 1
@@ -77,11 +80,13 @@ export default async function ProductsPage({ searchParams }: Props) {
             {query.q ? (
               <>
                 {" "}
-                for “<span className="font-medium text-ink">{query.q}</span>”
+                for “<span className="text-ink font-medium">{query.q}</span>”
               </>
             ) : null}
           </p>
-          <p className="hidden text-sm text-muted md:block">Sorted by {SORT_LABELS[query.sort].toLowerCase()}</p>
+          <p className="text-muted hidden text-sm md:block">
+            Sorted by {SORT_LABELS[query.sort].toLowerCase()}
+          </p>
         </div>
 
         <div className="mt-8">
@@ -96,7 +101,9 @@ export default async function ProductsPage({ searchParams }: Props) {
                   </ButtonLink>
                 }
               >
-                <p>Try a shorter search or another category. Our edit is small but carefully chosen.</p>
+                <p>
+                  Try a shorter search or another category. Our edit is small but carefully chosen.
+                </p>
               </EmptyState>
             ) : (
               <ul className="grid grid-cols-2 gap-x-4 gap-y-8 md:grid-cols-3 lg:grid-cols-4 lg:gap-x-6 lg:gap-y-10">
