@@ -4,7 +4,7 @@ Branch: `phase-2` (from `main`). Evidence handoff folder (owner override): `E:\h
 instead of `E:\handoff\ecommerce_phase2`.
 
 - [x] 1. Branch `phase-2` from main; copy this prompt to docs/ — branch created from merged main (19e0ca9); new `.claude/settings.json` from the owner's setup folder committed.
-- [ ] 2. Prisma models and migration; .env.example updated
+- [x] 2. Prisma models and migration; .env.example updated — Order/OrderItem/ProcessedEvent/OrderCounter + OrderStatus enum; stripe 23.2.0 installed; `var/` git-ignored.
 - [ ] 3. PaymentProvider interface, MockProvider, StripeProvider (SDK mocked)
 - [ ] 4. Webhook handler, signature, idempotency
 - [ ] 5. Checkout page, form and validation

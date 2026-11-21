@@ -1,4 +1,4 @@
-// Nile Goods: Phase 1 schema.
+// Nile Goods: Phase 1 + Phase 2 schema.
 // Kept Postgres-friendly: string cuid ids, integer cents, no SQLite-only types.
 
 generator client {
@@ -20,22 +20,23 @@ model Category {
 }
 
 model Product {
-  id               String     @id @default(cuid())
-  slug             String     @unique
+  id               String      @id @default(cuid())
+  slug             String      @unique
   name             String
   shortDescription String
   description      String
   priceCents       Int
   compareAtCents   Int?
-  currency         String     @default("USD")
-  stock            Int        @default(0)
+  currency         String      @default("USD")
+  stock            Int         @default(0)
   imagePath        String
   categoryId       String
-  category         Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  isActive         Boolean    @default(true)
-  isFeatured       Boolean    @default(false)
-  createdAt        DateTime   @default(now())
+  category         Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  isActive         Boolean     @default(true)
+  isFeatured       Boolean     @default(false)
+  createdAt        DateTime    @default(now())
   cartItems        CartItem[]
+  orderItems       OrderItem[]
 
   @@index([categoryId])
   @@index([isActive, createdAt])
@@ -58,4 +59,78 @@ model CartItem {
 
   @@unique([cartId, productId])
   @@index([productId])
+}
+
+// ---------------------------------------------------------------------------
+// Phase 2: orders and payments
+// ---------------------------------------------------------------------------
+
+enum OrderStatus {
+  pending_payment
+  paid
+  payment_failed
+  cancelled
+  expired
+}
+
+model Order {
+  id                String      @id @default(cuid())
+  /// Random, unguessable token used in order URLs (never the id).
+  publicToken       String      @unique
+  /// Human-friendly number, e.g. NG-2026-000123.
+  orderNumber       String      @unique
+  status            OrderStatus @default(pending_payment)
+  email             String
+  customerName      String
+  addressLine1      String
+  addressLine2      String?
+  city              String
+  postalCode        String
+  country           String
+  subtotalCents     Int
+  shippingCents     Int
+  discountCents     Int         @default(0)
+  totalCents        Int
+  currency          String      @default("USD")
+  provider          String
+  providerSessionId String?     @unique
+  /// Cart this order was created from; cleared when the order is paid.
+  cartId            String?
+  /// Stock is held until this time while the order is pending payment.
+  reservedUntil     DateTime
+  paidAt            DateTime?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  items             OrderItem[]
+
+  @@index([status, reservedUntil])
+  @@index([cartId])
+}
+
+model OrderItem {
+  id                     String  @id @default(cuid())
+  orderId                String
+  order                  Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId              String
+  product                Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  productNameSnapshot    String
+  unitPriceCentsSnapshot Int
+  quantity               Int
+  lineTotalCents         Int
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+/// Webhook events already handled (idempotency guard).
+model ProcessedEvent {
+  id         String   @id
+  type       String
+  receivedAt DateTime @default(now())
+}
+
+/// Per-year counter for order numbers (portable alternative to a DB sequence).
+model OrderCounter {
+  year  Int @id
+  value Int @default(0)
 }

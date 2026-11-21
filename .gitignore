@@ -61,3 +61,6 @@ next-env.d.ts
 /src/generated/
 *.log
 /prisma/e2e.db*
+
+# phase 2: local "email" outbox (confirmation emails written as files)
+/var/
