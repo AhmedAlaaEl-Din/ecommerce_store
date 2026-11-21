@@ -4,7 +4,7 @@ Branch: `phase-3` (from `main`, which already contains `phase-2`). Evidence hand
 `E:\handoff\ecommerce_phase1\phase3_evidence`.
 
 - [x] 1. Branch phase-3; copy this prompt to docs/ — branched from main (02e179f, contains phase-2); prompt copied to docs/PHASE3_PROMPT.md.
-- [ ] 2. Prisma models (AdminUser, AdminSession, AuditLog, StockMovement, fulfilment fields, notes, refunds) and migration
+- [x] 2. Prisma models (AdminUser, AdminSession, AuditLog, StockMovement, fulfilment fields, notes, refunds) and migration — migration `admin_panel`: AdminUser/AdminSession (hashed session ids), AuditLog, StockMovement (reason enum), OrderEvent timeline, OrderNote, Refund, Setting; Order gains fulfilment fields + `refunded` status; Product gains archivedAt/thumbPath/updatedAt. Installed sharp 0.35.5 and @node-rs/argon2 2.2.2 (prebuilt Windows binaries, argon2id works).
 - [ ] 3. Password hashing, login, sessions, lockout, requireAdmin helper
 - [ ] 4. Admin layout, 403 page, mobile drawer
 - [ ] 5. Dashboard and demo-history seed

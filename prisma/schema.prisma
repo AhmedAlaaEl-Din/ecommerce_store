@@ -1,4 +1,4 @@
-// Nile Goods: Phase 1 + Phase 2 schema.
+// Nile Goods: Phase 1 + Phase 2 + Phase 3 schema.
 // Kept Postgres-friendly: string cuid ids, integer cents, no SQLite-only types.
 
 generator client {
@@ -32,11 +32,17 @@ model Product {
   imagePath        String
   categoryId       String
   category         Category    @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  /// Phase 3: smaller variant of an uploaded image (cards, admin lists); null for SVG illustrations.
+  thumbPath        String?
   isActive         Boolean     @default(true)
   isFeatured       Boolean     @default(false)
+  /// Phase 3: archived products are hidden everywhere except the admin (kept because orders reference them).
+  archivedAt       DateTime?
   createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @default(now()) @updatedAt
   cartItems        CartItem[]
   orderItems       OrderItem[]
+  stockMovements   StockMovement[]
 
   @@index([categoryId])
   @@index([isActive, createdAt])
@@ -71,6 +77,16 @@ enum OrderStatus {
   payment_failed
   cancelled
   expired
+  /// Phase 3: paid, then fully refunded from the admin.
+  refunded
+}
+
+/// Phase 3: what happens to a paid order after payment.
+enum FulfilmentStatus {
+  unfulfilled
+  packed
+  shipped
+  delivered
 }
 
 model Order {
@@ -106,8 +122,25 @@ model Order {
   updatedAt         DateTime    @updatedAt
   items             OrderItem[]
 
+  // Phase 3: fulfilment, refunds, timeline and internal notes
+  fulfilmentStatus  FulfilmentStatus @default(unfulfilled)
+  packedAt          DateTime?
+  shippedAt         DateTime?
+  deliveredAt       DateTime?
+  /// Free text, entered by staff when the order is marked shipped.
+  carrier           String?
+  trackingNumber    String?
+  refundedAt        DateTime?
+  refund            Refund?
+  events            OrderEvent[]
+  notes             OrderNote[]
+  stockMovements    StockMovement[]
+
   @@index([status, reservedUntil])
   @@index([cartId])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([fulfilmentStatus])
 }
 
 model OrderItem {
@@ -136,4 +169,151 @@ model ProcessedEvent {
 model OrderCounter {
   year  Int @id
   value Int @default(0)
+}
+
+// ---------------------------------------------------------------------------
+// Phase 3: admin panel
+// ---------------------------------------------------------------------------
+
+enum AdminRole {
+  admin
+  staff
+}
+
+model AdminUser {
+  id             String         @id @default(cuid())
+  /// Stored lower-cased.
+  email          String         @unique
+  name           String
+  role           AdminRole      @default(staff)
+  /// argon2id (PHC string).
+  passwordHash   String
+  isActive       Boolean        @default(true)
+  /// Consecutive failed logins since the last success or lockout.
+  failedLogins   Int            @default(0)
+  lockedUntil    DateTime?
+  lastLoginAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  sessions       AdminSession[]
+  auditLogs      AuditLog[]
+  notes          OrderNote[]
+  stockMovements StockMovement[]
+  orderEvents    OrderEvent[]
+  refunds        Refund[]
+}
+
+/// The cookie holds a random token; only its SHA-256 hash is stored here (`id`).
+model AdminSession {
+  id         String    @id
+  userId     String
+  user       AdminUser @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt  DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  /// Absolute expiry (createdAt + 12 h); the 30-minute idle timeout uses lastSeenAt.
+  expiresAt  DateTime
+
+  @@index([userId])
+}
+
+/// Every admin change and every login attempt. `summary` is JSON without personal data.
+model AuditLog {
+  id         String     @id @default(cuid())
+  createdAt  DateTime   @default(now())
+  actorId    String?
+  actor      AdminUser? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  /// e.g. "product.update", "auth.login_failed"
+  action     String
+  entityType String
+  entityId   String?
+  summary    String     @default("{}")
+
+  @@index([createdAt])
+  @@index([actorId, createdAt])
+  @@index([entityType, createdAt])
+}
+
+enum StockReason {
+  /// Opening balance written by the seed or when a product is created.
+  initial
+  received
+  damaged
+  correction
+  return
+  /// Checkout reserved stock for a pending order.
+  reservation
+  /// A pending order was cancelled, failed or expired.
+  release
+  /// A late payment took the stock again after its reservation was released.
+  sale
+  /// Stock put back by a refund (optional checkbox).
+  refund_restock
+}
+
+/// Every change to Product.stock; the sum of `delta` per product equals its stock.
+model StockMovement {
+  id         String      @id @default(cuid())
+  productId  String
+  product    Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  delta      Int
+  reason     StockReason
+  stockAfter Int
+  orderId    String?
+  order      Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  actorId    String?
+  actor      AdminUser?  @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  note       String?
+  createdAt  DateTime    @default(now())
+
+  @@index([productId, createdAt])
+  @@index([orderId])
+}
+
+/// Order timeline (created, paid, packed, shipped, refunded, ...).
+model OrderEvent {
+  id        String     @id @default(cuid())
+  orderId   String
+  order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  type      String
+  message   String
+  actorId   String?
+  actor     AdminUser? @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  createdAt DateTime   @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+/// Internal staff notes; never shown to customers.
+model OrderNote {
+  id        String    @id @default(cuid())
+  orderId   String
+  order     Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  authorId  String
+  author    AdminUser @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  body      String
+  createdAt DateTime  @default(now())
+
+  @@index([orderId, createdAt])
+}
+
+/// Full refunds only (one per order).
+model Refund {
+  id               String    @id @default(cuid())
+  orderId          String    @unique
+  order            Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  amountCents      Int
+  currency         String
+  provider         String
+  /// The provider's refund id (Stripe re_...) or a mock id.
+  providerRefundId String
+  restocked        Boolean
+  actorId          String
+  actor            AdminUser @relation(fields: [actorId], references: [id], onDelete: Restrict)
+  createdAt        DateTime  @default(now())
+}
+
+/// Small key/value settings (e.g. lowStockThreshold).
+model Setting {
+  key   String @id
+  value String
 }

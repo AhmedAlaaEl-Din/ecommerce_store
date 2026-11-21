@@ -64,3 +64,7 @@ next-env.d.ts
 
 # phase 2: local "email" outbox (confirmation emails written as files)
 /var/
+
+# phase 3: uploaded product images (only the folder is kept)
+/public/uploads/products/*
+!/public/uploads/products/.gitkeep
