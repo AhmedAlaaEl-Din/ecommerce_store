@@ -84,11 +84,23 @@ export async function placeOrderAction(
     };
   }
 
-  const result = await createPendingOrder(db, {
-    cartId,
-    customer: valid.data,
-    provider: payments.config.provider,
-  });
+  let result: Awaited<ReturnType<typeof createPendingOrder>>;
+  try {
+    result = await createPendingOrder(db, {
+      cartId,
+      customer: valid.data,
+      provider: payments.config.provider,
+    });
+  } catch (err) {
+    // Logged without the query arguments (they contain the address).
+    logError("checkout", "could not create the order", err);
+    return {
+      values,
+      errors: {},
+      attempt,
+      formError: "Something went wrong on our side. Nothing was charged. Please try again.",
+    };
+  }
   if (!result.ok) {
     if (result.code === "EMPTY_CART") redirect("/cart");
     const ids = result.changes.map((c) => c.productId).join(".");

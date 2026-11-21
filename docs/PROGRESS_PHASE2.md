@@ -11,7 +11,7 @@ instead of `E:\handoff\ecommerce_phase2`.
 - [x] 6. Reservation transaction and expiry — one transaction with conditional decrements (no rollback path), 30-min hold, `npm run orders:expire` + expiry before each checkout; cross-process race integration test.
 - [x] 7. Mock pay page, success page with polling, failure and cancel paths — /mock-pay/[sessionId] (labelled banner, Pay/Decline/Cancel) signs Stripe-shaped events and hands them to `receiveWebhook`, the function behind the webhook route; paid event arrives ~1.5 s after redirect like Stripe; /order/[token] polls every 2 s up to 30 s; decline/cancel return to the refilled form.
 - [x] 8. Outbox email and /dev/outbox — escaped HTML confirmation written once per paid order to var/outbox (git-ignored); /dev/outbox list + viewer return 404 in production.
-- [ ] 9. Security items (section 5)
+- [x] 9. Security items (section 5) — CSRF: server actions (Origin-checked by Next), webhook excluded (signature); token buckets on checkout/webhook/mock pay; order pages token-only + noindex/no-referrer; checkout prefill only for the same cart; logs mask emails and drop Prisma query args.
 - [ ] 10. Unit and integration tests
 - [ ] 11. E2E and axe; `npm run verify` passes
 - [ ] 12. Visual self-review loop (as in Phase 1, section 5.4)

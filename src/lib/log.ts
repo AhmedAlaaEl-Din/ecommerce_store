@@ -25,6 +25,22 @@ export function logInfo(scope: string, message: string, fields: Record<string, u
   console.log(`[${scope}] ${message}`, Object.keys(fields).length ? fields : "");
 }
 
+/**
+ * A safe one-line description of an error. Prisma errors repeat the query
+ * arguments (which can include emails and addresses) after the first line, so
+ * only the error name, its code and the first line are kept.
+ */
+export function describeError(err: unknown): string {
+  if (!(err instanceof Error)) return err === undefined ? "" : typeof err;
+  const code = (err as { code?: unknown }).code;
+  const firstLine = err.message.split("\n").find((l) => l.trim() !== "") ?? "";
+  const clipped = firstLine
+    .trim()
+    .slice(0, 160)
+    .replace(/[\w.+-]+@[\w-]+(\.[\w-]+)+/g, "[email]");
+  return [err.name, typeof code === "string" ? code : null, clipped].filter(Boolean).join(" ");
+}
+
 export function logError(scope: string, message: string, err?: unknown) {
-  console.error(`[${scope}] ${message}`, err instanceof Error ? err.message : (err ?? ""));
+  console.error(`[${scope}] ${message}`, describeError(err));
 }
