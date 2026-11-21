@@ -1,4 +1,4 @@
-import type { CatalogQuery, SortOption } from "./schemas";
+import type { CatalogQuery, SortOption } from "./catalog-options";
 
 export type CatalogParams = {
   category?: string | null;

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { SORT_LABELS, withChanges } from "@/lib/catalog-url";
-import { SORT_OPTIONS, type CatalogQuery, type SortOption } from "@/lib/schemas";
+import { SORT_OPTIONS, type CatalogQuery, type SortOption } from "@/lib/catalog-options";
 import { CloseIcon, SearchIcon, SlidersIcon } from "../icons";
 import { Button } from "../ui/Button";
 import { fieldClasses } from "../ui/Input";

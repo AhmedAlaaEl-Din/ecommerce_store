@@ -149,6 +149,11 @@ test.describe("cart rules", () => {
     const days = (cookie!.expires - Date.now() / 1000) / 86400;
     expect(days).toBeGreaterThan(29.9);
     expect(days).toBeLessThan(30.1);
+    // Every page (including static-looking ones and the 404) reads the cart count.
+    for (const path of ["/info", "/no-such-page", "/products"]) {
+      await page.goto(path);
+      await expect(page.getByTestId("cart-count")).toHaveText("1");
+    }
   });
 
   test("adding the same product again increases quantity but never above stock", async ({

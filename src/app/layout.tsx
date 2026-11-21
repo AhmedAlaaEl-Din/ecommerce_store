@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Fraunces } from "next/font/google";
+import { unstable_rethrow } from "next/navigation";
 import { CartCountProvider } from "@/components/cart/CartCountProvider";
 import { SiteFooter } from "@/components/layout/SiteFooter";
 import { SiteHeader } from "@/components/layout/SiteHeader";
@@ -51,12 +52,14 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   // itself show a friendly error if it also cannot load.
   const [categories, cartCount] = await Promise.all([
     getCategories().catch((err: unknown) => {
+      unstable_rethrow(err); // let Next.js internal signals (dynamic usage, redirects) through
       console.error("[layout] categories failed:", err instanceof Error ? err.message : err);
       return [];
     }),
     readCartId()
       .then((id) => getCartItemCount(db, id))
       .catch((err: unknown) => {
+        unstable_rethrow(err);
         console.error("[layout] cart count failed:", err instanceof Error ? err.message : err);
         return 0;
       }),

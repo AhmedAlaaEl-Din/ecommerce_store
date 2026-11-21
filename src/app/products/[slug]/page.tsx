@@ -84,7 +84,8 @@ export default async function ProductPage({ params }: Props) {
             width={600}
             height={600}
             unoptimized
-            priority
+            loading="eager"
+            fetchPriority="high"
             className="aspect-square h-auto w-full"
           />
           {sale.onSale && stock !== "out" && (

@@ -41,7 +41,8 @@ export function ProductCard({
           width={600}
           height={600}
           unoptimized
-          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          fetchPriority={priority ? "high" : "auto"}
           className={cn(
             "ease-brand aspect-square h-auto w-full transition-transform duration-200 group-hover:scale-[1.03] motion-reduce:group-hover:scale-100",
             stock === "out" && "opacity-55 grayscale-[35%]",

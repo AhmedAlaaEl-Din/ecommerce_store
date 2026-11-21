@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { SORT_OPTIONS, type CatalogQuery } from "./catalog-options";
 import { MAX_QUANTITY_PER_LINE } from "./cart/math";
 
 /** Product ids are Prisma cuids: lowercase alphanumerics, about 25 characters. */
@@ -33,10 +34,7 @@ export const restoreCartItemSchema = z.object({
 /** Cart ids are random UUIDs that we generate; anything else in the cookie is ignored. */
 export const cartIdSchema = z.uuid();
 
-export const SORT_OPTIONS = ["newest", "price-asc", "price-desc"] as const;
-export type SortOption = (typeof SORT_OPTIONS)[number];
-
-export const PAGE_SIZE = 12;
+export { PAGE_SIZE, SORT_OPTIONS, type CatalogQuery, type SortOption } from "./catalog-options";
 
 const firstValue = (v: unknown) => (Array.isArray(v) ? v[0] : v);
 
@@ -69,4 +67,6 @@ export const catalogQuerySchema = z.object({
   page: z.preprocess(firstValue, z.coerce.number().int().min(1).max(1000).catch(1).default(1)),
 });
 
-export type CatalogQuery = z.infer<typeof catalogQuerySchema>;
+// Compile-time check that the schema output matches the shared CatalogQuery type.
+const _queryShape: (q: z.infer<typeof catalogQuerySchema>) => CatalogQuery = (q) => q;
+void _queryShape;

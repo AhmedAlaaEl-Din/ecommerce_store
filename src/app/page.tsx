@@ -127,7 +127,8 @@ function HeroArt() {
             width={600}
             height={600}
             unoptimized
-            priority
+            loading="eager"
+            fetchPriority="high"
             className="h-full w-full object-cover"
           />
         </div>
@@ -138,7 +139,7 @@ function HeroArt() {
             width={600}
             height={600}
             unoptimized
-            priority
+            loading="eager"
             className="h-full w-full object-cover"
           />
         </div>
@@ -149,7 +150,7 @@ function HeroArt() {
             width={600}
             height={600}
             unoptimized
-            priority
+            loading="eager"
             className="h-full w-full object-cover"
           />
         </div>
