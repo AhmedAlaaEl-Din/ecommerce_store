@@ -10,7 +10,7 @@
 - [x] 8. Cart (server, cookie, actions, toasts, undo)
 - [x] 9. Unit and integration tests
 - [x] 10. E2E and axe tests, `npm run verify` passes
-- [ ] 11. Visual self-review loop (section 5.4)
+- [x] 11. Visual self-review loop (section 5.4)
 - [ ] 12. CHECKPOINT: design review subagent, then fixes
 - [ ] 13. CHECKPOINT: code and security review subagent, then fixes
 - [ ] 14. Lighthouse scores
@@ -29,6 +29,7 @@
 - 8: /cart: server-read cart -> client CartView with optimistic qty/remove, latest-request-wins guard, undo toast (restoreCartItemAction), sticky summary, free-shipping progress, disabled "Checkout coming in Phase 2". Cookie ng_cart: random UUID, httpOnly, Lax, 30d, Secure when x-forwarded-proto=https. Smoke-tested (scripts/dev/smoke-cart.ts).
 - 9: Vitest projects unit (30 tests: money, sale display incl. <Price> SSR markup, cart maths, clamping, zod schemas, URL helpers) + integration (29 tests on prisma/test.db created by global-setup via migrate deploy: cart add/update/remove/undo, stock limit, unknown/inactive/OOS, DB price trust, seed idempotency, search/sort/paging).
 - 10: Playwright vs next build+start on port 3100 with separate prisma/e2e.db (scripts/e2e-server.ts reseeds). e2e 17 (desktop 12 + mobile 5), axe 13 (11 pages + cart/toast + open menu/sheet). Only axe finding was label-content-name-mismatch on the wordmark (fixed). npm run verify green.
+- 11: scripts/review-shots.ts -> 28 shots (14 desktop, 14 mobile incl. menu/sheet/toast/scrolled header). Round 1 found: cart line image stretched + trash wrapping on mobile; search kept "All products" h1; home section-header links wrapping titles on mobile; wordmark trailing space collapsed in flex. Fixed. Round 2: clean. (Earlier rounds during build: featured/sale duplication, footer too long on mobile, card titles balance-wrapping, breadcrumb "Home > Home".) Also fixed e2e-server orphaning next start on Windows.
 
 ## Needed permissions
 

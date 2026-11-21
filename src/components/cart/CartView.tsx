@@ -193,7 +193,7 @@ function CartLineRow({
     <li className="flex gap-4 py-5 sm:gap-6" data-testid="cart-line" data-product={line.slug}>
       <Link
         href={`/products/${line.slug}`}
-        className="shrink-0 overflow-hidden rounded-lg"
+        className="shrink-0 self-start overflow-hidden rounded-lg"
         style={{ backgroundColor: line.accentColor }}
         tabIndex={-1}
         aria-hidden="true"
@@ -233,28 +233,30 @@ function CartLineRow({
             {formatMoney(line.lineTotalCents, line.currency)}
           </p>
         </div>
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-          <QuantityStepper
-            value={line.quantity}
-            max={Math.min(line.stock, MAX_QUANTITY_PER_LINE)}
-            onChange={onQuantity}
-            label={`Quantity for ${line.name}`}
-            size="sm"
-          />
+        <div className="mt-3 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 sm:gap-3">
+            <QuantityStepper
+              value={line.quantity}
+              max={Math.min(line.stock, MAX_QUANTITY_PER_LINE)}
+              onChange={onQuantity}
+              label={`Quantity for ${line.name}`}
+              size="sm"
+            />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onRemove}
+              icon={<TrashIcon size={18} />}
+              aria-label={`Remove ${line.name} from cart`}
+              className="text-muted hover:text-danger w-11 px-0 sm:w-auto sm:px-3.5"
+              data-testid="remove-line"
+            >
+              <span className="hidden sm:inline">Remove</span>
+            </Button>
+          </div>
           <p className="text-base font-semibold tabular-nums sm:hidden" aria-hidden="true">
             {formatMoney(line.lineTotalCents, line.currency)}
           </p>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onRemove}
-            icon={<TrashIcon size={18} />}
-            aria-label={`Remove ${line.name} from cart`}
-            className="text-muted hover:text-danger"
-            data-testid="remove-line"
-          >
-            <span className="hidden sm:inline">Remove</span>
-          </Button>
         </div>
         {line.quantity >= line.stock && line.stock <= 3 && (
           <p className="text-warning mt-2 text-sm">

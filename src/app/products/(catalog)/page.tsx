@@ -43,7 +43,7 @@ export default async function ProductsPage({ searchParams }: Props) {
   ];
   if (category) crumbs.push({ label: category.name });
 
-  const heading = category ? category.name : "All products";
+  const heading = query.q ? "Search results" : category ? category.name : "All products";
   const from = result.total === 0 ? 0 : (result.page - 1) * PAGE_SIZE + 1;
   const to = Math.min(result.page * PAGE_SIZE, result.total);
 

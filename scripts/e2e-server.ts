@@ -33,7 +33,14 @@ const server = spawn(`npx next start --hostname localhost --port ${port}`, {
   stdio: "inherit",
   shell: true,
 });
-const stop = () => server.kill();
+const stop = () => {
+  // On Windows the shell wrapper would otherwise leave "next start" running.
+  if (process.platform === "win32" && server.pid) {
+    spawn("taskkill", ["/pid", String(server.pid), "/T", "/F"], { stdio: "ignore" });
+  } else {
+    server.kill();
+  }
+};
 process.on("SIGINT", stop);
 process.on("SIGTERM", stop);
 server.on("exit", (code) => process.exit(code ?? 0));

@@ -181,7 +181,7 @@ function SectionHeader({
   linkLabel?: string;
 }) {
   return (
-    <div className="flex items-end justify-between gap-4">
+    <div className="flex flex-col items-start gap-1 sm:flex-row sm:items-end sm:justify-between sm:gap-4">
       <div>
         <p className="text-accent text-xs font-semibold tracking-[0.12em] uppercase">{eyebrow}</p>
         <h2 id={id} className="mt-2 text-xl sm:text-2xl">
