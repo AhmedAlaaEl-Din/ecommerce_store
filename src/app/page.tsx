@@ -237,7 +237,11 @@ function ProductRow({
 
 function TrustStrip() {
   const items = [
-    { icon: <TruckIcon size={22} />, title: "Free shipping over $50", text: "Flat $5.95 below that." },
+    {
+      icon: <TruckIcon size={22} />,
+      title: "Free shipping over $50",
+      text: "Flat $5.95 below that.",
+    },
     {
       icon: <ReturnIcon size={22} />,
       title: "30-day returns",

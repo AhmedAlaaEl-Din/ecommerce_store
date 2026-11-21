@@ -10,6 +10,10 @@ export function testDb() {
 }
 
 export async function resetDb(db: ReturnType<typeof createDb>) {
+  await db.processedEvent.deleteMany();
+  await db.orderItem.deleteMany();
+  await db.order.deleteMany();
+  await db.orderCounter.deleteMany();
   await db.cartItem.deleteMany();
   await db.cart.deleteMany();
   await db.product.deleteMany();
