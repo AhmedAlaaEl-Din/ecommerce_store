@@ -56,3 +56,8 @@ next-env.d.ts
 
 # evidence (screenshots, frames)
 /evidence/
+
+/src/generated/prisma
+/src/generated/
+*.log
+/prisma/e2e.db*

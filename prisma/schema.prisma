@@ -1,0 +1,61 @@
+// Nile Goods: Phase 1 schema.
+// Kept Postgres-friendly: string cuid ids, integer cents, no SQLite-only types.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  name        String
+  description String
+  accentColor String
+  products    Product[]
+}
+
+model Product {
+  id               String     @id @default(cuid())
+  slug             String     @unique
+  name             String
+  shortDescription String
+  description      String
+  priceCents       Int
+  compareAtCents   Int?
+  currency         String     @default("USD")
+  stock            Int        @default(0)
+  imagePath        String
+  categoryId       String
+  category         Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  isActive         Boolean    @default(true)
+  isFeatured       Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+  cartItems        CartItem[]
+
+  @@index([categoryId])
+  @@index([isActive, createdAt])
+}
+
+model Cart {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  items     CartItem[]
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int
+
+  @@unique([cartId, productId])
+  @@index([productId])
+}
