@@ -14,6 +14,8 @@ export type ProductCardData = {
   currency: string;
   stock: number;
   imagePath: string;
+  /** Phase 3: smaller variant of an uploaded image. */
+  thumbPath?: string | null;
   category: { name: string; accentColor: string };
 };
 
@@ -36,7 +38,7 @@ export function ProductCard({
         style={{ backgroundColor: product.category.accentColor }}
       >
         <Image
-          src={product.imagePath}
+          src={product.thumbPath ?? product.imagePath}
           alt={`Illustration of the ${product.name}`}
           width={600}
           height={600}

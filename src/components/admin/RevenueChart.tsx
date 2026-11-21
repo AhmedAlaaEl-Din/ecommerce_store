@@ -41,7 +41,7 @@ export function RevenueChart({ days, currency }: { days: DayRevenue[]; currency:
         aria-labelledby="revenue-chart-title revenue-chart-desc"
         data-testid="revenue-chart"
       >
-        <title id="revenue-chart-title">Revenue by day, last {days.length} days</title>
+        <title id="revenue-chart-title">{`Revenue by day, last ${days.length} days`}</title>
         <desc id="revenue-chart-desc">{summary}</desc>
         {ticks.map((t) => {
           const y = PAD.top + innerH - (t / max) * innerH;

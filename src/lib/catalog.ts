@@ -12,6 +12,7 @@ export const productCardSelect = {
   currency: true,
   stock: true,
   imagePath: true,
+  thumbPath: true,
   category: { select: { slug: true, name: true, accentColor: true } },
 } satisfies Prisma.ProductSelect;
 

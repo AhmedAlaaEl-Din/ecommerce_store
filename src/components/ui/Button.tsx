@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/lib/cn";
 import { Spinner } from "./Spinner";
 
-export type ButtonVariant = "primary" | "secondary" | "ghost";
+export type ButtonVariant = "primary" | "secondary" | "ghost" | "danger";
 export type ButtonSize = "sm" | "md" | "lg";
 
 const base =
@@ -21,6 +21,10 @@ const variants: Record<ButtonVariant, string> = {
     "disabled:border-line disabled:text-muted disabled:hover:bg-surface",
   ghost:
     "text-ink hover:bg-sunken active:bg-sunken disabled:text-muted disabled:hover:bg-transparent",
+  // Phase 3 (admin): confirm buttons for destructive actions. White on danger is 6.4:1.
+  danger:
+    "bg-danger text-white shadow-1 hover:bg-[#93201a] active:bg-[#93201a] " +
+    "disabled:bg-sunken disabled:text-muted disabled:shadow-none",
 };
 
 const sizes: Record<ButtonSize, string> = {

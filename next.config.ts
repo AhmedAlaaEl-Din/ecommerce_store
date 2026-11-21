@@ -49,6 +49,9 @@ const nextConfig: NextConfig = {
   experimental: {
     // forbidden() renders app/admin/(panel)/forbidden.tsx with HTTP 403.
     authInterrupts: true,
+    // Product image uploads (5 MB max, checked again in the action) plus
+    // multipart overhead. Applies to every server action; see the Phase 3 report.
+    serverActions: { bodySizeLimit: "6mb" },
   },
   poweredByHeader: false,
   reactStrictMode: true,
