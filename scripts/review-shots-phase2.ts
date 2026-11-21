@@ -109,7 +109,10 @@ async function main() {
     await page.getByTestId("mock-pay").click();
     await page.waitForURL(/\/order\//);
     await page.getByTestId("order-pending").waitFor();
-    await page.screenshot({ path: join(OUT, `10-order-confirming-${vp.name}.png`), fullPage: true });
+    await page.screenshot({
+      path: join(OUT, `10-order-confirming-${vp.name}.png`),
+      fullPage: true,
+    });
     console.log(`  10-order-confirming-${vp.name}.png`);
     await page.getByTestId("order-paid").waitFor({ timeout: 15_000 });
     await shot(page, vp, "11-order-paid");

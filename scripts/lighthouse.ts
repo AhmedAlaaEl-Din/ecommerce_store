@@ -18,7 +18,7 @@ const RUNS = Number(process.env.LH_RUNS ?? 3);
 // Optional CPU calibration (see Lighthouse docs/throttling.md). Default: preset (4x).
 const CPU = process.env.LH_CPU;
 const LABEL = process.env.LH_LABEL ?? (CPU ? `cpu${CPU}x` : "");
-const OUT = join(process.cwd(), "evidence", "phase1", "lighthouse");
+const OUT = join(process.cwd(), "evidence", process.env.LH_PHASE ?? "phase2", "lighthouse");
 const pages = [
   { name: "home", path: "/" },
   { name: "catalog", path: "/products" },

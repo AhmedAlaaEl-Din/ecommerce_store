@@ -13,8 +13,11 @@ import { SITE_URL } from "@/lib/site";
 import "./globals.css";
 
 // Self-hosted at build time by next/font (no runtime font CDN). Both are SIL OFL.
+// Only the one weight the design uses (600) instead of the whole variable font:
+// a smaller file on the critical path. The wordmark's italic is synthesised.
 const display = Fraunces({
   subsets: ["latin"],
+  weight: "600",
   variable: "--font-display-face",
   display: "swap",
 });

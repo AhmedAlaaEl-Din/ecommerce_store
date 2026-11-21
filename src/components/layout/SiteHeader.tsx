@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useRef, useState } from "react";
@@ -7,14 +8,20 @@ import { cn } from "@/lib/cn";
 import { useCartCount } from "../cart/CartCountProvider";
 import { BagIcon, CloseIcon, MenuIcon, SearchIcon } from "../icons";
 import { fieldClasses } from "../ui/Input";
-import { MobileMenu } from "./MobileMenu";
 import { Wordmark } from "./Wordmark";
 
 export type NavCategory = { slug: string; name: string };
 
+// The drawer's code is only needed once someone opens it: keep it out of the
+// first-load bundle (less JavaScript to parse and hydrate on every page).
+const MobileMenu = dynamic(() => import("./MobileMenu").then((m) => m.MobileMenu), {
+  ssr: false,
+});
+
 export function SiteHeader({ categories }: { categories: NavCategory[] }) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [menuLoaded, setMenuLoaded] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
@@ -53,7 +60,10 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
           aria-haspopup="dialog"
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
-          onClick={() => setMenuOpen(true)}
+          onClick={() => {
+            setMenuLoaded(true);
+            setMenuOpen(true);
+          }}
         >
           <MenuIcon size={22} />
         </button>
@@ -131,14 +141,16 @@ export function SiteHeader({ categories }: { categories: NavCategory[] }) {
         </div>
       )}
 
-      <MobileMenu
-        open={menuOpen}
-        onClose={() => {
-          setMenuOpen(false);
-          menuButtonRef.current?.focus();
-        }}
-        categories={categories}
-      />
+      {menuLoaded && (
+        <MobileMenu
+          open={menuOpen}
+          onClose={() => {
+            setMenuOpen(false);
+            menuButtonRef.current?.focus();
+          }}
+          categories={categories}
+        />
+      )}
     </header>
   );
 }
