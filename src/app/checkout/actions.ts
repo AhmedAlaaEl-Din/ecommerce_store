@@ -22,7 +22,7 @@ import { attachProviderSession, createPendingOrder, releaseOrder } from "@/lib/o
 import { getPayments } from "@/lib/payments";
 import { PaymentConfigError } from "@/lib/payments/config";
 import { checkoutLimiter } from "@/lib/rate-limit";
-import { SITE_URL } from "@/lib/site";
+import { appUrl } from "@/lib/site";
 
 export type CheckoutState = {
   values: CheckoutValues;
@@ -117,8 +117,8 @@ export async function placeOrderAction(
       currency: order.currency,
       lines: order.lines,
       shippingCents: order.shippingCents,
-      successUrl: `${SITE_URL}/order/${order.publicToken}`,
-      cancelUrl: `${SITE_URL}/checkout/cancel?order=${order.publicToken}`,
+      successUrl: `${appUrl()}/order/${order.publicToken}`,
+      cancelUrl: `${appUrl()}/checkout/cancel?order=${order.publicToken}`,
       reservedUntil: order.reservedUntil,
     });
     await attachProviderSession(db, order.id, session.sessionId);

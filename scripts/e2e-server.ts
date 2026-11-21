@@ -16,6 +16,7 @@ const env = {
   ...process.env,
   DATABASE_URL: "file:./prisma/e2e.db",
   NEXT_PUBLIC_SITE_URL: `http://localhost:${port}`,
+  APP_URL: `http://localhost:${port}`,
   // Phase 2: the production build runs with the offline mock payment provider.
   PAYMENT_PROVIDER: "mock",
   ALLOW_MOCK_PAYMENTS: "true",

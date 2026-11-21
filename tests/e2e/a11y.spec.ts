@@ -58,3 +58,55 @@ test("axe: mobile menu and filter sheet open", async ({ page }) => {
   await expect(page.getByTestId("filter-sheet")).toBeVisible();
   expect(await seriousViolations(page)).toEqual([]);
 });
+
+test("axe: checkout (empty form, then with errors), mock pay and order pages", async ({ page }) => {
+  await page.goto("/products/grove-olive-wood-board");
+  await page.getByTestId("add-to-cart").click();
+  await expect(page.getByTestId("cart-count")).toHaveText("1");
+
+  await page.goto("/checkout");
+  expect(await seriousViolations(page)).toEqual([]);
+  await page.getByTestId("place-order").click();
+  await expect(page.getByTestId("checkout-error")).toBeVisible();
+  expect(await seriousViolations(page)).toEqual([]);
+
+  await page.getByLabel("Email").fill("mona@example.com");
+  await page.getByLabel("Full name").fill("Mona Example");
+  await page.getByLabel("Street address").fill("12 Reed Lane");
+  await page.getByLabel("Town or city").fill("Delta Town");
+  await page.getByLabel("Postal code").fill("DT 1024");
+  await page.getByLabel("Country").selectOption("nilera");
+  await page.getByTestId("place-order").click();
+  await expect(page).toHaveURL(/\/mock-pay\//);
+  expect(await seriousViolations(page)).toEqual([]);
+
+  await page.getByTestId("mock-pay").click();
+  await expect(page.getByTestId("order-pending")).toBeVisible();
+  expect(await seriousViolations(page)).toEqual([]);
+  await expect(page.getByTestId("order-paid")).toBeVisible({ timeout: 15_000 });
+  expect(await seriousViolations(page)).toEqual([]);
+});
+
+test("axe: checkout on a phone with the summary open, and the cancelled notice", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/products/bazaar-woven-market-bag");
+  await page.getByTestId("add-to-cart").click();
+  await expect(page.getByTestId("cart-count")).toHaveText("1");
+  await page.goto("/checkout");
+  await page.getByTestId("mobile-summary").getByText("Show order summary").click();
+  expect(await seriousViolations(page)).toEqual([]);
+
+  await page.getByLabel("Email").fill("mona@example.com");
+  await page.getByLabel("Full name").fill("Mona Example");
+  await page.getByLabel("Street address").fill("12 Reed Lane");
+  await page.getByLabel("Town or city").fill("Delta Town");
+  await page.getByLabel("Postal code").fill("DT 1024");
+  await page.getByLabel("Country").selectOption("nilera");
+  await page.getByTestId("place-order").click();
+  await expect(page).toHaveURL(/\/mock-pay\//);
+  await page.getByTestId("mock-cancel").click();
+  await expect(page.getByTestId("checkout-notice")).toBeVisible();
+  expect(await seriousViolations(page)).toEqual([]);
+});

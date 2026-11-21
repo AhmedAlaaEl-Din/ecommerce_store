@@ -13,7 +13,7 @@ instead of `E:\handoff\ecommerce_phase2`.
 - [x] 8. Outbox email and /dev/outbox — escaped HTML confirmation written once per paid order to var/outbox (git-ignored); /dev/outbox list + viewer return 404 in production.
 - [x] 9. Security items (section 5) — CSRF: server actions (Origin-checked by Next), webhook excluded (signature); token buckets on checkout/webhook/mock pay; order pages token-only + noindex/no-referrer; checkout prefill only for the same cart; logs mask emails and drop Prisma query args.
 - [x] 10. Unit and integration tests — unit 74 (provider rules, signatures, order number, totals, form schema, idempotency guard, masking, rate limiter, email escaping); integration 59 (reservation, two-process race, transitions, duplicates, tampering, late payment).
-- [ ] 11. E2E and axe; `npm run verify` passes
+- [x] 11. E2E and axe; `npm run verify` passes — 34 e2e (purchase, decline, cancel, validation, autocomplete, sold-out-between-cart-and-checkout, keyboard-only, mobile, guards) + 15 axe; fixed runtime APP_URL for redirects, select reset after submit, error-link target size.
 - [ ] 12. Visual self-review loop (as in Phase 1, section 5.4)
 - [ ] 13. CHECKPOINT: security review subagent, then fixes
 - [ ] 14. CHECKPOINT: design review subagent, then fixes

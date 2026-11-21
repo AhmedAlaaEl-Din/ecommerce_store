@@ -87,8 +87,8 @@ test.describe("shopping journey", () => {
     await expect(page.getByTestId("cart-line")).toHaveCount(2);
     await expect(page.getByTestId("subtotal")).toHaveText("$107.00"); // 2 × 44 + 19
     await expect(page.getByTestId("shipping")).toHaveText("Free");
-    await expect(page.getByTestId("checkout")).toBeDisabled();
-    await expect(page.getByTestId("checkout")).toHaveText("Checkout coming in Phase 2");
+    await expect(page.getByTestId("checkout")).toHaveText("Checkout");
+    await expect(page.getByTestId("checkout")).toHaveAttribute("href", "/checkout");
 
     // Change quantity: subtotal updates instantly
     const mug = page.locator('[data-product="basalt-stoneware-mug"]');

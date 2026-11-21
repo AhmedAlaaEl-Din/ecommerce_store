@@ -56,7 +56,11 @@ export function CheckoutForm({
   }, [state.attempt]);
 
   return (
+    // key: remount after each submit so every field (including the select) shows
+    // the values returned by the server; React's automatic form reset would
+    // otherwise put the select back to its first default.
     <form
+      key={state.attempt}
       ref={formRef}
       action={formAction}
       noValidate
@@ -78,10 +82,13 @@ export function CheckoutForm({
             {state.formError ?? "Please check the highlighted fields."}
           </p>
           {errorFields.length > 0 && (
-            <ul className="mt-2 ml-7 list-disc">
+            <ul className="mt-2 ml-7 flex list-disc flex-col gap-1">
               {errorFields.map((f) => (
                 <li key={f}>
-                  <a href={`#checkout-${f}`} className="underline underline-offset-4">
+                  <a
+                    href={`#checkout-${f}`}
+                    className="inline-block min-h-6 py-0.5 underline underline-offset-4"
+                  >
                     {FIELD_LABELS[f]}: {e[f]}
                   </a>
                 </li>

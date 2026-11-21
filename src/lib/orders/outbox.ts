@@ -6,6 +6,7 @@ import { mkdir, readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import type { Db } from "../db";
 import { formatMoney } from "../money";
+import { appUrl } from "../site";
 import { countryName } from "./checkout-schema";
 
 export function outboxDir(): string {
@@ -106,7 +107,7 @@ export async function writeConfirmationEmail(db: Db, orderId: string): Promise<s
     where: { id: orderId },
     include: { items: { orderBy: { id: "asc" } } },
   });
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  const siteUrl = appUrl();
   const dir = outboxDir();
   await mkdir(/*turbopackIgnore: true*/ dir, { recursive: true });
   const name = `${order.orderNumber}-${Date.now()}.html`;
