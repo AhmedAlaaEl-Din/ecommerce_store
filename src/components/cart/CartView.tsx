@@ -18,7 +18,7 @@ import {
 import type { CartLine, CartView as CartData } from "@/lib/cart/service";
 import { formatMoney } from "@/lib/money";
 import { LOW_STOCK_THRESHOLD } from "@/lib/pricing";
-import { ArrowRightIcon, TrashIcon } from "../icons";
+import { ArrowRightIcon, ShieldIcon, TrashIcon } from "../icons";
 import { Button, ButtonLink } from "../ui/Button";
 import { EmptyState } from "../ui/EmptyState";
 import { Price } from "../ui/Price";
@@ -359,11 +359,18 @@ function OrderSummary({ cart }: { cart: CartData }) {
         </div>
       </dl>
 
-      <Button size="lg" fullWidth disabled className="mt-6" data-testid="checkout">
-        Checkout coming in Phase 2
-      </Button>
+      <ButtonLink
+        href="/checkout"
+        size="lg"
+        fullWidth
+        className="mt-6"
+        data-testid="checkout"
+        icon={<ShieldIcon size={18} />}
+      >
+        Checkout
+      </ButtonLink>
       <p className="text-muted mt-3 text-center text-xs">
-        Demo store: no payment is taken and no order is placed.
+        Demo store: payments run in test mode only. No real money is taken.
       </p>
     </aside>
   );

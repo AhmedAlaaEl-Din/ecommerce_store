@@ -7,7 +7,7 @@ instead of `E:\handoff\ecommerce_phase2`.
 - [x] 2. Prisma models and migration; .env.example updated — Order/OrderItem/ProcessedEvent/OrderCounter + OrderStatus enum; stripe 23.2.0 installed; `var/` git-ignored.
 - [x] 3. PaymentProvider interface, MockProvider, StripeProvider (SDK mocked) — config rules fail fast via instrumentation.ts; live keys refused; shipping now $5.95 flat; 20 new unit tests.
 - [x] 4. Webhook handler, signature, idempotency — /api/webhooks/payments verifies the raw body with Stripe's helper (both providers), ProcessedEvent guard, session-id match, outbox side effect once; integration-tested.
-- [ ] 5. Checkout page, form and validation
+- [x] 5. Checkout page, form and validation — /checkout with contact + shipping (autocomplete, invented country list), zod on the server, error summary + inline errors, values kept; summary right on desktop, collapsible on top on mobile; cart button now "Checkout".
 - [ ] 6. Reservation transaction and expiry
 - [ ] 7. Mock pay page, success page with polling, failure and cancel paths
 - [ ] 8. Outbox email and /dev/outbox
