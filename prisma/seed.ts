@@ -2,6 +2,7 @@ import "dotenv/config";
 import type { PrismaClient } from "../src/generated/prisma/client";
 import { createDb } from "../src/lib/db";
 import type { Currency } from "../src/lib/money";
+import { seedDemoAccounts } from "../src/lib/admin/demo-accounts";
 import { categories, products, SEED_EPOCH } from "./seed-data";
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -48,10 +49,31 @@ export async function seedDatabase(db: PrismaClient, opts: { resetCarts?: boolea
       isFeatured: p.isFeatured ?? false,
       createdAt: new Date(SEED_EPOCH.getTime() - p.ageDays * DAY),
     };
-    await db.product.upsert({
-      where: { slug: p.slug },
-      create: { slug: p.slug, ...data },
-      update: data,
+    await db.$transaction(async (tx) => {
+      const row = await tx.product.upsert({
+        where: { slug: p.slug },
+        create: { slug: p.slug, ...data },
+        update: { ...data, archivedAt: null },
+      });
+      // Phase 3: the stock history must explain the number. Write an opening
+      // balance (or a correction on re-seed) so movements always add up to stock.
+      const sum = await tx.stockMovement.aggregate({
+        where: { productId: row.id },
+        _sum: { delta: true },
+        _count: true,
+      });
+      const delta = row.stock - (sum._sum.delta ?? 0);
+      if (delta !== 0) {
+        await tx.stockMovement.create({
+          data: {
+            productId: row.id,
+            delta,
+            reason: sum._count === 0 ? "initial" : "correction",
+            stockAfter: row.stock,
+            note: sum._count === 0 ? "Opening stock (seed)" : "Reset by the seed",
+          },
+        });
+      }
     });
   }
 
@@ -65,6 +87,11 @@ async function main() {
     const result = await seedDatabase(db, { resetCarts });
     console.log(
       `Seeded ${result.categories} categories and ${result.products} products${resetCarts ? " (carts cleared)" : ""}.`,
+    );
+    // Phase 3: demo admin accounts. Passwords go only to var/demo-credentials.txt.
+    const { wrote } = await seedDemoAccounts(db);
+    console.log(
+      `Demo admin accounts ready (admin@example.com, staff@example.com). Passwords: var/demo-credentials.txt${wrote ? " (written)" : " (unchanged)"}.`,
     );
   } finally {
     await db.$disconnect();

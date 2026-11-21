@@ -30,9 +30,25 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
 ];
 
+// Phase 3: the admin is never cached, never indexed and never framed, and
+// sends no referrer (admin URLs contain order and product ids).
+const adminHeaders = [
+  { key: "Cache-Control", value: "no-store, max-age=0" },
+  { key: "X-Robots-Tag", value: "noindex, nofollow" },
+  { key: "Referrer-Policy", value: "no-referrer" },
+];
+
 const nextConfig: NextConfig = {
   async headers() {
-    return [{ source: "/:path*", headers: securityHeaders }];
+    return [
+      { source: "/:path*", headers: securityHeaders },
+      { source: "/admin", headers: adminHeaders },
+      { source: "/admin/:path*", headers: adminHeaders },
+    ];
+  },
+  experimental: {
+    // forbidden() renders app/admin/(panel)/forbidden.tsx with HTTP 403.
+    authInterrupts: true,
   },
   poweredByHeader: false,
   reactStrictMode: true,

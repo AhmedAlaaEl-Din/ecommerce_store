@@ -1,7 +1,7 @@
 "use client";
 
 import { useActionState, useEffect, useRef, useState, type FormEvent } from "react";
-import { placeOrderAction, type CheckoutState } from "@/app/checkout/actions";
+import { placeOrderAction, type CheckoutState } from "@/app/(checkout)/checkout/actions";
 import type { CheckoutField, CheckoutValues } from "@/lib/orders/checkout-schema";
 import { AlertIcon, ShieldIcon } from "../icons";
 import { Button } from "../ui/Button";

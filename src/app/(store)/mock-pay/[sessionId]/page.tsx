@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
-import { mockDeclineAction, mockPayAction } from "@/app/mock-pay/actions";
+import { mockDeclineAction, mockPayAction } from "@/app/(store)/mock-pay/actions";
 import { AlertIcon, CheckIcon, CloseIcon, InfoIcon } from "@/components/icons";
 import { Button, buttonClasses } from "@/components/ui/Button";
 import { db } from "@/lib/db";

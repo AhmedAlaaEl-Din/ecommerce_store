@@ -5,7 +5,7 @@ Branch: `phase-3` (from `main`, which already contains `phase-2`). Evidence hand
 
 - [x] 1. Branch phase-3; copy this prompt to docs/ — branched from main (02e179f, contains phase-2); prompt copied to docs/PHASE3_PROMPT.md.
 - [x] 2. Prisma models (AdminUser, AdminSession, AuditLog, StockMovement, fulfilment fields, notes, refunds) and migration — migration `admin_panel`: AdminUser/AdminSession (hashed session ids), AuditLog, StockMovement (reason enum), OrderEvent timeline, OrderNote, Refund, Setting; Order gains fulfilment fields + `refunded` status; Product gains archivedAt/thumbPath/updatedAt. Installed sharp 0.35.5 and @node-rs/argon2 2.2.2 (prebuilt Windows binaries, argon2id works).
-- [ ] 3. Password hashing, login, sessions, lockout, requireAdmin helper
+- [x] 3. Password hashing, login, sessions, lockout, requireAdmin helper — argon2id (@node-rs/argon2, OWASP params); DB sessions keyed by SHA-256 of a 256-bit cookie token (httpOnly, SameSite=Lax, path /admin, Secure in production), rotated on login, 30 min idle / 12 h absolute; generic login error, timing-equalised unknown emails, per-IP + per-account token buckets, 5 failures -> 15 min lock; every attempt audited with a masked email; `requireAdmin(role?)` (redirect to login / forbidden() 403); demo accounts seeded with random passwords written only to var/demo-credentials.txt (reused across DBs); `npm run admin:create`. Route groups: (store), (checkout), admin.
 - [ ] 4. Admin layout, 403 page, mobile drawer
 - [ ] 5. Dashboard and demo-history seed
 - [ ] 6. Products CRUD, image upload, archive

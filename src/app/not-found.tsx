@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { ArrowRightIcon } from "@/components/icons";
+import { StoreChrome } from "@/components/layout/StoreChrome";
 import { ButtonLink } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
@@ -8,7 +9,9 @@ export const metadata: Metadata = {
 };
 
 export default function NotFound() {
+  // Unmatched URLs render outside the (store) layout, so the chrome is added here.
   return (
+    <StoreChrome>
     <div className="mx-auto flex max-w-7xl flex-col items-center px-4 pt-16 pb-8 text-center sm:px-6 lg:px-10 lg:pt-24">
       <svg width="220" height="160" viewBox="0 0 220 160" aria-hidden="true">
         <circle cx="110" cy="80" r="72" fill="#F3E1D5" />
@@ -50,5 +53,6 @@ export default function NotFound() {
         </ButtonLink>
       </div>
     </div>
+    </StoreChrome>
   );
 }
