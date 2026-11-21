@@ -99,6 +99,9 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
   // 1. Home hero
   await page.goto(BASE, { waitUntil: "networkidle" });
   await rec.snap("home", "Nile Goods: a calm, editorial home-goods store (demo).", 2.5);
+  if (!mobile) await page.getByRole("link", { name: "Shop the collection" }).hover();
+  await page.waitForTimeout(200);
+  await rec.snap("home", "One clear primary action.", 1.2);
 
   // 2. Scroll to featured
   const featuredY = await page
@@ -168,7 +171,14 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
 
   // 7. Add to cart (toast + badge animation)
   const add = page.getByTestId("add-to-cart");
-  await add.scrollIntoViewIfNeeded();
+  if (mobile) {
+    const y = await add.evaluate((el) => el.getBoundingClientRect().top + window.scrollY - 360);
+    await rec.scrollTo("product", "Full-width Add to cart on mobile.", y, 3);
+  } else {
+    await add.hover();
+    await page.waitForTimeout(150);
+    await rec.snap("product", "Add to cart.", 1.0);
+  }
   await page.getByRole("button", { name: "Increase quantity" }).click();
   await rec.snap("add-to-cart", "Choose a quantity.", 1.0);
   await add.click();
@@ -186,6 +196,15 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
   // 8. Cart
   await page.goto(`${BASE}/cart`, { waitUntil: "networkidle" });
   await rec.snap("cart", "The cart lives on the server, keyed by an httpOnly cookie.", 2.5);
+  if (mobile) {
+    const y = await page
+      .getByTestId("order-summary")
+      .evaluate((el) => el.getBoundingClientRect().top + window.scrollY - 120);
+    await rec.scrollTo("cart", "Order summary with free-shipping progress.", y, 3);
+    await rec.scrollTo("cart", "Back to the items.", 0, 2);
+  } else {
+    await rec.snap("cart", "Order summary stays in view on desktop.", 1.5);
+  }
 
   // 9. Change quantity
   const mug = page.locator('[data-product="basalt-stoneware-mug"]');
@@ -195,6 +214,7 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
   await rec.snap("change-quantity", "Subtotal updated.", 1.5);
 
   // 10. Reload persists
+  await rec.snap("reload", "Now reload the page…", 1.0);
   await page.reload({ waitUntil: "networkidle" });
   await rec.snap("reload", "After a reload, the cart is still there.", 2.0);
 
@@ -213,9 +233,11 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
   await rec.snap("remove-undo", "Undo puts it back.", 2.0);
 
   // 12. Empty cart
+  await rec.snap("empty-cart", "Remove everything…", 1.0);
   while ((await page.getByTestId("remove-line").count()) > 0) {
     await page.getByTestId("remove-line").first().click();
     await page.waitForTimeout(250);
+    await rec.snap("empty-cart", "Removing…", 0.4);
   }
   await page.getByTestId("empty-cart").waitFor();
   await settle();
@@ -225,10 +247,32 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
   // 13. Out-of-stock product
   await page.goto(`${BASE}/products/lumen-table-lamp`, { waitUntil: "networkidle" });
   await rec.snap("out-of-stock", "Out-of-stock products can’t be added.", 2.0);
+  const disabled = page.getByTestId("add-to-cart");
+  if (mobile) {
+    const y = await disabled.evaluate(
+      (el) => el.getBoundingClientRect().top + window.scrollY - 360,
+    );
+    await rec.scrollTo(
+      "out-of-stock",
+      "The button is disabled, with a pointer to similar pieces.",
+      y,
+      3,
+    );
+  } else {
+    await disabled.hover();
+    await rec.snap(
+      "out-of-stock",
+      "The button is disabled, with a pointer to similar pieces.",
+      1.5,
+    );
+  }
 
   // 14. 404
   await page.goto(`${BASE}/products/a-made-up-product`, { waitUntil: "networkidle" });
   await rec.snap("404", "A real 404, in the same style.", 2.5);
+  if (!mobile) await page.getByRole("link", { name: "Back to home" }).hover();
+  await page.waitForTimeout(200);
+  await rec.snap("404", "A clear way back home.", 2.0);
 }
 
 async function main() {

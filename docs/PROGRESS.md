@@ -14,7 +14,7 @@
 - [x] 12. CHECKPOINT: design review subagent, then fixes
 - [x] 13. CHECKPOINT: code and security review subagent, then fixes
 - [x] 14. Lighthouse scores
-- [ ] 15. Demo frames and storyboard (section 10)
+- [x] 15. Demo frames and storyboard (section 10)
 - [ ] 16. README, LICENSE, docs/PHASE1_REPORT.md, docs/HOW_TO_TEST_PHASE1.md
 - [ ] 17. Privacy check and final `npm run verify`
 
@@ -33,6 +33,7 @@
 - 12: Design review subagent: 10 findings + extras; 8 fixed/partly fixed, 2 rejected with reasons. Details in docs/reviews/design-review.md. Verify green after fixes. Category "home" renamed "Home & Living". scripts/record-frames.ts, scripts/lighthouse.ts and LICENSE drafted (committed here, used in 14-16).
 - 13: Code/security review subagent: no critical issues; 23 findings -> 19 fixed, 1 partly (rate limit deferred to Phase 4), 1 rejected (Input kept), 1 documented, 1 left to owner (.claude/settings.json). Details docs/reviews/code-security-review.md. Watch: shell node -e edits strip single quotes/backslashes (bit me twice: CSP keywords, regex) - use Write/Edit for such text. Verify: unit 30, integ 32, e2e 18, axe 13.
 - 14: Lighthouse (median of 3, mobile preset): perf 70/74/82 default (missed; CPU benchmark ~730, LH warns slow CPU), 93/92/91 with calibrated 2x CPU; a11y/BP/SEO 100 everywhere. Fixes: fetchPriority=high (priority prop deprecated), zod out of client bundle (CSP eval -> BP 100). Also fixed regression: layout try/catch swallowed Next dynamic-usage signal (unstable_rethrow) -> /info,/_not-found had been static; e2e now checks badge on /info & 404. Details docs/reviews/lighthouse.md.
+- 15: npm run frames (scripts/record-frames.ts starts its own server on port 3200 with reseeded e2e.db): 54 desktop (1280x720) + 64 mobile (390x844) frames, bursts of 4-6 frames 60ms apart for toast/badge/qty/remove, storyboard.json with captions+durations. Copied evidence/phase1 (frames, storyboard, review, lighthouse) to E:handoffecommerce_phase1 (39 MB).
 
 ## Needed permissions
 
