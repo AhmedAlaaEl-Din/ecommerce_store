@@ -8,7 +8,7 @@
 - [x] 6. Catalog with filters, search, sort, pagination
 - [x] 7. Product page and 404
 - [x] 8. Cart (server, cookie, actions, toasts, undo)
-- [ ] 9. Unit and integration tests
+- [x] 9. Unit and integration tests
 - [ ] 10. E2E and axe tests, `npm run verify` passes
 - [ ] 11. Visual self-review loop (section 5.4)
 - [ ] 12. CHECKPOINT: design review subagent, then fixes
@@ -27,6 +27,7 @@
 - 6: /products: zod-parsed URL state (category,q,sort,page; bad values fall back), debounced search, chips + sort select (desktop), bottom-sheet dialog (mobile), result count, empty state w/ reset, skeletons via shared transition + loading.tsx, 12/page pagination. Note: SQLite `contains` is case-insensitive (ASCII); Postgres in Phase 4 needs mode:"insensitive".
 - 7: /products/[slug] (breadcrumbs, big image, price+sale, stock badge, stepper, AddToCart, benefits, related) + OG/twitter meta; real 404 verified via curl for unknown/invalid slugs and made-up URLs. Catalog moved into route group products/(catalog) so its loading.tsx does not wrap [slug] (would stream 200 before notFound). Friendly error.tsx. Cart server actions (src/app/actions/cart.ts) written here for AddToCart.
 - 8: /cart: server-read cart -> client CartView with optimistic qty/remove, latest-request-wins guard, undo toast (restoreCartItemAction), sticky summary, free-shipping progress, disabled "Checkout coming in Phase 2". Cookie ng_cart: random UUID, httpOnly, Lax, 30d, Secure when x-forwarded-proto=https. Smoke-tested (scripts/dev/smoke-cart.ts).
+- 9: Vitest projects unit (30 tests: money, sale display incl. <Price> SSR markup, cart maths, clamping, zod schemas, URL helpers) + integration (29 tests on prisma/test.db created by global-setup via migrate deploy: cart add/update/remove/undo, stock limit, unknown/inactive/OOS, DB price trust, seed idempotency, search/sort/paging).
 
 ## Needed permissions
 

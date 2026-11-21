@@ -16,7 +16,10 @@
     "db:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "db:reset": "prisma migrate reset --force && tsx prisma/seed.ts",
-    "illustrations": "tsx scripts/generate-illustrations.ts"
+    "illustrations": "tsx scripts/generate-illustrations.ts",
+    "test:unit": "vitest run --project unit",
+    "test:integration": "vitest run --project integration",
+    "test": "vitest run"
   },
   "dependencies": {
     "@prisma/adapter-better-sqlite3": "^7.10.1",
@@ -34,7 +37,6 @@
     "@types/node": "^26.6.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^6.3.0",
     "cross-env": "^10.1.0",
     "dotenv": "^18.0.10",
     "eslint": "^9",
@@ -47,7 +49,6 @@
     "tailwindcss": "4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^5.1.1"
   },
   "allowScripts": {
