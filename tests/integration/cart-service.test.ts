@@ -3,6 +3,7 @@ import {
   addItem,
   getCart,
   getCartItemCount,
+  pruneIdleCarts,
   removeItem,
   restoreItem,
   updateItemQuantity,
@@ -183,5 +184,39 @@ describe("getCart", () => {
     const cart = await getCart(db, cartId);
     expect(cart.lines.map((l) => l.slug)).toEqual(["plenty"]);
     expect(await getCartItemCount(db, cartId)).toBe(2);
+  });
+});
+
+describe("stock changes after adding", () => {
+  it("re-clamps quantities to current stock and excludes sold-out lines from totals", async () => {
+    const cartId = await newCartWith(f.plenty.id, 5); // 5 x 1250
+    await addItem(db, cartId, f.scarce.id, 2); // 2 x 4000
+    await db.product.update({ where: { id: f.plenty.id }, data: { stock: 3 } });
+    await db.product.update({ where: { id: f.scarce.id }, data: { stock: 0 } });
+    const cart = await getCart(db, cartId);
+    const plenty = cart.lines.find((l) => l.slug === "plenty")!;
+    const scarce = cart.lines.find((l) => l.slug === "scarce")!;
+    expect(plenty.quantity).toBe(3);
+    expect(plenty.unavailable).toBe(false);
+    expect(scarce.unavailable).toBe(true);
+    expect(scarce.lineTotalCents).toBe(0);
+    expect(cart.subtotalCents).toBe(3750);
+    expect(cart.itemCount).toBe(3);
+    expect(await getCartItemCount(db, cartId)).toBe(3);
+  });
+});
+
+describe("pruneIdleCarts", () => {
+  it("deletes only carts idle for longer than the limit, and every change refreshes updatedAt", async () => {
+    const oldCart = await newCartWith(f.plenty.id, 1);
+    const activeCart = await newCartWith(f.plenty.id, 1);
+    const longAgo = new Date(Date.now() - 40 * 24 * 60 * 60 * 1000);
+    await db.cart.updateMany({ data: { updatedAt: longAgo } });
+    // A quantity change on the active cart marks it as recently used.
+    await updateItemQuantity(db, activeCart, f.plenty.id, 2);
+    expect(await pruneIdleCarts(db, 30)).toBe(1);
+    expect(await db.cart.findUnique({ where: { id: oldCart } })).toBeNull();
+    expect(await db.cart.findUnique({ where: { id: activeCart } })).not.toBeNull();
+    expect(await db.cartItem.count({ where: { cartId: oldCart } })).toBe(0);
   });
 });

@@ -15,8 +15,6 @@ export const productCardSelect = {
   category: { select: { slug: true, name: true, accentColor: true } },
 } satisfies Prisma.ProductSelect;
 
-export type ProductCardRow = Prisma.ProductGetPayload<{ select: typeof productCardSelect }>;
-
 export async function getCategories(db: Db = defaultDb) {
   return db.category.findMany({
     orderBy: { name: "asc" },
@@ -79,7 +77,19 @@ const sortOrder: Record<CatalogQuery["sort"], Prisma.ProductOrderByWithRelationI
 export async function searchProducts(query: CatalogQuery, db: Db = defaultDb) {
   const where: Prisma.ProductWhereInput = { isActive: true };
   if (query.category) where.category = { slug: query.category };
-  if (query.q) where.name = { contains: query.q };
+  if (query.q) {
+    if (/[%_]/.test(query.q)) {
+      // SQLite LIKE (used by `contains`) treats % and _ as wildcards and Prisma
+      // cannot add an ESCAPE clause, so match these rare queries literally in code.
+      const needle = query.q.toLowerCase();
+      const candidates = await db.product.findMany({ where, select: { id: true, name: true } });
+      where.id = {
+        in: candidates.filter((p) => p.name.toLowerCase().includes(needle)).map((p) => p.id),
+      };
+    } else {
+      where.name = { contains: query.q };
+    }
+  }
 
   const total = await db.product.count({ where });
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -92,10 +102,6 @@ export async function searchProducts(query: CatalogQuery, db: Db = defaultDb) {
     select: productCardSelect,
   });
   return { products, total, page, totalPages };
-}
-
-export async function getCategoryBySlug(slug: string, db: Db = defaultDb) {
-  return db.category.findUnique({ where: { slug } });
 }
 
 /** Active product by slug, or null. Inactive products are treated as not found. */

@@ -86,6 +86,7 @@ export async function updateCartItemAction(input: unknown): Promise<CartMutation
     );
     const cart = await getCart(db, cartId);
     if (!result.ok) return { ok: false, message: MESSAGES[result.code], cart };
+    if (cartId) await writeCartId(cartId); // sliding 30-day expiry
     return { ok: true, cart, limited: result.data.limited };
   } catch (err) {
     logError("update", err);
@@ -101,6 +102,7 @@ export async function removeCartItemAction(input: unknown): Promise<CartMutation
     const result = await removeItem(db, cartId, parsed.data.productId);
     const cart = await getCart(db, cartId);
     if (!result.ok) return { ok: false, message: MESSAGES[result.code], cart };
+    if (cartId) await writeCartId(cartId); // sliding 30-day expiry
     return { ok: true, cart, removed: result.data };
   } catch (err) {
     logError("remove", err);

@@ -12,7 +12,7 @@
 - [x] 10. E2E and axe tests, `npm run verify` passes
 - [x] 11. Visual self-review loop (section 5.4)
 - [x] 12. CHECKPOINT: design review subagent, then fixes
-- [ ] 13. CHECKPOINT: code and security review subagent, then fixes
+- [x] 13. CHECKPOINT: code and security review subagent, then fixes
 - [ ] 14. Lighthouse scores
 - [ ] 15. Demo frames and storyboard (section 10)
 - [ ] 16. README, LICENSE, docs/PHASE1_REPORT.md, docs/HOW_TO_TEST_PHASE1.md
@@ -31,6 +31,7 @@
 - 10: Playwright vs next build+start on port 3100 with separate prisma/e2e.db (scripts/e2e-server.ts reseeds). e2e 17 (desktop 12 + mobile 5), axe 13 (11 pages + cart/toast + open menu/sheet). Only axe finding was label-content-name-mismatch on the wordmark (fixed). npm run verify green.
 - 11: scripts/review-shots.ts -> 28 shots (14 desktop, 14 mobile incl. menu/sheet/toast/scrolled header). Round 1 found: cart line image stretched + trash wrapping on mobile; search kept "All products" h1; home section-header links wrapping titles on mobile; wordmark trailing space collapsed in flex. Fixed. Round 2: clean. (Earlier rounds during build: featured/sale duplication, footer too long on mobile, card titles balance-wrapping, breadcrumb "Home > Home".) Also fixed e2e-server orphaning next start on Windows.
 - 12: Design review subagent: 10 findings + extras; 8 fixed/partly fixed, 2 rejected with reasons. Details in docs/reviews/design-review.md. Verify green after fixes. Category "home" renamed "Home & Living". scripts/record-frames.ts, scripts/lighthouse.ts and LICENSE drafted (committed here, used in 14-16).
+- 13: Code/security review subagent: no critical issues; 23 findings -> 19 fixed, 1 partly (rate limit deferred to Phase 4), 1 rejected (Input kept), 1 documented, 1 left to owner (.claude/settings.json). Details docs/reviews/code-security-review.md. Watch: shell node -e edits strip single quotes/backslashes (bit me twice: CSP keywords, regex) - use Write/Edit for such text. Verify: unit 30, integ 32, e2e 18, axe 13.
 
 ## Needed permissions
 

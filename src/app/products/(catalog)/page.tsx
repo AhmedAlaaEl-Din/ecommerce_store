@@ -30,6 +30,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
       ? `${category.description} Browse ${category.name.toLowerCase()} at Nile Goods (demo store).`
       : "Browse every Nile Goods product: ceramics, kitchen tools, stationery and bags. Demo store, no real orders.",
     alternates: { canonical: catalogHref({ category: query.category }) },
+    // Search result pages reflect user input in the title: keep them out of indexes.
+    robots: query.q ? { index: false, follow: true } : undefined,
   };
 }
 

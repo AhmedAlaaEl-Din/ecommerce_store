@@ -1,15 +1,15 @@
 import { z } from "zod";
 import { MAX_QUANTITY_PER_LINE } from "./cart/math";
 
-/** Product ids are Prisma cuids: short, lowercase alphanumerics. */
+/** Product ids are Prisma cuids: lowercase alphanumerics, about 25 characters. */
 export const productIdSchema = z
   .string()
-  .trim()
-  .min(1)
-  .max(64)
-  .regex(/^[a-z0-9]+$/i, "Invalid product id");
+  .min(8)
+  .max(40)
+  .regex(/^[a-z0-9]+$/, "Invalid product id");
 
-export const quantitySchema = z.coerce.number().int().min(1).max(MAX_QUANTITY_PER_LINE);
+/** Server actions receive typed values, so no coercion: "5", true or ["5"] are rejected. */
+export const quantitySchema = z.number().int().min(1).max(MAX_QUANTITY_PER_LINE);
 
 export const addToCartSchema = z.object({
   productId: productIdSchema,

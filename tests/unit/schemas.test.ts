@@ -11,30 +11,46 @@ import {
 
 describe("cart input schemas", () => {
   it("accepts a product id and defaults quantity to 1", () => {
-    expect(addToCartSchema.parse({ productId: "cmabc123" })).toEqual({
-      productId: "cmabc123",
+    expect(addToCartSchema.parse({ productId: "cmabc12345" })).toEqual({
+      productId: "cmabc12345",
       quantity: 1,
     });
   });
 
-  it("coerces numeric strings", () => {
-    expect(updateCartItemSchema.parse({ productId: "abc", quantity: "3" }).quantity).toBe(3);
+  it("does not coerce: strings, booleans and arrays are rejected", () => {
+    for (const quantity of ["3", true, ["3"]]) {
+      expect(updateCartItemSchema.safeParse({ productId: "cmabc12345", quantity }).success).toBe(
+        false,
+      );
+    }
+    expect(updateCartItemSchema.parse({ productId: "cmabc12345", quantity: 3 }).quantity).toBe(3);
   });
 
   it("rejects bad quantities", () => {
     for (const quantity of [0, -1, 1.5, 100, "x", null]) {
-      expect(updateCartItemSchema.safeParse({ productId: "abc", quantity }).success).toBe(false);
+      expect(updateCartItemSchema.safeParse({ productId: "cmabc12345", quantity }).success).toBe(
+        false,
+      );
     }
   });
 
   it("rejects bad product ids", () => {
-    for (const productId of ["", "a".repeat(65), "abc'; DROP TABLE", "../x", 42, undefined]) {
+    for (const productId of [
+      "",
+      "short",
+      "a".repeat(41),
+      "ABCDEFGHIJ",
+      "abc'; DROP TABLE",
+      "../x",
+      42,
+      undefined,
+    ]) {
       expect(removeCartItemSchema.safeParse({ productId }).success).toBe(false);
     }
   });
 
   it("ignores any price sent by the client", () => {
-    const parsed = addToCartSchema.parse({ productId: "abc", quantity: 1, priceCents: 1 });
+    const parsed = addToCartSchema.parse({ productId: "cmabc12345", quantity: 1, priceCents: 1 });
     expect(parsed).not.toHaveProperty("priceCents");
   });
 

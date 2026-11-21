@@ -17,6 +17,7 @@ import {
 } from "@/lib/cart/math";
 import type { CartLine, CartView as CartData } from "@/lib/cart/service";
 import { formatMoney } from "@/lib/money";
+import { LOW_STOCK_THRESHOLD } from "@/lib/pricing";
 import { ArrowRightIcon, TrashIcon } from "../icons";
 import { Button, ButtonLink } from "../ui/Button";
 import { EmptyState } from "../ui/EmptyState";
@@ -26,7 +27,7 @@ import { useToast } from "../ui/Toast";
 import { useCartCount } from "./CartCountProvider";
 
 function withLines(cart: CartData, lines: CartLine[]): CartData {
-  return { ...cart, lines, ...cartTotals(lines) };
+  return { ...cart, lines, ...cartTotals(lines.filter((l) => !l.unavailable)) };
 }
 
 export function CartView({ initialCart }: { initialCart: CartData }) {
@@ -237,8 +238,9 @@ function CartLineRow({
           <div className="flex items-center gap-1 sm:gap-3">
             <QuantityStepper
               value={line.quantity}
-              max={Math.min(line.stock, MAX_QUANTITY_PER_LINE)}
+              max={Math.max(1, Math.min(line.stock, MAX_QUANTITY_PER_LINE))}
               onChange={onQuantity}
+              disabled={line.unavailable}
               label={`Quantity for ${line.name}`}
               size="sm"
             />
@@ -258,10 +260,17 @@ function CartLineRow({
             {formatMoney(line.lineTotalCents, line.currency)}
           </p>
         </div>
-        {line.quantity >= line.stock && line.stock <= 3 && (
-          <p className="text-warning mt-2 text-sm">
-            Only {line.stock} available. You have them all.
+        {line.unavailable ? (
+          <p className="text-danger mt-2 text-sm font-medium" data-testid="line-unavailable">
+            Sold out since you added it. It isn’t included in your total; please remove it.
           </p>
+        ) : (
+          line.quantity >= line.stock &&
+          line.stock <= LOW_STOCK_THRESHOLD && (
+            <p className="text-warning mt-2 text-sm">
+              Only {line.stock} available. You have them all.
+            </p>
+          )
         )}
       </div>
     </li>
@@ -269,9 +278,11 @@ function CartLineRow({
 }
 
 function OrderSummary({ cart }: { cart: CartData }) {
+  // Phase 1 sells in one currency (see SUPPORTED_CURRENCIES); use the cart's.
+  const currency = cart.lines[0]?.currency ?? "USD";
   const savings = cart.lines.reduce(
     (sum, l) =>
-      l.compareAtCents != null && l.compareAtCents > l.priceCents
+      !l.unavailable && l.compareAtCents != null && l.compareAtCents > l.priceCents
         ? sum + (l.compareAtCents - l.priceCents) * l.quantity
         : sum,
     0,
@@ -294,7 +305,9 @@ function OrderSummary({ cart }: { cart: CartData }) {
         {cart.amountToFreeShippingCents > 0 ? (
           <p>
             You’re{" "}
-            <strong className="tabular-nums">{formatMoney(cart.amountToFreeShippingCents)}</strong>{" "}
+            <strong className="tabular-nums">
+              {formatMoney(cart.amountToFreeShippingCents, currency)}
+            </strong>{" "}
             away from free shipping.
           </p>
         ) : (
@@ -321,27 +334,27 @@ function OrderSummary({ cart }: { cart: CartData }) {
             Subtotal ({cart.itemCount} {cart.itemCount === 1 ? "item" : "items"})
           </dt>
           <dd className="font-medium tabular-nums" data-testid="subtotal">
-            {formatMoney(cart.subtotalCents)}
+            {formatMoney(cart.subtotalCents, currency)}
           </dd>
         </div>
         {savings > 0 && (
           <div className="flex justify-between">
             <dt className="text-muted">Sale savings</dt>
             <dd className="text-accent font-medium tabular-nums" data-testid="savings">
-              −{formatMoney(savings)}
+              −{formatMoney(savings, currency)}
             </dd>
           </div>
         )}
         <div className="flex justify-between">
           <dt className="text-muted">Shipping</dt>
           <dd className="font-medium tabular-nums" data-testid="shipping">
-            {cart.shippingCents === 0 ? "Free" : formatMoney(cart.shippingCents)}
+            {cart.shippingCents === 0 ? "Free" : formatMoney(cart.shippingCents, currency)}
           </dd>
         </div>
         <div className="border-line flex justify-between border-t pt-3 text-base">
           <dt className="font-semibold">Total</dt>
           <dd className="font-display text-xl font-semibold tabular-nums" data-testid="total">
-            {formatMoney(cart.totalCents)}
+            {formatMoney(cart.totalCents, currency)}
           </dd>
         </div>
       </dl>

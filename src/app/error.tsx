@@ -1,14 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import { Button, ButtonLink } from "@/components/ui/Button";
 
 /** Friendly fallback for unexpected render errors. The raw error is never shown. */
 export default function ErrorPage({
+  error,
   reset,
 }: {
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  useEffect(() => {
+    // The digest matches the server log entry; the message itself is never shown.
+    console.error("Page error", error.digest ?? "(no digest)");
+  }, [error.digest]);
   return (
     <div className="mx-auto flex max-w-xl flex-col items-center px-4 pt-20 pb-8 text-center">
       <p className="text-accent text-xs font-semibold tracking-[0.12em] uppercase">

@@ -82,6 +82,11 @@ describe("searchProducts", () => {
     expect(newest.slug).toBe("nomad-roll-top-backpack");
   });
 
+  it("treats LIKE wildcards in the search box literally", async () => {
+    expect((await searchProducts(q({ q: "%" }), db)).total).toBe(0);
+    expect((await searchProducts(q({ q: "_" }), db)).total).toBe(0);
+  });
+
   it("hides inactive products", async () => {
     await db.product.update({ where: { slug: "dune-ceramic-vase" }, data: { isActive: false } });
     expect((await searchProducts(q({ q: "vase" }), db)).total).toBe(0);

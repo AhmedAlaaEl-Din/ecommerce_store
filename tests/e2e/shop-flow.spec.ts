@@ -204,6 +204,16 @@ test.describe("cart rules", () => {
 });
 
 test.describe("edge cases", () => {
+  test("responses carry security headers", async ({ page }) => {
+    const res = await page.goto("/");
+    const h = res!.headers();
+    expect(h["content-security-policy"]).toContain("frame-ancestors 'none'");
+    expect(h["x-content-type-options"]).toBe("nosniff");
+    expect(h["x-frame-options"]).toBe("DENY");
+    expect(h["referrer-policy"]).toBe("strict-origin-when-cross-origin");
+    expect(h["x-powered-by"]).toBeUndefined();
+  });
+
   test("out-of-stock product has a disabled add button", async ({ page }) => {
     await page.goto("/products/lumen-table-lamp");
     await expect(page.getByTestId("stock-badge")).toHaveText("Out of stock");

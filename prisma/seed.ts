@@ -1,9 +1,12 @@
 import "dotenv/config";
 import type { PrismaClient } from "../src/generated/prisma/client";
 import { createDb } from "../src/lib/db";
+import type { Currency } from "../src/lib/money";
 import { categories, products, SEED_EPOCH } from "./seed-data";
 
 const DAY = 24 * 60 * 60 * 1000;
+/** Typed against SUPPORTED_CURRENCIES, so an unsupported code fails to compile. */
+const CURRENCY: Currency = "USD";
 
 /**
  * Idempotent seed: upserts categories and products by slug, so running it
@@ -27,6 +30,8 @@ export async function seedDatabase(db: PrismaClient, opts: { resetCarts?: boolea
   }
 
   for (const p of products) {
+    if (!Number.isSafeInteger(p.priceCents) || p.priceCents < 0)
+      throw new Error(`Bad price for ${p.slug}`);
     const categoryId = categoryIds.get(p.category);
     if (!categoryId) throw new Error(`Unknown category ${p.category} for ${p.slug}`);
     const data = {
@@ -35,7 +40,7 @@ export async function seedDatabase(db: PrismaClient, opts: { resetCarts?: boolea
       description: p.description,
       priceCents: p.priceCents,
       compareAtCents: p.compareAtCents ?? null,
-      currency: "USD",
+      currency: CURRENCY,
       stock: p.stock,
       imagePath: `/products/${p.slug}.svg`,
       categoryId,

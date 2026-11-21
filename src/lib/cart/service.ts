@@ -26,6 +26,8 @@ export type CartLine = {
   stock: number;
   quantity: number;
   lineTotalCents: number;
+  /** True when the product sold out after it was added; excluded from totals. */
+  unavailable: boolean;
 };
 
 export type CartView = {
@@ -63,7 +65,9 @@ export async function getCart(db: Db, cartId: string | null): Promise<CartView> 
   const lines: CartLine[] = cart.items
     .filter((i) => i.product.isActive)
     .map((i) => {
-      const quantity = i.quantity;
+      // Never show more than can be bought now (stock may have dropped since adding).
+      const unavailable = i.product.stock <= 0;
+      const quantity = unavailable ? i.quantity : Math.min(i.quantity, i.product.stock);
       return {
         productId: i.productId,
         slug: i.product.slug,
@@ -76,32 +80,37 @@ export async function getCart(db: Db, cartId: string | null): Promise<CartView> 
         currency: i.product.currency,
         stock: i.product.stock,
         quantity,
-        lineTotalCents: lineTotalCents({ priceCents: i.product.priceCents, quantity }),
+        lineTotalCents: unavailable
+          ? 0
+          : lineTotalCents({ priceCents: i.product.priceCents, quantity }),
+        unavailable,
       };
     });
 
-  return { id: cart.id, lines, ...cartTotals(lines) };
+  return { id: cart.id, lines, ...cartTotals(lines.filter((l) => !l.unavailable)) };
 }
 
 export async function getCartItemCount(db: Db, cartId: string | null): Promise<number> {
   if (!cartId) return 0;
-  const agg = await db.cartItem.aggregate({
-    where: { cartId, product: { isActive: true } },
-    _sum: { quantity: true },
+  const items = await db.cartItem.findMany({
+    where: { cartId, product: { isActive: true, stock: { gt: 0 } } },
+    select: { quantity: true, product: { select: { stock: true } } },
   });
-  return agg._sum.quantity ?? 0;
+  return items.reduce((sum, i) => sum + Math.min(i.quantity, i.product.stock), 0);
 }
 
-async function findBuyableProduct(db: Db, productId: string) {
+type Tx = Parameters<Parameters<Db["$transaction"]>[0]>[0];
+
+async function findBuyableProduct(db: Db | Tx, productId: string) {
   const product = await db.product.findUnique({
     where: { id: productId },
-    select: { id: true, stock: true, isActive: true, name: true },
+    select: { id: true, stock: true, isActive: true },
   });
   if (!product || !product.isActive) return null;
   return product;
 }
 
-async function ensureCart(db: Db, cartId: string | null): Promise<string> {
+async function ensureCart(db: Db | Tx, cartId: string | null): Promise<string> {
   if (cartId) {
     const existing = await db.cart.findUnique({ where: { id: cartId }, select: { id: true } });
     if (existing) return existing.id;
@@ -128,12 +137,13 @@ export async function addItem(
   productId: string,
   quantity: number,
 ): Promise<CartResult<AddResult>> {
-  const product = await findBuyableProduct(db, productId);
-  if (!product) return { ok: false, code: "PRODUCT_NOT_FOUND" };
-  if (product.stock <= 0) return { ok: false, code: "OUT_OF_STOCK" };
-
-  const id = await ensureCart(db, cartId);
-  return db.$transaction(async (tx) => {
+  // Stock check, cart creation and the quantity write happen in one transaction
+  // (SQLite serialises write transactions), so concurrent adds cannot overshoot stock.
+  return db.$transaction(async (tx): Promise<CartResult<AddResult>> => {
+    const product = await findBuyableProduct(tx, productId);
+    if (!product) return { ok: false, code: "PRODUCT_NOT_FOUND" };
+    if (product.stock <= 0) return { ok: false, code: "OUT_OF_STOCK" };
+    const id = await ensureCart(tx, cartId);
     const existing = await tx.cartItem.findUnique({
       where: { cartId_productId: { cartId: id, productId } },
       select: { quantity: true },
@@ -147,7 +157,7 @@ export async function addItem(
     });
     await tx.cart.update({ where: { id }, data: { updatedAt: new Date() } });
     return {
-      ok: true as const,
+      ok: true,
       data: { cartId: id, quantity: next, limited: next < requested, stock: product.stock },
     };
   });
@@ -170,7 +180,10 @@ export async function updateItemQuantity(
   if (item.product.stock <= 0) return { ok: false, code: "OUT_OF_STOCK" };
 
   const next = clampQuantity(quantity, item.product.stock);
-  await db.cartItem.update({ where: { id: item.id }, data: { quantity: next } });
+  await db.$transaction([
+    db.cartItem.update({ where: { id: item.id }, data: { quantity: next } }),
+    db.cart.update({ where: { id: cartId }, data: { updatedAt: new Date() } }),
+  ]);
   return { ok: true, data: { quantity: next, limited: next < quantity } };
 }
 
@@ -186,7 +199,10 @@ export async function removeItem(
     select: { id: true, quantity: true },
   });
   if (!item) return { ok: false, code: "NOT_IN_CART" };
-  await db.cartItem.delete({ where: { id: item.id } });
+  await db.$transaction([
+    db.cartItem.delete({ where: { id: item.id } }),
+    db.cart.update({ where: { id: cartId }, data: { updatedAt: new Date() } }),
+  ]);
   return { ok: true, data: { productId, quantity: item.quantity } };
 }
 
@@ -201,4 +217,14 @@ export async function restoreItem(
   quantity: number,
 ): Promise<CartResult<AddResult>> {
   return addItem(db, cartId, productId, quantity);
+}
+
+/**
+ * Deletes carts that have not changed for `maxIdleDays` (default 30, matching
+ * the cookie lifetime). Run with `npm run db:prune-carts`.
+ */
+export async function pruneIdleCarts(db: Db, maxIdleDays = 30, now = new Date()): Promise<number> {
+  const cutoff = new Date(now.getTime() - maxIdleDays * 24 * 60 * 60 * 1000);
+  const result = await db.cart.deleteMany({ where: { updatedAt: { lt: cutoff } } });
+  return result.count;
 }

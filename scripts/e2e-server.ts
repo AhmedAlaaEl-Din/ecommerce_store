@@ -9,6 +9,8 @@ import { join } from "node:path";
 
 const root = process.cwd();
 const port = process.env.E2E_PORT ?? "3100";
+// Validated before it is used anywhere (it ends up in a shell command below).
+if (!/^[0-9]{2,5}$/.test(port)) throw new Error(`Invalid E2E_PORT: ${port}`);
 const env = {
   ...process.env,
   DATABASE_URL: "file:./prisma/e2e.db",
@@ -25,8 +27,7 @@ if (!existsSync(join(root, ".next", "BUILD_ID"))) {
   execSync("npx next build", { cwd: root, env, stdio: "inherit" });
 }
 
-// Single command string (port is validated below), run through the shell for Windows npx.
-if (!/^[0-9]{2,5}$/.test(port)) throw new Error(`Invalid E2E_PORT: ${port}`);
+// Single command string (port validated above), run through the shell for Windows npx.
 const server = spawn(`npx next start --hostname localhost --port ${port}`, {
   cwd: root,
   env,

@@ -1,3 +1,11 @@
+/** Currencies the shop sells in. Phase 1 is USD only; totals assume one currency per cart. */
+export const SUPPORTED_CURRENCIES = ["USD"] as const;
+export type Currency = (typeof SUPPORTED_CURRENCIES)[number];
+
+export function isSupportedCurrency(c: string): c is Currency {
+  return (SUPPORTED_CURRENCIES as readonly string[]).includes(c);
+}
+
 const formatters = new Map<string, Intl.NumberFormat>();
 
 function formatterFor(currency: string): Intl.NumberFormat {

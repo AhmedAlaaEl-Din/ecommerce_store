@@ -114,9 +114,15 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
     await rec.snap("category", "Accessible mobile menu.", 1.5);
     await page.getByTestId("mobile-menu").getByRole("link", { name: "Kitchen" }).click();
   } else {
-    await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Kitchen" }).hover();
+    await page
+      .getByRole("navigation", { name: "Main" })
+      .getByRole("link", { name: "Kitchen" })
+      .hover();
     await rec.snap("category", "Browse by category.", 1.0);
-    await page.getByRole("navigation", { name: "Main" }).getByRole("link", { name: "Kitchen" }).click();
+    await page
+      .getByRole("navigation", { name: "Main" })
+      .getByRole("link", { name: "Kitchen" })
+      .click();
   }
   await page.waitForURL(/category=kitchen/);
   await settle();
@@ -143,7 +149,10 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
     await page.getByTestId("open-filters").click();
     await page.waitForTimeout(350);
     await rec.snap("sort", "Filters and sorting in a bottom sheet on mobile.", 1.5);
-    await page.getByTestId("filter-sheet").getByRole("radio", { name: "Price: low to high" }).check();
+    await page
+      .getByTestId("filter-sheet")
+      .getByRole("radio", { name: "Price: low to high" })
+      .check();
     await rec.snap("sort", "Sort by price, low to high.", 1.0);
     await page.getByTestId("apply-filters").click();
   } else {
@@ -194,7 +203,11 @@ async function story(page: Page, rec: Recorder, mobile: boolean) {
   await rec.burst("remove-undo", "Remove an item…", 4, 60);
   await page.getByTestId("toast").filter({ hasText: "Removed" }).waitFor();
   await rec.snap("remove-undo", "…with an Undo option.", 1.5);
-  await page.getByTestId("toast").filter({ hasText: "Removed" }).getByRole("button", { name: "Undo" }).click();
+  await page
+    .getByTestId("toast")
+    .filter({ hasText: "Removed" })
+    .getByRole("button", { name: "Undo" })
+    .click();
   await page.getByTestId("toast").filter({ hasText: "Item restored" }).waitFor();
   await page.waitForTimeout(200);
   await rec.snap("remove-undo", "Undo puts it back.", 2.0);
@@ -245,8 +258,16 @@ async function main() {
           title: "Nile Goods: Phase 1 demo",
           note: "Page-only screenshots. Durations are suggestions in seconds.",
           sets: {
-            desktop: { width: 1280, height: 720, frames: storyboard.filter((f) => f.set === "desktop").length },
-            mobile: { width: 390, height: 844, frames: storyboard.filter((f) => f.set === "mobile").length },
+            desktop: {
+              width: 1280,
+              height: 720,
+              frames: storyboard.filter((f) => f.set === "desktop").length,
+            },
+            mobile: {
+              width: 390,
+              height: 844,
+              frames: storyboard.filter((f) => f.set === "mobile").length,
+            },
           },
           frames: storyboard,
         },

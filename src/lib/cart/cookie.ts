@@ -14,17 +14,28 @@ export async function readCartId(): Promise<string | null> {
 }
 
 /**
- * Writes (or refreshes) the cart cookie: httpOnly, SameSite=Lax, 30 days.
- * `Secure` is set whenever the request came in over HTTPS (e.g. behind the
- * Phase 4 nginx proxy); plain http://localhost keeps working in every browser.
+ * Whether to mark the cookie `Secure`. Decided by server configuration, never
+ * by a header the client could send on its own:
+ * - COOKIE_SECURE=true -> always Secure (Phase 4, served over HTTPS).
+ * - TRUST_PROXY=true   -> Secure when the trusted reverse proxy reports https.
+ * - default            -> not Secure, so plain http://localhost works in every browser.
  */
+async function shouldUseSecureCookie(): Promise<boolean> {
+  if (process.env.COOKIE_SECURE === "true") return true;
+  if (process.env.TRUST_PROXY === "true") {
+    const proto = (await headers()).get("x-forwarded-proto")?.split(",")[0]?.trim();
+    return proto === "https";
+  }
+  return false;
+}
+
+/** Writes (or refreshes, so expiry slides) the cart cookie: httpOnly, SameSite=Lax, 30 days. */
 export async function writeCartId(cartId: string): Promise<void> {
-  const h = await headers();
-  const proto = h.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  const secure = await shouldUseSecureCookie();
   (await cookies()).set(CART_COOKIE, cartId, {
     httpOnly: true,
     sameSite: "lax",
-    secure: proto === "https",
+    secure,
     path: "/",
     maxAge: CART_COOKIE_MAX_AGE,
   });

@@ -17,7 +17,12 @@ const viewports = [
   { name: "desktop", width: 1440, height: 900 },
 ] as const;
 
-type Shot = { name: string; path: string; prepare?: (page: Page, vp: string) => Promise<void>; full?: boolean };
+type Shot = {
+  name: string;
+  path: string;
+  prepare?: (page: Page, vp: string) => Promise<void>;
+  full?: boolean;
+};
 
 const shots: Shot[] = [
   { name: "01-home", path: "/" },

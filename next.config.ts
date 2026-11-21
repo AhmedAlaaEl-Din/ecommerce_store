@@ -4,7 +4,36 @@ import type { NextConfig } from "next";
 // real HTTP 404 for unknown slugs, and with Cache Components the prerendered
 // shell is streamed with a 200 before `notFound()` can run. The previous
 // (dynamic-rendering) model is still fully supported in Next.js 16.
+const isDev = process.env.NODE_ENV !== "production";
+
+// Everything is served from this origin: no CDNs, analytics or third-party calls.
+// Next.js inlines its bootstrap scripts, so script-src needs 'unsafe-inline'
+// (a nonce-based CSP is a Phase 4 hardening item); dev also needs 'unsafe-eval'.
+const csp = [
+  "default-src 'self'",
+  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob:",
+  "font-src 'self'",
+  `connect-src 'self'${isDev ? " ws://localhost:*" : ""}`,
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'none'",
+].join("; ");
+
+const securityHeaders = [
+  { key: "Content-Security-Policy", value: csp },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=()" },
+];
+
 const nextConfig: NextConfig = {
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
   poweredByHeader: false,
   reactStrictMode: true,
   serverExternalPackages: ["better-sqlite3", "@prisma/adapter-better-sqlite3"],
