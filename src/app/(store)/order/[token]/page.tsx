@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { CartCountSync } from "@/components/cart/CartCountSync";
 import { DemoRibbon } from "@/components/checkout/DemoRibbon";
 import { AlertIcon, ArrowRightIcon, CheckIcon } from "@/components/icons";
+import { OrderProgress } from "@/components/order/OrderProgress";
 import { OrderStatusPoller } from "@/components/order/OrderStatusPoller";
 import { ButtonLink } from "@/components/ui/Button";
 import { Spinner } from "@/components/ui/Spinner";
@@ -38,7 +39,7 @@ export default async function OrderPage({ params }: Props) {
       {order.provider === "mock" && <DemoRibbon />}
       <div className="mx-auto max-w-3xl px-4 pt-8 pb-4 sm:px-6 lg:pt-14">
         {cartCount !== null && <CartCountSync count={cartCount} />}
-        {order.status === "paid" ? (
+        {order.status === "paid" || order.status === "refunded" ? (
           <Paid order={order} />
         ) : order.status === "pending_payment" ? (
           <Pending order={order} />
@@ -128,6 +129,13 @@ function Paid({ order }: { order: OrderView }) {
         saved as a local file, not sent).
       </p>
 
+      {order.status === "refunded" && (
+        <p className="bg-accent-soft text-accent mt-6 rounded-md px-4 py-3 text-sm" data-testid="order-refunded" role="status">
+          This order was refunded in full ({m(order.totalCents)}). Refunds usually show on your statement within 5 to 10 business days.
+        </p>
+      )}
+      <OrderProgress order={order} />
+
       <div className="mt-8 grid gap-6 sm:grid-cols-[1fr_15rem]">
         <section
           aria-labelledby="items-heading"
@@ -162,7 +170,7 @@ function Paid({ order }: { order: OrderView }) {
             </div>
             <div className="flex justify-between pt-1 text-base font-semibold">
               <dt>
-                Total paid{" "}
+                {order.status === "refunded" ? "Total (refunded)" : "Total paid"}{" "}
                 <span className="text-muted text-sm font-normal">
                   ({order.provider === "mock" ? "mock payment" : "test mode"})
                 </span>
@@ -207,8 +215,9 @@ function Paid({ order }: { order: OrderView }) {
           What happens next
         </h2>
         <p className="text-muted mt-2 max-w-prose">
-          In a real store we would pack your order within two working days and email you a tracking
-          link. This is a demo, so nothing will ship. Keep this page’s link to see the order again.
+          We pack orders within two working days and update this page when your parcel ships, with
+          its tracking number. This is a demo store, so nothing really ships. Keep this page’s link to
+          check on the order.
         </p>
       </section>
 

@@ -8,7 +8,6 @@ import {
 } from "@/components/checkout/CheckoutSummary";
 import { DemoRibbon } from "@/components/checkout/DemoRibbon";
 import { AlertIcon, ChevronDownIcon, InfoIcon } from "@/components/icons";
-import { Breadcrumbs } from "@/components/ui/Breadcrumbs";
 import { readCartId } from "@/lib/cart/cookie";
 import { getCart } from "@/lib/cart/service";
 import { db } from "@/lib/db";
@@ -115,14 +114,8 @@ export default async function CheckoutPage({ searchParams }: Props) {
     <>
       {mock && <DemoRibbon />}
       <div className="mx-auto max-w-6xl px-4 pt-6 sm:px-6 lg:px-10 lg:pt-10">
-        <Breadcrumbs
-          items={[
-            { label: "Home", href: "/" },
-            { label: "Cart", href: "/cart" },
-            { label: "Checkout" },
-          ]}
-        />
-        <h1 className="mt-4 text-2xl sm:text-3xl">Checkout</h1>
+        {/* Focused checkout (Phase 3): the layout's header has the only way out, "Back to cart". */}
+        <h1 className="text-2xl sm:text-3xl">Checkout</h1>
 
         {notice && (
           <div

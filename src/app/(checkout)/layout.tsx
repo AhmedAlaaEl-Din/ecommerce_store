@@ -12,7 +12,7 @@ export default function CheckoutLayout({ children }: { children: React.ReactNode
   return (
     <>
       <header className="border-line bg-surface border-b" data-testid="checkout-header">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
+        <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-10">
           <Link
             href="/cart"
             className="text-ink/80 hover:text-ink inline-flex min-h-11 items-center gap-1 text-sm font-medium underline-offset-4 hover:underline"
