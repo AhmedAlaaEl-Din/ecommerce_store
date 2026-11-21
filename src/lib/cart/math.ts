@@ -2,7 +2,7 @@
 export const MAX_QUANTITY_PER_LINE = 99;
 
 export const FREE_SHIPPING_THRESHOLD_CENTS = 5000;
-export const FLAT_SHIPPING_CENTS = 600;
+export const FLAT_SHIPPING_CENTS = 595;
 
 /**
  * Clamps a requested quantity to [1, min(stock, MAX_QUANTITY_PER_LINE)].

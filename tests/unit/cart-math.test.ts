@@ -61,8 +61,8 @@ describe("cart totals", () => {
   it("summarises the cart", () => {
     expect(cartTotals([{ priceCents: 1900, quantity: 1 }])).toEqual({
       subtotalCents: 1900,
-      shippingCents: 600,
-      totalCents: 2500,
+      shippingCents: 595,
+      totalCents: 2495,
       itemCount: 1,
       amountToFreeShippingCents: 3100,
     });

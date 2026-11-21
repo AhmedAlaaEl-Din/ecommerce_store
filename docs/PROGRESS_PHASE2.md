@@ -5,7 +5,7 @@ instead of `E:\handoff\ecommerce_phase2`.
 
 - [x] 1. Branch `phase-2` from main; copy this prompt to docs/ — branch created from merged main (19e0ca9); new `.claude/settings.json` from the owner's setup folder committed.
 - [x] 2. Prisma models and migration; .env.example updated — Order/OrderItem/ProcessedEvent/OrderCounter + OrderStatus enum; stripe 23.2.0 installed; `var/` git-ignored.
-- [ ] 3. PaymentProvider interface, MockProvider, StripeProvider (SDK mocked)
+- [x] 3. PaymentProvider interface, MockProvider, StripeProvider (SDK mocked) — config rules fail fast via instrumentation.ts; live keys refused; shipping now $5.95 flat; 20 new unit tests.
 - [ ] 4. Webhook handler, signature, idempotency
 - [ ] 5. Checkout page, form and validation
 - [ ] 6. Reservation transaction and expiry

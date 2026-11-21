@@ -11,7 +11,7 @@ const sections = [
   {
     id: "shipping",
     title: "Shipping",
-    body: "Orders over $50 ship free; below that, shipping is a flat $6. Most orders would leave our studio within two working days.",
+    body: "Orders over $50 ship free; below that, shipping is a flat $5.95. Most orders would leave our studio within two working days.",
   },
   {
     id: "returns",

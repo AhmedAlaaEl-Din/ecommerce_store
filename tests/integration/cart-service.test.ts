@@ -174,8 +174,8 @@ describe("getCart", () => {
     const cartId = await newCartWith(f.plenty.id, 1);
     const cart = await getCart(db, cartId);
     expect(cart.subtotalCents).toBe(1250);
-    expect(cart.shippingCents).toBe(600);
-    expect(cart.totalCents).toBe(1850);
+    expect(cart.shippingCents).toBe(595);
+    expect(cart.totalCents).toBe(1845);
   });
 
   it("hides products that became inactive", async () => {
