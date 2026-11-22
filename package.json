@@ -32,7 +32,8 @@
     "frames:phase2": "tsx scripts/record-frames-phase2.ts",
     "admin:create": "tsx scripts/admin-create.ts",
     "db:seed:history": "tsx prisma/seed-history.ts",
-    "review:shots:phase3": "tsx scripts/review-shots-phase3.ts"
+    "review:shots:phase3": "tsx scripts/review-shots-phase3.ts",
+    "frames:phase3": "tsx scripts/record-frames-phase3.ts"
   },
   "dependencies": {
     "@node-rs/argon2": "^2.2.2",
