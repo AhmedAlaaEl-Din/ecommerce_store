@@ -279,9 +279,11 @@ export function Kpi({
   testId?: string;
 }) {
   return (
-    <div className="border-line bg-surface shadow-1 rounded-lg border p-4" data-testid={testId}>
+    <div className="border-line bg-surface shadow-1 min-w-0 rounded-lg border p-4" data-testid={testId}>
       <p className="text-muted text-xs font-semibold tracking-[0.06em] uppercase">{label}</p>
-      <p className="font-display mt-1 text-2xl leading-tight font-semibold tabular-nums">{value}</p>
+      <p className="font-display mt-1 text-[clamp(1.125rem,0.55rem+1vw,1.5rem)] leading-tight font-semibold whitespace-nowrap tabular-nums">
+        {value}
+      </p>
       {sub && <p className="text-muted mt-1 text-xs">{sub}</p>}
     </div>
   );

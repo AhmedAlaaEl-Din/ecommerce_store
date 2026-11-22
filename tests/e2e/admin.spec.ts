@@ -340,3 +340,53 @@ test.describe("dashboard revenue chart fits its card", () => {
     });
   }
 });
+
+test.describe("dashboard KPI values are never clipped", () => {
+  const widths = [1024, 1280, 1366, 1440, 1600, 1920, 390];
+  for (const deviceScaleFactor of [1, 1.25]) {
+    for (const width of widths) {
+      test(`$99,999.99 fits its card at ${width}px, scale ${deviceScaleFactor}`, async ({
+        browser,
+      }) => {
+        const context = await browser.newContext({
+          storageState: ADMIN_STATE,
+          viewport: { width, height: 900 },
+          deviceScaleFactor,
+        });
+        const page = await context.newPage();
+        await page.goto("/admin");
+        await expect(page.getByTestId("kpis")).toBeVisible();
+        // Worst case money in every money card (the value is the second <p>).
+        await page.evaluate(() => {
+          for (const id of ["kpi-today", "kpi-7d", "kpi-30d", "kpi-aov"]) {
+            const v = document.querySelector(`[data-testid="${id}"] p:nth-of-type(2)`)!;
+            v.textContent = "$99,999.99";
+          }
+        });
+        const result = await page.evaluate(() =>
+          [...document.querySelectorAll('[data-testid="kpis"] > div')].map((card) => {
+            const value = card.querySelector("p:nth-of-type(2)") as HTMLElement;
+            const range = document.createRange();
+            range.selectNodeContents(value);
+            const text = range.getBoundingClientRect();
+            const c = card.getBoundingClientRect();
+            return {
+              id: card.getAttribute("data-testid"),
+              clipped: value.scrollWidth > value.clientWidth,
+              textInside: text.left >= c.left - 0.5 && text.right <= c.right + 0.5,
+            };
+          }),
+        );
+        expect(result).toHaveLength(6);
+        for (const r of result) {
+          expect(r.clipped, `${r.id} scrollWidth`).toBe(false);
+          expect(r.textInside, `${r.id} inside card`).toBe(true);
+        }
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+          width,
+        );
+        await context.close();
+      });
+    }
+  }
+});

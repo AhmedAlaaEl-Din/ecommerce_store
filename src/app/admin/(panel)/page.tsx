@@ -32,7 +32,7 @@ export default async function AdminDashboardPage() {
         title="Dashboard"
         description={`Welcome back, ${user.name.split(" ")[0]}. Figures use UTC days and count paid orders.`}
       />
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6" data-testid="kpis">
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(10.5rem,1fr))] gap-3" data-testid="kpis">
         <Kpi
           label="Revenue today"
           value={money(d.kpis.today.revenue)}
