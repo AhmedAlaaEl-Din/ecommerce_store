@@ -1,4 +1,4 @@
-# Nile Goods: demo store (Phases 1–2)
+# Nile Goods: demo store (Phases 1–3)
 
 A portfolio demo of a small home-goods shop: storefront, catalog, a server-side cart and a full
 checkout with orders and payments. **Payments are mock (offline, the default) or Stripe in test mode
@@ -12,6 +12,29 @@ Design direction: **warm, calm, editorial, crafted** (see [docs/DESIGN.md](docs/
 | Product page: added to cart (desktop)                                                                | Cart (mobile, 390 px)                                                                  |
 | ---------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | ![Product page with the "Added to cart" toast and cart badge](docs/images/product-added-desktop.png) | ![Cart with three items and the order summary on a phone](docs/images/cart-mobile.png) |
+
+## Admin panel (Phase 3)
+
+A back-office at `/admin` (noindex, never cached, not linked from the store): dashboard with KPIs and an
+accessible SVG revenue chart, products (image upload with magic-byte checks and EXIF stripping, archive vs
+delete), categories, inventory with a stock-movement history, orders (fulfilment, tracking, notes, packing
+slip, CSV export, refunds through the payment provider), customers, users and an audit log. Sign-in uses
+argon2id, database sessions (30 min idle, 12 h absolute), per-IP and per-account throttling and a 15-minute
+lockout after 5 failures. Every page, route and action calls `requireAdmin(role?)`; a test walks all of them.
+Demo accounts get random passwords written only to the git-ignored `var/demo-credentials.txt`.
+
+| Dashboard (desktop) | Order detail (mobile) |
+| --- | --- |
+| ![Admin dashboard](docs/images/admin-dashboard-desktop.png) | ![Admin order on a phone](docs/images/admin-order-mobile.png) |
+
+| Area | admin | staff |
+| --- | :-: | :-: |
+| Dashboard, orders (view, fulfil, notes, packing slip), products (view), stock adjustments, inventory view | yes | yes |
+| Create/edit/archive/delete products, categories, low-stock setting | yes | no |
+| Cancel and refund orders, CSV export, customers | yes | no |
+| Users, audit log | yes | no |
+
+See [docs/HOW_TO_TEST_PHASE3.md](docs/HOW_TO_TEST_PHASE3.md) and docs/PHASE3_REPORT.md.
 
 ## What's in Phase 2: checkout, orders, payments
 
@@ -120,6 +143,9 @@ npm 11 may report that some packages have install scripts. The required ones (`b
 | `npm run db:migrate` / `npm run db:seed` / `npm run db:reset` | Database migrations, idempotent seed, full reset                                          |
 | `npm run db:prune-carts`                                      | Delete carts idle for over 30 days                                                        |
 | `npm run orders:expire`                                       | Release stock held by pending orders whose 30-minute reservation has passed               |
+| `npm run admin:create -- --email x@example.com --role admin` | Create an admin/staff account; prints a one-time password |
+| `npm run db:seed:history`                                     | About 60 invented demo orders over 45 days for the dashboard |
+| `npm run frames:phase3` / `npm run review:shots:phase3`       | Phase 3 demo frames + storyboard / admin review screenshots |
 | `npm run frames:phase2`                                       | Phase 2 demo frames (mock payments) + storyboard into `evidence/phase2/`                  |
 | `npm run review:shots:phase2`                                 | Review screenshots of every Phase 2 page/state (needs a running server on 3100)           |
 | `npm run review:shots`                                        | Review screenshots of every page at 390×844 and 1440×900 (needs a running server on 3100) |

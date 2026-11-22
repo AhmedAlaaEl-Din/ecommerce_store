@@ -21,8 +21,8 @@ Branch: `phase-3` (from `main`, which already contains `phase-2`). Evidence hand
 - [x] 16. CHECKPOINT: security review subagent, then fixes — 0 critical/high, 4 medium, 8 low, 3 info (docs/reviews/phase3-security-review.md); fixed M1, L2, L3, L6b; rest rejected or deferred with reasons in the file.
 - [x] 17. CHECKPOINT: design review subagent, then fixes — 10 problems + notes (docs/reviews/phase3-design-review.md); reviewer saw only 18 of 51 shots; no UI changes, dispositions (deferred as known issues, one claim rejected as wrong) listed in the file.
 - [x] 18. Frames, storyboard and review screenshots; copy to handoff — `npm run frames:phase3`: 38 desktop (1440x900) + 11 mobile (390x844) frames, storyboard.json, 53 review shots; 103 files copied to E:handoffecommerce_phase1phase3_evidence.
-- [ ] 19. Docs (section 10)
-- [ ] 20. Privacy check and final `npm run verify`
+- [x] 19. Docs (section 10) — HOW_TO_TEST_PHASE3.md, PHASE3_REPORT.md, README Admin panel section + 2 screenshots.
+- [x] 20. Privacy check and final `npm run verify` — verify exit 0 (unit 135, integration 143, e2e 52, axe 30); demo passwords found in 0 tracked files, docs or logs; no secrets.
 
 ## Blocked
 
