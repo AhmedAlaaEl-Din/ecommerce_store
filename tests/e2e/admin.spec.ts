@@ -390,3 +390,57 @@ test.describe("dashboard KPI values are never clipped", () => {
     }
   }
 });
+
+test.describe("big numbers on other admin pages never overflow", () => {
+  for (const width of [390, 1024, 1440]) {
+    test(`orders, order detail, products and stock history at ${width}px`, async ({ browser }) => {
+      const context = await browser.newContext({
+        storageState: ADMIN_STATE,
+        viewport: { width, height: 900 },
+        deviceScaleFactor: 1.25,
+      });
+      const page = await context.newPage();
+      const stress = async () => {
+        await page.evaluate(() => {
+          for (const el of document.querySelectorAll("main .tabular-nums")) {
+            if (el.children.length === 0 && /[$\d]/.test(el.textContent ?? ""))
+              el.textContent = "$99,999,999.99";
+          }
+        });
+        const bad = await page.evaluate(() => {
+          const out: string[] = [];
+          for (const el of document.querySelectorAll("main .tabular-nums")) {
+            const h = el as HTMLElement;
+            if (h.scrollWidth > h.clientWidth) out.push(`clipped: ${h.className}`);
+            // Anything outside the viewport must sit inside a scroll container.
+            const r = h.getBoundingClientRect();
+            if (r.right > window.innerWidth + 0.5) {
+              let p: HTMLElement | null = h.parentElement;
+              let scrolls = false;
+              while (p && p !== document.body) {
+                if (getComputedStyle(p).overflowX === "auto") scrolls = true;
+                p = p.parentElement;
+              }
+              if (!scrolls) out.push(`outside viewport: ${h.className}`);
+            }
+          }
+          if (document.documentElement.scrollWidth > window.innerWidth) out.push("page scrolls sideways");
+          return out;
+        });
+        expect(bad).toEqual([]);
+      };
+      await page.goto("/admin/orders");
+      await stress();
+      await page.locator('a[href^="/admin/orders/"]:not([href$="export"])').first().click();
+      await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
+      await stress();
+      await page.goto("/admin/products");
+      await stress();
+      await page.goto("/admin/inventory");
+      await page.locator('a[href^="/admin/inventory/"]').first().click();
+      await expect(page.getByTestId("current-stock")).toBeVisible();
+      await stress();
+      await context.close();
+    });
+  }
+});
