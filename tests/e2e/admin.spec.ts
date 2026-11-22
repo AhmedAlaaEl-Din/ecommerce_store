@@ -69,7 +69,7 @@ test.describe("admin: signing in", () => {
     expect(cookie).toMatchObject({ httpOnly: true, sameSite: "Lax", path: "/admin" });
     await expect(page.getByTestId("admin-role")).toHaveText("Admin");
     await expect(page.getByTestId("kpis")).toBeVisible();
-    await expect(page.getByTestId("revenue-chart")).toBeVisible();
+    await expect(page.getByTestId("revenue-chart-scroll")).toBeVisible();
     await expect(page.getByTestId("kpi-30d")).not.toContainText("$0.00"); // demo history
 
     await page.getByRole("link", { name: "Products", exact: true }).first().click();
@@ -300,4 +300,43 @@ test("the staff demo account can sign in with its own password", async ({ page }
   expect(demoPassword(STAFF_EMAIL)).toMatch(/^[A-Za-z0-9_-]{24}$/);
   await login(page, STAFF_EMAIL);
   await expect(page.getByTestId("admin-role")).toHaveText("Staff");
+});
+
+test.describe("dashboard revenue chart fits its card", () => {
+  for (const size of [
+    { width: 390, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 1440, height: 900 },
+  ]) {
+    test(`at ${size.width}x${size.height} every bar is inside the card and nothing scrolls`, async ({
+      browser,
+    }) => {
+      const context = await browser.newContext({ storageState: ADMIN_STATE, viewport: size });
+      const page = await context.newPage();
+      await page.goto("/admin");
+      const svg = page.locator('svg[data-testid^="revenue-chart-"]:visible');
+      await expect(svg).toHaveCount(1);
+      await expect(svg).toBeVisible();
+      const card = page.locator("#revenue");
+      const cardBox = (await card.boundingBox())!;
+      const svgBox = (await svg.boundingBox())!;
+      expect(svgBox.width).toBeLessThanOrEqual(cardBox.width);
+      expect(svgBox.x + svgBox.width).toBeLessThanOrEqual(cardBox.x + cardBox.width + 0.5);
+      // The last bar (today) must be fully inside the card, and all 30 bars exist.
+      const bars = svg.locator("rect");
+      expect(await bars.count()).toBe(30);
+      const last = (await bars.last().boundingBox())!;
+      expect(last.x).toBeGreaterThanOrEqual(cardBox.x);
+      expect(last.x + last.width).toBeLessThanOrEqual(cardBox.x + cardBox.width + 0.5);
+      // No sideways scrolling inside the chart, none on the page.
+      const scrolls = await page
+        .getByTestId("revenue-chart-scroll")
+        .evaluate((el) => el.scrollWidth > el.clientWidth);
+      expect(scrolls).toBe(false);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(
+        size.width,
+      );
+      await context.close();
+    });
+  }
 });

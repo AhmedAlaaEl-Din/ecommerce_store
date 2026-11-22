@@ -156,7 +156,7 @@ async function desktopStory(page: Page, rec: Recorder) {
     3.0,
   );
   const chartY = await page
-    .getByTestId("revenue-chart")
+    .getByTestId("revenue-chart-scroll")
     .evaluate((el) => el.getBoundingClientRect().top + window.scrollY - 140);
   await rec.scrollTo(
     "dashboard",
