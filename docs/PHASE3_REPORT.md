@@ -81,6 +81,14 @@ demo history; privacy grep clean; evidence copied to the handoff folder.
 
 **Final test counts: 135 unit · 143 integration · 55 end-to-end · 30 accessibility** (`npm run verify` exit 0).
 
+## Fix 2: dashboard KPI numbers clipped
+
+- **Cause:** the six KPI cards sat in a fixed `xl:grid-cols-6` grid with a fixed `text-2xl` value. On a ~1590 px laptop window with display scaling, the columns were too narrow for "$1,680.50", so the last digit was cut off by the card edge.
+- **Change:** the grid is now `repeat(auto-fit, minmax(10.5rem, 1fr))`, so cards wrap to 4, 3 or 2 per row when there is no room. The value font is `clamp(1.125rem, 0.55rem + 1vw, 1.5rem)` (still 24 px at 1440), with `tabular-nums`, `whitespace-nowrap` and `min-w-0` on the card. No `overflow: hidden`. The 390 px phone layout keeps two columns.
+- **Other pages:** order list, order detail, product list and stock history were checked with "$99,999,999.99" injected into every number; none overflowed (wide tables already scroll inside their own container), so no change was needed.
+- **Tests:** `dashboard KPI values are never clipped` injects "$99,999.99" into every money card and checks, at 1024, 1280, 1366, 1440, 1600, 1920 and 390 px, at scale 1 and 1.25, that no value scrolls or leaves its card (14 tests). It failed at 10 of the 14 before the fix and passes after. `big numbers on other admin pages never overflow` covers the other pages at 390, 1024 and 1440 (3 tests).
+- **Final counts:** 135 unit · 143 integration · 72 end-to-end · 30 accessibility. Frames 38 desktop + 11 mobile, review screenshots 53; privacy grep clean.
+
 ## Known issues
 
 - No bulk selection or row actions on orders/products; filters need Apply; no mobile card tables.

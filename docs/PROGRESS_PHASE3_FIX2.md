@@ -4,6 +4,6 @@
 - [x] 2. Fix — auto-fit minmax(10.5rem,1fr) grid, clamp() font, nowrap, min-w-0; 14 pass
 - [x] 3. Other pages (orders, order detail, products, stock history) — no overflow found; covered by new test
 - [x] 4. verify exit 0 (135/143/72/30)
-- [ ] 5. Re-run frames:phase3 and review shots, privacy grep
-- [ ] 6. Copy evidence + report to handoff
-- [ ] 7. Fix 2 section in PHASE3_REPORT.md, update NEXT_SESSION.md
+- [x] 5. frames 38+11, review shots 53; privacy grep clean
+- [x] 6. copied 104 files to phase3_evidence (video folder untouched)
+- [x] 7. Fix 2 section in report, NEXT_SESSION updated
