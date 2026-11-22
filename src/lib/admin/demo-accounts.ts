@@ -38,6 +38,9 @@ export function readDemoCredentials(root = process.cwd()): Map<string, string> {
 
 /** Creates or updates the two demo accounts. Returns whether the file was (re)written. */
 export async function seedDemoAccounts(db: Db, root = process.cwd()): Promise<{ wrote: boolean }> {
+  if (process.env.NODE_ENV === "production" && process.env.ALLOW_DEMO_ACCOUNTS !== "true") {
+    throw new Error("Refusing to seed demo admin accounts in production.");
+  }
   const existing = readDemoCredentials(root);
   const creds = new Map<string, string>();
   for (const a of DEMO_ACCOUNTS) creds.set(a.email, existing.get(a.email) ?? generatePassword());

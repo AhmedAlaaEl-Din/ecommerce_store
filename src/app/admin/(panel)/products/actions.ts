@@ -70,7 +70,14 @@ export async function createProductAction(
   }
   const img = await readImage(fd);
   if ("error" in img) return { error: img.error, fieldErrors: { image: img.error } };
-  const res = await createProduct(db, user, parsed.data, img.image);
+  const res = await (async () => {
+    try {
+      return createProduct(db, user, parsed.data, img.image);
+    } catch (err) {
+      await deleteStoredImage([img.image?.imagePath, img.image?.thumbPath]);
+      throw err;
+    }
+  })();
   if (!res.ok) {
     await deleteStoredImage([img.image?.imagePath, img.image?.thumbPath]);
     return { error: res.error, fieldErrors: res.fieldErrors };
@@ -91,7 +98,14 @@ export async function updateProductAction(
   }
   const img = await readImage(fd);
   if ("error" in img) return { error: img.error, fieldErrors: { image: img.error } };
-  const res = await updateProduct(db, user, String(id), parsed.data, img.image);
+  const res = await (async () => {
+    try {
+      return updateProduct(db, user, String(id), parsed.data, img.image);
+    } catch (err) {
+      await deleteStoredImage([img.image?.imagePath, img.image?.thumbPath]);
+      throw err;
+    }
+  })();
   if (!res.ok) {
     await deleteStoredImage([img.image?.imagePath, img.image?.thumbPath]);
     return { error: res.error, fieldErrors: res.fieldErrors };

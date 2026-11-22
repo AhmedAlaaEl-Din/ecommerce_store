@@ -168,7 +168,7 @@ export function DoneNotice({
   code: string | undefined;
   messages: Record<string, string>;
 }) {
-  if (!code || !(code in messages)) return null;
+  if (!code || !Object.hasOwn(messages, code)) return null;
   return <Notice tone="success">{messages[code]}</Notice>;
 }
 
